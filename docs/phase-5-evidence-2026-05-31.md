@@ -29,12 +29,12 @@ Command:
 
 ```sh
 scripts/prepare-phase-5-host-baseline-capture.sh
-scripts/prepare-phase-5-host-baseline-capture.sh --evidence docs/phase-5-evidence-2026-05-31.md --label "Non-production Mac Photos test library" --timestamp 20260601-photos-baseline --date 2026-06-01
+scripts/prepare-phase-5-host-baseline-capture.sh --evidence docs/phase-5-evidence-2026-05-31.md --label "Non-production Mac Photos test library" --timestamp 20260603-photos-baseline --date 2026-06-03
 scripts/capture-metadata-baseline.sh --photos --confirm-non-production-photos --photos-library-label "Non-production Mac Photos test library" --validate-only 1000 10000 50000
-scripts/capture-metadata-baseline.sh --photos --confirm-non-production-photos --photos-library-label "Non-production Mac Photos test library" --timestamp 20260601-photos-baseline 1000 10000 50000
+scripts/capture-metadata-baseline.sh --photos --confirm-non-production-photos --photos-library-label "Non-production Mac Photos test library" --timestamp 20260603-photos-baseline 1000 10000 50000
 ```
 
-Preflight status: Passed locally on 2026-06-01 with `--validate-only`; this checked the non-production label, formal 1k/10k/50k counts, and project evidence output directory without building or reading the current Mac Photos library.
+Preflight status: Passed locally on 2026-06-03 with `--validate-only`; this checked the non-production label, formal 1k/10k/50k counts, and project evidence output directory without building or reading the current Mac Photos library.
 
 | Asset count | Elapsed seconds | Assets / second | Notes |
 | ---: | ---: | ---: | --- |
@@ -75,9 +75,9 @@ Prepare evidence folders:
 ```sh
 scripts/prepare-phase-5-manual-evidence.sh
 scripts/prepare-phase-5-macos-manual-capture.sh
-scripts/prepare-phase-5-macos-manual-capture.sh --manual-dir docs/phase-5-evidence/manual-2026-05-31 --evidence docs/phase-5-evidence-2026-05-31.md --date 2026-06-01
-screencapture -i docs/phase-5-evidence/manual-2026-05-31/macos/authorization/macos-first-photos-authorization-2026-06-01.png
-screencapture -i docs/phase-5-evidence/manual-2026-05-31/macos/delete-confirmation/macos-system-photos-delete-confirmation-2026-06-01.png
+scripts/prepare-phase-5-macos-manual-capture.sh --manual-dir docs/phase-5-evidence/manual-2026-05-31 --evidence docs/phase-5-evidence-2026-05-31.md --date 2026-06-03
+screencapture -i docs/phase-5-evidence/manual-2026-05-31/macos/authorization/macos-first-photos-authorization-2026-06-03.png
+screencapture -i docs/phase-5-evidence/manual-2026-05-31/macos/delete-confirmation/macos-system-photos-delete-confirmation-2026-06-03.png
 scripts/check-phase-5-manual-evidence.sh docs/phase-5-evidence/manual-2026-05-31
 ```
 

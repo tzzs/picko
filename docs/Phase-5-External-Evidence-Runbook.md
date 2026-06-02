@@ -1,6 +1,6 @@
 # Picko Phase 5 External Evidence Runbook
 
-日期：2026-06-01
+日期：2026-06-03
 工作目录：`/Users/tanzz/workspaces/picko/.worktrees/mvp-core`
 
 This runbook covers the remaining Phase 5 evidence that cannot be completed by
@@ -28,8 +28,8 @@ Run the read-only status report first:
 ```sh
 scripts/report-phase-5-status.sh \
   --evidence docs/phase-5-evidence-2026-05-31.md \
-  --date 2026-06-01 \
-  --host-timestamp 20260601-photos-baseline
+  --date 2026-06-03 \
+  --host-timestamp 20260603-photos-baseline
 ```
 
 Expected remaining items should be limited to host Photos-backed baseline and
@@ -43,7 +43,7 @@ Default handoff generation:
 
 ```sh
 scripts/create-phase-5-external-evidence-handoff.sh \
-  --output docs/phase-5-evidence/phase-5-external-handoff-2026-06-01.md
+  --output docs/phase-5-evidence/phase-5-external-handoff-2026-06-03.md
 ```
 
 This uses the latest generated external handoff when present, then falls back to
@@ -59,9 +59,9 @@ scripts/create-phase-5-external-evidence-handoff.sh \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
   --runbook docs/Phase-5-External-Evidence-Runbook.md \
   --label "Non-production Mac Photos test library" \
-  --date 2026-06-01 \
-  --host-timestamp 20260601-photos-baseline \
-  --output docs/phase-5-evidence/phase-5-external-handoff-2026-06-01.md
+  --date 2026-06-03 \
+  --host-timestamp 20260603-photos-baseline \
+  --output docs/phase-5-evidence/phase-5-external-handoff-2026-06-03.md
 ```
 
 The handoff generator is read-only with respect to Photos and the evidence
@@ -88,11 +88,11 @@ Explicit reproducibility:
 
 ```sh
 scripts/check-phase-5-external-handoff.sh \
-  --handoff docs/phase-5-evidence/phase-5-external-handoff-2026-06-01.md \
+  --handoff docs/phase-5-evidence/phase-5-external-handoff-2026-06-03.md \
   --evidence docs/phase-5-evidence-2026-05-31.md \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
-  --date 2026-06-01 \
-  --host-timestamp 20260601-photos-baseline
+  --date 2026-06-03 \
+  --host-timestamp 20260603-photos-baseline
 ```
 
 ## 3. Host Photos-Backed Baseline
@@ -116,8 +116,8 @@ Explicit reproducibility:
 scripts/prepare-phase-5-host-baseline-capture.sh \
   --evidence docs/phase-5-evidence-2026-05-31.md \
   --label "Non-production Mac Photos test library" \
-  --timestamp 20260601-photos-baseline \
-  --date 2026-06-01
+  --timestamp 20260603-photos-baseline \
+  --date 2026-06-03
 ```
 
 This helper validates the recorded `Passed` preflight and does not read Photos
@@ -131,7 +131,7 @@ scripts/capture-metadata-baseline.sh \
   --photos \
   --confirm-non-production-photos \
   --photos-library-label "Non-production Mac Photos test library" \
-  --timestamp 20260601-photos-baseline \
+  --timestamp 20260603-photos-baseline \
   1000 10000 50000
 ```
 
@@ -140,7 +140,7 @@ Write the captured JSON back to the evidence document:
 ```sh
 scripts/update-phase-5-host-baseline.sh \
   --evidence docs/phase-5-evidence-2026-05-31.md \
-  --baseline-json docs/phase-5-evidence/metadata-baseline-photos-1000-10000-50000-20260601-photos-baseline.json
+  --baseline-json docs/phase-5-evidence/metadata-baseline-photos-1000-10000-50000-20260603-photos-baseline.json
 ```
 
 ## 4. macOS Manual Photos Evidence
@@ -173,7 +173,7 @@ Explicit reproducibility:
 scripts/prepare-phase-5-macos-manual-capture.sh \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
   --evidence docs/phase-5-evidence-2026-05-31.md \
-  --date 2026-06-01
+  --date 2026-06-03
 ```
 
 This helper validates the manual evidence README safety guidance and does not
@@ -183,8 +183,8 @@ evidence.
 After the relevant system prompt is visible, capture the two remaining artifacts:
 
 ```sh
-screencapture -i docs/phase-5-evidence/manual-2026-05-31/macos/authorization/macos-first-photos-authorization-2026-06-01.png
-screencapture -i docs/phase-5-evidence/manual-2026-05-31/macos/delete-confirmation/macos-system-photos-delete-confirmation-2026-06-01.png
+screencapture -i docs/phase-5-evidence/manual-2026-05-31/macos/authorization/macos-first-photos-authorization-2026-06-03.png
+screencapture -i docs/phase-5-evidence/manual-2026-05-31/macos/delete-confirmation/macos-system-photos-delete-confirmation-2026-06-03.png
 ```
 
 Validate the manual evidence folder:
@@ -201,7 +201,7 @@ scripts/update-phase-5-manual-verification.sh \
   --scenario "First Photos authorization" \
   --platform "macOS" \
   --result "Passed" \
-  --path docs/phase-5-evidence/manual-2026-05-31/macos/authorization/macos-first-photos-authorization-2026-06-01.png \
+  --path docs/phase-5-evidence/manual-2026-05-31/macos/authorization/macos-first-photos-authorization-2026-06-03.png \
   --notes "Non-production Mac Photos library first authorization prompt captured"
 
 scripts/update-phase-5-manual-verification.sh \
@@ -209,7 +209,7 @@ scripts/update-phase-5-manual-verification.sh \
   --scenario "Pre-delete basket triggers Photos confirmation" \
   --platform "macOS" \
   --result "Passed" \
-  --path docs/phase-5-evidence/manual-2026-05-31/macos/delete-confirmation/macos-system-photos-delete-confirmation-2026-06-01.png \
+  --path docs/phase-5-evidence/manual-2026-05-31/macos/delete-confirmation/macos-system-photos-delete-confirmation-2026-06-03.png \
   --notes "Non-production Mac Photos library system delete confirmation captured without clicking Delete"
 ```
 
@@ -230,8 +230,8 @@ Explicit finalization reproducibility:
 ```sh
 scripts/finalize-phase-5-evidence.sh \
   --evidence docs/phase-5-evidence-2026-05-31.md \
-  --date 2026-06-01 \
-  --host-timestamp 20260601-photos-baseline
+  --date 2026-06-03 \
+  --host-timestamp 20260603-photos-baseline
 
 scripts/audit-mvp-next-completion.sh \
   --plan docs/MVP-Next-Development-Plan.md \
@@ -240,9 +240,9 @@ scripts/audit-mvp-next-completion.sh \
   --runbook docs/Phase-5-External-Evidence-Runbook.md \
   --evidence docs/phase-5-evidence-2026-05-31.md \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
-  --handoff docs/phase-5-evidence/phase-5-external-handoff-2026-06-01.md \
-  --date 2026-06-01 \
-  --host-timestamp 20260601-photos-baseline
+  --handoff docs/phase-5-evidence/phase-5-external-handoff-2026-06-03.md \
+  --date 2026-06-03 \
+  --host-timestamp 20260603-photos-baseline
 ```
 
 The finalizer checks the Phase 5 evidence directory cleanliness and evidence
@@ -257,7 +257,7 @@ The equivalent manual evidence sequence before the whole-plan audit is:
 
 ```sh
 scripts/record-phase-5-completeness-gates.sh --evidence docs/phase-5-evidence-2026-05-31.md
-scripts/report-phase-5-status.sh --evidence docs/phase-5-evidence-2026-05-31.md --date 2026-06-01 --host-timestamp 20260601-photos-baseline --fail-on-incomplete
+scripts/report-phase-5-status.sh --evidence docs/phase-5-evidence-2026-05-31.md --date 2026-06-03 --host-timestamp 20260603-photos-baseline --fail-on-incomplete
 scripts/check-phase-5-evidence.sh docs/phase-5-evidence-2026-05-31.md
 ```
 

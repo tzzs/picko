@@ -111,8 +111,8 @@ scripts/check-phase-5-external-evidence-readiness.sh \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
   --runbook docs/Phase-5-External-Evidence-Runbook.md \
   --label "Non-production Mac Photos test library" \
-  --date 2026-06-01 \
-  --host-timestamp 20260601-photos-baseline
+  --date 2026-06-03 \
+  --host-timestamp 20260603-photos-baseline
 ```
 
 Coverage: runs the Phase 5 shell literal safety checker, external runbook checker, Phase 5 evidence directory cleanliness checker, validates the manual evidence folder skeleton, validates the host baseline capture helper against the recorded Passed preflight using the same deterministic host timestamp that the checklist and status report will print, rejects pre-existing host baseline JSON target paths before operator capture can collide with existing evidence, validates the macOS manual capture helper output, rejects pre-existing macOS capture target paths before operator screenshots can overwrite evidence, validates that the external checklist emits concrete macOS write-back paths plus the final evidence wrapper and whole-plan audit commands, validates Phase 5 shell literal safety gate, evidence template coverage, and evidence directory cleanliness coverage wording, and confirms the status report only asks for the expected remaining external evidence categories. In short, the external checklist emits concrete macOS write-back paths plus the final evidence wrapper, whole-plan audit commands, Phase 5 shell literal safety gate coverage wording, evidence template coverage wording, and evidence directory cleanliness coverage wording. It is read-only and does not read Photos libraries, launch apps, capture screenshots, run benchmarks, or edit evidence. Local smoke coverage rejects non filename-safe host timestamps, pre-existing host baseline JSON target paths, and pre-existing macOS capture target paths.
@@ -404,14 +404,14 @@ scripts/prepare-phase-5-host-baseline-capture.sh
 scripts/prepare-phase-5-host-baseline-capture.sh \
   --evidence docs/phase-5-evidence-2026-05-31.md \
   --label "Non-production Mac Photos test library" \
-  --timestamp 20260601-photos-baseline \
-  --date 2026-06-01
+  --timestamp 20260603-photos-baseline \
+  --date 2026-06-03
 
 scripts/capture-metadata-baseline.sh \
   --photos \
   --confirm-non-production-photos \
   --photos-library-label "Non-production Mac Photos test library" \
-  --timestamp 20260601-photos-baseline \
+  --timestamp 20260603-photos-baseline \
   1000 10000 50000
 ```
 
@@ -545,8 +545,8 @@ Verified behavior:
 
 macOS 手工取证建议：
 
-1. 授权截图保存到 `docs/phase-5-evidence/manual-2026-05-31/macos/authorization/macos-first-photos-authorization-2026-06-01.png`。
-2. 删除确认截图保存到 `docs/phase-5-evidence/manual-2026-05-31/macos/delete-confirmation/macos-system-photos-delete-confirmation-2026-06-01.png`。
+1. 授权截图保存到 `docs/phase-5-evidence/manual-2026-05-31/macos/authorization/macos-first-photos-authorization-2026-06-03.png`。
+2. 删除确认截图保存到 `docs/phase-5-evidence/manual-2026-05-31/macos/delete-confirmation/macos-system-photos-delete-confirmation-2026-06-03.png`。
 3. 系统提示可见后可用 `screencapture -i PATH` 手动选择窗口或区域；不要捕获个人照片缩略图、人脸、文件名、地图/位置细节或 Finder 路径。
 4. 删除确认取证只停在 Photos 系统确认弹窗，不能点击系统 `Delete`。
 

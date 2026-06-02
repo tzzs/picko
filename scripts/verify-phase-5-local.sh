@@ -168,9 +168,9 @@ if scripts/audit-mvp-next-completion.sh \
   --runbook docs/Phase-5-External-Evidence-Runbook.md \
   --evidence docs/phase-5-evidence-2026-05-31.md \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
-  --handoff docs/phase-5-evidence/phase-5-external-handoff-2026-06-01.md \
-  --date 2026-06-01 \
-  --host-timestamp 20260601-photos-baseline >/tmp/picko-mvp-next-completion-audit-smoke.log; then
+  --handoff docs/phase-5-evidence/phase-5-external-handoff-2026-06-03.md \
+  --date 2026-06-03 \
+  --host-timestamp 20260603-photos-baseline >/tmp/picko-mvp-next-completion-audit-smoke.log; then
   echo "MVP Next completion audit accepted incomplete Phase 5 evidence." >&2
   exit 1
 fi
@@ -200,8 +200,8 @@ fi
 for expected_text in \
   "Evidence: docs/phase-5-evidence-2026-05-31.md" \
   "Manual evidence: docs/phase-5-evidence/manual-2026-05-31" \
-  "External handoff: docs/phase-5-evidence/phase-5-external-handoff-2026-06-01.md" \
-  "Host timestamp: 20260601-photos-baseline" \
+  "External handoff: docs/phase-5-evidence/phase-5-external-handoff-2026-06-03.md" \
+  "Host timestamp: 20260603-photos-baseline" \
   "MVP Next completion audit failed"
 do
   if ! grep -q "$expected_text" /tmp/picko-mvp-next-completion-audit-default-smoke.log; then
@@ -209,7 +209,7 @@ do
     exit 1
   fi
 done
-if grep -q "Evidence: docs/phase-5-evidence-2026-06-01.md" /tmp/picko-mvp-next-completion-audit-default-smoke.log; then
+if grep -q "Evidence: docs/phase-5-evidence-2026-06-03.md" /tmp/picko-mvp-next-completion-audit-default-smoke.log; then
   echo "Default MVP Next completion audit ignored the active evidence package." >&2
   exit 1
 fi
@@ -219,7 +219,7 @@ scripts/check-phase-5-external-evidence-readiness.sh \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
   --runbook docs/Phase-5-External-Evidence-Runbook.md \
   --label "Non-production Mac Photos test library" \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp readiness-host-smoke
 readiness_legacy_host_evidence="/tmp/picko-phase-5-readiness-legacy-host.md"
 cp docs/phase-5-evidence-2026-05-31.md "$readiness_legacy_host_evidence"
@@ -230,7 +230,7 @@ from pathlib import Path
 path = Path(sys.argv[1])
 source = path.read_text()
 source = source.replace(
-    'scripts/capture-metadata-baseline.sh --photos --confirm-non-production-photos --photos-library-label "Non-production Mac Photos test library" --timestamp 20260601-photos-baseline 1000 10000 50000',
+    'scripts/capture-metadata-baseline.sh --photos --confirm-non-production-photos --photos-library-label "Non-production Mac Photos test library" --timestamp 20260603-photos-baseline 1000 10000 50000',
     'scripts/capture-metadata-baseline.sh --photos --confirm-non-production-photos --photos-library-label "Non-production Mac Photos test library" 1000 10000 50000',
 )
 path.write_text(source)
@@ -240,8 +240,8 @@ if scripts/check-phase-5-external-evidence-readiness.sh \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
   --runbook docs/Phase-5-External-Evidence-Runbook.md \
   --label "Non-production Mac Photos test library" \
-  --date 2026-06-01 \
-  --host-timestamp 20260601-photos-baseline >/dev/null; then
+  --date 2026-06-03 \
+  --host-timestamp 20260603-photos-baseline >/dev/null; then
   echo "Phase 5 external evidence readiness accepted legacy host capture without --timestamp." >&2
   exit 1
 fi
@@ -263,8 +263,8 @@ if scripts/check-phase-5-external-evidence-readiness.sh \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
   --runbook docs/Phase-5-External-Evidence-Runbook.md \
   --label "Non-production Mac Photos test library" \
-  --date 2026-06-01 \
-  --host-timestamp 20260601-photos-baseline >/dev/null; then
+  --date 2026-06-03 \
+  --host-timestamp 20260603-photos-baseline >/dev/null; then
   echo "Phase 5 external evidence readiness accepted evidence missing the macOS manual capture helper." >&2
   exit 1
 fi
@@ -275,7 +275,7 @@ scripts/prepare-phase-5-macos-manual-capture.sh \
   --validate-only \
   --manual-dir "$macos_helper_validate_only_dir" \
   --evidence docs/phase-5-evidence-2026-05-31.md \
-  --date 2026-06-01 >/dev/null
+  --date 2026-06-03 >/dev/null
 if [[ -d "$macos_helper_validate_only_dir/macos" ]]; then
   echo "macOS manual capture helper --validate-only created capture directories." >&2
   exit 1
@@ -286,7 +286,7 @@ if scripts/check-phase-5-external-evidence-readiness.sh \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
   --runbook docs/Phase-5-External-Evidence-Runbook.md \
   --label "Production personal Photos library" \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp readiness-host-smoke >/dev/null; then
   echo "Phase 5 external evidence readiness accepted a production/personal Photos label." >&2
   exit 1
@@ -296,7 +296,7 @@ if scripts/check-phase-5-external-evidence-readiness.sh \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
   --runbook docs/Phase-5-External-Evidence-Runbook.md \
   --label "Non-production Mac Photos test library" \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp "bad/path" >/dev/null; then
   echo "Phase 5 external evidence readiness accepted a non filename-safe host timestamp." >&2
   exit 1
@@ -309,7 +309,7 @@ if scripts/check-phase-5-external-evidence-readiness.sh \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
   --runbook docs/Phase-5-External-Evidence-Runbook.md \
   --label "Non-production Mac Photos test library" \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp readiness-existing-json >"$readiness_existing_json_log" 2>&1; then
   echo "Phase 5 external evidence readiness accepted a pre-existing host baseline JSON target path." >&2
   exit 1
@@ -324,13 +324,13 @@ readiness_existing_artifact_dir="/tmp/picko-phase-5-readiness-existing-artifact"
 rm -rf "$readiness_existing_artifact_dir"
 scripts/prepare-phase-5-manual-evidence.sh --output "$readiness_existing_artifact_dir" >/dev/null
 mkdir -p "$readiness_existing_artifact_dir/macos/authorization"
-printf 'existing capture\n' > "$readiness_existing_artifact_dir/macos/authorization/macos-first-photos-authorization-2026-06-01.png"
+printf 'existing capture\n' > "$readiness_existing_artifact_dir/macos/authorization/macos-first-photos-authorization-2026-06-03.png"
 if scripts/check-phase-5-external-evidence-readiness.sh \
   --evidence docs/phase-5-evidence-2026-05-31.md \
   --manual-dir "$readiness_existing_artifact_dir" \
   --runbook docs/Phase-5-External-Evidence-Runbook.md \
   --label "Non-production Mac Photos test library" \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp readiness-host-smoke >/dev/null; then
   echo "Phase 5 external evidence readiness accepted a pre-existing macOS capture artifact path." >&2
   exit 1
@@ -355,7 +355,7 @@ if scripts/check-phase-5-external-evidence-readiness.sh \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
   --runbook docs/Phase-5-External-Evidence-Runbook.md \
   --label "Non-production Mac Photos test library" \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp readiness-host-smoke >/dev/null; then
   echo "Phase 5 external evidence readiness accepted evidence with an extra environment gap." >&2
   exit 1
@@ -367,24 +367,24 @@ for expected_text in \
   "Phase 5 evidence document exists: docs/phase-5-evidence-2026-05-31.md" \
   "Phase 5 manual evidence directory exists: docs/phase-5-evidence/manual-2026-05-31" \
   "External evidence readiness preflight passes" \
-  "External evidence handoff is current: docs/phase-5-evidence/phase-5-external-handoff-2026-06-01.md" \
-  "timestamp 20260601-photos-baseline"
+  "External evidence handoff is current: docs/phase-5-evidence/phase-5-external-handoff-2026-06-03.md" \
+  "timestamp 20260603-photos-baseline"
 do
   if ! grep -q "$expected_text" "$mvp_status_default_smoke"; then
     echo "MVP Next default status report is missing expected text: $expected_text" >&2
     exit 1
   fi
 done
-if grep -q "Phase 5 evidence document is missing: docs/phase-5-evidence-2026-06-01.md" "$mvp_status_default_smoke"; then
+if grep -q "Phase 5 evidence document is missing: docs/phase-5-evidence-2026-06-03.md" "$mvp_status_default_smoke"; then
   echo "MVP Next default status report ignored the latest existing evidence document." >&2
   exit 1
 fi
 scripts/report-mvp-next-development-status.sh \
   --evidence docs/phase-5-evidence-2026-05-31.md \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
-  --handoff docs/phase-5-evidence/phase-5-external-handoff-2026-06-01.md \
-  --date 2026-06-01 \
-  --host-timestamp 20260601-photos-baseline > "$mvp_status_smoke"
+  --handoff docs/phase-5-evidence/phase-5-external-handoff-2026-06-03.md \
+  --date 2026-06-03 \
+  --host-timestamp 20260603-photos-baseline > "$mvp_status_smoke"
 for expected_text in \
   "Picko MVP Next Development Status" \
   "Photos Adapter phase completion is recorded" \
@@ -430,9 +430,9 @@ done
 if scripts/report-mvp-next-development-status.sh \
   --evidence docs/phase-5-evidence-2026-05-31.md \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
-  --handoff docs/phase-5-evidence/phase-5-external-handoff-2026-06-01.md \
-  --date 2026-06-01 \
-  --host-timestamp 20260601-photos-baseline \
+  --handoff docs/phase-5-evidence/phase-5-external-handoff-2026-06-03.md \
+  --date 2026-06-03 \
+  --host-timestamp 20260603-photos-baseline \
   --fail-on-incomplete >/dev/null; then
   echo "MVP Next status report accepted incomplete Phase 5 evidence with --fail-on-incomplete." >&2
   exit 1
@@ -454,9 +454,9 @@ if scripts/report-mvp-next-development-status.sh \
   --product-spec docs/MVP-Product-Spec.md \
   --evidence docs/phase-5-evidence-2026-05-31.md \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
-  --handoff docs/phase-5-evidence/phase-5-external-handoff-2026-06-01.md \
-  --date 2026-06-01 \
-  --host-timestamp 20260601-photos-baseline \
+  --handoff docs/phase-5-evidence/phase-5-external-handoff-2026-06-03.md \
+  --date 2026-06-03 \
+  --host-timestamp 20260603-photos-baseline \
   --fail-on-incomplete >/dev/null; then
   echo "MVP Next status report accepted a stale plan that omitted remaining Phase 5 gaps." >&2
   exit 1
@@ -478,9 +478,9 @@ if scripts/report-mvp-next-development-status.sh \
   --product-spec "$mvp_stale_product_spec" \
   --evidence docs/phase-5-evidence-2026-05-31.md \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
-  --handoff docs/phase-5-evidence/phase-5-external-handoff-2026-06-01.md \
-  --date 2026-06-01 \
-  --host-timestamp 20260601-photos-baseline \
+  --handoff docs/phase-5-evidence/phase-5-external-handoff-2026-06-03.md \
+  --date 2026-06-03 \
+  --host-timestamp 20260603-photos-baseline \
   --fail-on-incomplete >/dev/null; then
   echo "MVP Next status report accepted a product spec that omitted the SwiftData/JSON persistence decision." >&2
   exit 1
@@ -491,7 +491,7 @@ scripts/create-phase-5-external-evidence-handoff.sh \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
   --runbook docs/Phase-5-External-Evidence-Runbook.md \
   --label "Non-production Mac Photos test library" \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp handoff-host-smoke \
   --output "$handoff_smoke" >/tmp/picko-phase-5-external-handoff-create.log
 for expected_text in \
@@ -508,12 +508,12 @@ for expected_text in \
   "The only completion proof is a passing finalizer followed by a passing whole-plan audit." \
   "After capturing delete-confirmation evidence, press Escape or click Cancel to dismiss the system confirmation without deleting assets." \
   "metadata-baseline-photos-1000-10000-50000-handoff-host-smoke.json" \
-  "scripts/finalize-phase-5-evidence.sh --evidence docs/phase-5-evidence-2026-05-31.md --date 2026-06-01 --host-timestamp handoff-host-smoke" \
+  "scripts/finalize-phase-5-evidence.sh --evidence docs/phase-5-evidence-2026-05-31.md --date 2026-06-03 --host-timestamp handoff-host-smoke" \
   "This audit also covers the Phase 5 shell literal safety gate" \
   "evidence template coverage" \
   "handoff freshness, evidence directory cleanliness" \
   "final evidence completeness, and the MVP plan/spec status" \
-  "scripts/audit-mvp-next-completion.sh --plan docs/MVP-Next-Development-Plan.md --product-spec docs/MVP-Product-Spec.md --verification docs/Phase-5-Verification.md --runbook docs/Phase-5-External-Evidence-Runbook.md --evidence docs/phase-5-evidence-2026-05-31.md --manual-dir docs/phase-5-evidence/manual-2026-05-31 --handoff $handoff_smoke --date 2026-06-01 --host-timestamp handoff-host-smoke" \
+  "scripts/audit-mvp-next-completion.sh --plan docs/MVP-Next-Development-Plan.md --product-spec docs/MVP-Product-Spec.md --verification docs/Phase-5-Verification.md --runbook docs/Phase-5-External-Evidence-Runbook.md --evidence docs/phase-5-evidence-2026-05-31.md --manual-dir docs/phase-5-evidence/manual-2026-05-31 --handoff $handoff_smoke --date 2026-06-03 --host-timestamp handoff-host-smoke" \
   "This handoff was generated by a read-only script"
 do
   if ! grep -q -- "$expected_text" "$handoff_smoke"; then
@@ -529,15 +529,15 @@ handoff_default_smoke="/tmp/picko-phase-5-external-handoff-default-smoke.md"
 scripts/create-phase-5-external-evidence-handoff.sh \
   --output "$handoff_default_smoke" >/tmp/picko-phase-5-external-handoff-default-create.log
 for expected_text in \
-  'Date: 2026-06-01' \
+  'Date: 2026-06-03' \
   'Evidence: `docs/phase-5-evidence-2026-05-31.md`' \
   'Manual evidence directory: `docs/phase-5-evidence/manual-2026-05-31`' \
-  'Host baseline timestamp: `20260601-photos-baseline`' \
+  'Host baseline timestamp: `20260603-photos-baseline`' \
   "Host Photos-backed baseline on a non-production Mac Photos library: run scripts/prepare-phase-5-host-baseline-capture.sh. Explicit reproducibility:" \
   "For macOS captures, run scripts/prepare-phase-5-macos-manual-capture.sh. Explicit reproducibility:" \
-  'metadata-baseline-photos-1000-10000-50000-20260601-photos-baseline.json' \
-  "scripts/finalize-phase-5-evidence.sh --evidence docs/phase-5-evidence-2026-05-31.md --date 2026-06-01 --host-timestamp 20260601-photos-baseline" \
-  "scripts/audit-mvp-next-completion.sh --plan docs/MVP-Next-Development-Plan.md --product-spec docs/MVP-Product-Spec.md --verification docs/Phase-5-Verification.md --runbook docs/Phase-5-External-Evidence-Runbook.md --evidence docs/phase-5-evidence-2026-05-31.md --manual-dir docs/phase-5-evidence/manual-2026-05-31 --handoff $handoff_default_smoke --date 2026-06-01 --host-timestamp 20260601-photos-baseline"
+  'metadata-baseline-photos-1000-10000-50000-20260603-photos-baseline.json' \
+  "scripts/finalize-phase-5-evidence.sh --evidence docs/phase-5-evidence-2026-05-31.md --date 2026-06-03 --host-timestamp 20260603-photos-baseline" \
+  "scripts/audit-mvp-next-completion.sh --plan docs/MVP-Next-Development-Plan.md --product-spec docs/MVP-Product-Spec.md --verification docs/Phase-5-Verification.md --runbook docs/Phase-5-External-Evidence-Runbook.md --evidence docs/phase-5-evidence-2026-05-31.md --manual-dir docs/phase-5-evidence/manual-2026-05-31 --handoff $handoff_default_smoke --date 2026-06-03 --host-timestamp 20260603-photos-baseline"
 do
   if ! grep -q -- "$expected_text" "$handoff_default_smoke"; then
     echo "Default Phase 5 external evidence handoff is missing expected text: $expected_text" >&2
@@ -553,7 +553,7 @@ if scripts/create-phase-5-external-evidence-handoff.sh \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
   --runbook docs/Phase-5-External-Evidence-Runbook.md \
   --label "Non-production Mac Photos test library" \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp handoff-host-smoke >/dev/null; then
   echo "Phase 5 external evidence handoff accepted a missing --output path." >&2
   exit 1
@@ -563,7 +563,7 @@ if scripts/create-phase-5-external-evidence-handoff.sh \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
   --runbook docs/Phase-5-External-Evidence-Runbook.md \
   --label "Non-production Mac Photos test library" \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp "bad/path" \
   --output "$handoff_smoke" >/dev/null; then
   echo "Phase 5 external evidence handoff accepted a non filename-safe host timestamp." >&2
@@ -573,7 +573,7 @@ scripts/check-phase-5-external-handoff.sh \
   --handoff "$handoff_smoke" \
   --evidence docs/phase-5-evidence-2026-05-31.md \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp handoff-host-smoke
 scripts/check-phase-5-external-handoff.sh \
   --handoff "$handoff_smoke" \
@@ -584,7 +584,7 @@ if scripts/check-phase-5-external-handoff.sh \
   --handoff "$handoff_smoke" \
   --evidence docs/phase-5-evidence-2026-05-31.md \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp wrong-host-smoke >/dev/null; then
   echo "Phase 5 external evidence handoff checker accepted a mismatched host timestamp." >&2
   exit 1
@@ -596,7 +596,7 @@ if scripts/check-phase-5-external-handoff.sh \
   --handoff "$handoff_placeholder_smoke" \
   --evidence docs/phase-5-evidence-2026-05-31.md \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp handoff-host-smoke >/dev/null; then
   echo "Phase 5 external evidence handoff checker accepted a placeholder handoff." >&2
   exit 1
@@ -742,7 +742,7 @@ host_capture_guide="$(scripts/prepare-phase-5-host-baseline-capture.sh \
   --evidence "$host_capture_preflight_evidence" \
   --label "Non-production smoke library" \
   --timestamp smoke-host-run \
-  --date 2026-06-01)"
+  --date 2026-06-03)"
 for expected_text in \
   "scripts/capture-metadata-baseline.sh" \
   "--confirm-non-production-photos" \
@@ -750,7 +750,7 @@ for expected_text in \
   "--timestamp \"smoke-host-run\"" \
   "scripts/update-phase-5-host-baseline.sh" \
   "metadata-baseline-photos-1000-10000-50000-smoke-host-run.json" \
-  "scripts/report-phase-5-status.sh --evidence $host_capture_preflight_evidence --date 2026-06-01 --host-timestamp smoke-host-run" \
+  "scripts/report-phase-5-status.sh --evidence $host_capture_preflight_evidence --date 2026-06-03 --host-timestamp smoke-host-run" \
   "Do not run the capture command against a production or personal Photos library"
 do
   if ! printf '%s\n' "$host_capture_guide" | grep -q -- "$expected_text"; then
@@ -762,16 +762,16 @@ host_capture_default_guide="/tmp/picko-phase-5-host-capture-default-smoke.log"
 scripts/prepare-phase-5-host-baseline-capture.sh > "$host_capture_default_guide"
 for expected_text in \
   "--evidence docs/phase-5-evidence-2026-05-31.md" \
-  "--timestamp \"20260601-photos-baseline\"" \
-  "metadata-baseline-photos-1000-10000-50000-20260601-photos-baseline.json" \
-  "scripts/report-phase-5-status.sh --evidence docs/phase-5-evidence-2026-05-31.md --date 2026-06-01 --host-timestamp 20260601-photos-baseline"
+  "--timestamp \"20260603-photos-baseline\"" \
+  "metadata-baseline-photos-1000-10000-50000-20260603-photos-baseline.json" \
+  "scripts/report-phase-5-status.sh --evidence docs/phase-5-evidence-2026-05-31.md --date 2026-06-03 --host-timestamp 20260603-photos-baseline"
 do
   if ! grep -q -- "$expected_text" "$host_capture_default_guide"; then
     echo "Host baseline default capture guide is missing expected text: $expected_text" >&2
     exit 1
   fi
 done
-if grep -q "docs/phase-5-evidence-2026-06-01.md" "$host_capture_default_guide"; then
+if grep -q "docs/phase-5-evidence-2026-06-03.md" "$host_capture_default_guide"; then
   echo "Host baseline default capture guide ignored the latest existing evidence document." >&2
   exit 1
 fi
@@ -872,10 +872,10 @@ scripts/check-phase-5-manual-evidence.sh --structure-only "$manual_dir"
 macos_capture_guide="$(scripts/prepare-phase-5-macos-manual-capture.sh \
   --manual-dir "$manual_dir" \
   --evidence docs/phase-5-evidence-2026-05-31.md \
-  --date 2026-06-01)"
+  --date 2026-06-03)"
 for expected_text in \
-  "screencapture -i $manual_dir/macos/authorization/macos-first-photos-authorization-2026-06-01.png" \
-  "screencapture -i $manual_dir/macos/delete-confirmation/macos-system-photos-delete-confirmation-2026-06-01.png" \
+  "screencapture -i $manual_dir/macos/authorization/macos-first-photos-authorization-2026-06-03.png" \
+  "screencapture -i $manual_dir/macos/delete-confirmation/macos-system-photos-delete-confirmation-2026-06-03.png" \
   "Do not click the system Delete button" \
   "--scenario \"First Photos authorization\"" \
   "--scenario \"Pre-delete basket triggers Photos confirmation\""
@@ -888,8 +888,8 @@ done
 macos_capture_default_guide="/tmp/picko-phase-5-macos-capture-default-smoke.log"
 scripts/prepare-phase-5-macos-manual-capture.sh > "$macos_capture_default_guide"
 for expected_text in \
-  "screencapture -i docs/phase-5-evidence/manual-2026-05-31/macos/authorization/macos-first-photos-authorization-2026-06-01.png" \
-  "screencapture -i docs/phase-5-evidence/manual-2026-05-31/macos/delete-confirmation/macos-system-photos-delete-confirmation-2026-06-01.png" \
+  "screencapture -i docs/phase-5-evidence/manual-2026-05-31/macos/authorization/macos-first-photos-authorization-2026-06-03.png" \
+  "screencapture -i docs/phase-5-evidence/manual-2026-05-31/macos/delete-confirmation/macos-system-photos-delete-confirmation-2026-06-03.png" \
   "--evidence docs/phase-5-evidence-2026-05-31.md" \
   "scripts/check-phase-5-manual-evidence.sh docs/phase-5-evidence/manual-2026-05-31"
 do
@@ -898,22 +898,22 @@ do
     exit 1
   fi
 done
-if grep -q "docs/phase-5-evidence-2026-06-01.md" "$macos_capture_default_guide" \
-  || grep -q "docs/phase-5-evidence/manual-2026-06-01" "$macos_capture_default_guide"; then
+if grep -q "docs/phase-5-evidence-2026-06-03.md" "$macos_capture_default_guide" \
+  || grep -q "docs/phase-5-evidence/manual-2026-06-03" "$macos_capture_default_guide"; then
   echo "macOS manual default capture guide ignored the latest existing evidence package." >&2
   exit 1
 fi
 if scripts/prepare-phase-5-macos-manual-capture.sh \
   --manual-dir /tmp/picko-manual \
   --evidence docs/phase-5-evidence-2026-05-31.md \
-  --date 2026-06-01 >/dev/null; then
+  --date 2026-06-03 >/dev/null; then
   echo "macOS manual capture guide accepted a manual evidence directory outside project evidence." >&2
   exit 1
 fi
 if scripts/prepare-phase-5-macos-manual-capture.sh \
   --manual-dir "$manual_dir" \
   --evidence /tmp/picko-phase-5-missing-evidence.md \
-  --date 2026-06-01 >/dev/null; then
+  --date 2026-06-03 >/dev/null; then
   echo "macOS manual capture guide accepted a missing evidence document." >&2
   exit 1
 fi
@@ -926,16 +926,16 @@ MARKDOWN
 if scripts/prepare-phase-5-macos-manual-capture.sh \
   --manual-dir "$manual_dir" \
   --evidence "$missing_macos_manual_rows_evidence" \
-  --date 2026-06-01 >/dev/null; then
+  --date 2026-06-03 >/dev/null; then
   echo "macOS manual capture guide accepted evidence without the required macOS manual rows." >&2
   exit 1
 fi
 existing_macos_capture_log="/tmp/picko-phase-5-existing-macos-capture.log"
-printf 'existing capture\n' > "$manual_dir/macos/authorization/macos-first-photos-authorization-2026-06-01.png"
+printf 'existing capture\n' > "$manual_dir/macos/authorization/macos-first-photos-authorization-2026-06-03.png"
 if scripts/prepare-phase-5-macos-manual-capture.sh \
   --manual-dir "$manual_dir" \
   --evidence docs/phase-5-evidence-2026-05-31.md \
-  --date 2026-06-01 >"$existing_macos_capture_log" 2>&1; then
+  --date 2026-06-03 >"$existing_macos_capture_log" 2>&1; then
   echo "macOS manual capture guide accepted a pre-existing authorization screenshot target." >&2
   exit 1
 fi
@@ -944,7 +944,7 @@ if ! grep -q "macOS manual capture target already exists" "$existing_macos_captu
   cat "$existing_macos_capture_log" >&2
   exit 1
 fi
-rm -f "$manual_dir/macos/authorization/macos-first-photos-authorization-2026-06-01.png"
+rm -f "$manual_dir/macos/authorization/macos-first-photos-authorization-2026-06-03.png"
 manual_usage="$(scripts/check-phase-5-manual-evidence.sh --help)"
 if ! printf '%s\n' "$manual_usage" | grep -q "required manual interaction scenario directories"; then
   echo "Manual evidence checker help does not describe required capture directories precisely." >&2
@@ -1377,9 +1377,9 @@ scripts/phase-5-external-evidence-checklist.sh > "$external_checklist_default"
 for expected_text in \
   "docs/phase-5-evidence-2026-05-31.md" \
   "docs/phase-5-evidence/manual-2026-05-31" \
-  "--timestamp 20260601-photos-baseline" \
-  "metadata-baseline-photos-1000-10000-50000-20260601-photos-baseline.json" \
-  "scripts/finalize-phase-5-evidence.sh --evidence docs/phase-5-evidence-2026-05-31.md --date 2026-06-01 --host-timestamp 20260601-photos-baseline"
+  "--timestamp 20260603-photos-baseline" \
+  "metadata-baseline-photos-1000-10000-50000-20260603-photos-baseline.json" \
+  "scripts/finalize-phase-5-evidence.sh --evidence docs/phase-5-evidence-2026-05-31.md --date 2026-06-03 --host-timestamp 20260603-photos-baseline"
 do
   if ! grep -q -- "$expected_text" "$external_checklist_default"; then
     echo "External evidence default checklist is missing expected text: $expected_text" >&2
@@ -1389,7 +1389,7 @@ done
 scripts/phase-5-external-evidence-checklist.sh \
   --evidence docs/phase-5-evidence-2026-05-31.md \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp checklist-host-smoke > "$external_checklist"
 if grep -q '^[[:space:]]*--count 1000[[:space:]]*\\$' "$external_checklist"; then
   echo "External evidence checklist included a 1,000 iOS benchmark write-back even though current evidence already has local 1,000 evidence." >&2
@@ -1407,7 +1407,7 @@ if ! grep -q -- "--timestamp checklist-host-smoke" "$external_checklist"; then
   echo "External evidence checklist did not include the deterministic host baseline timestamp option." >&2
   exit 1
 fi
-if ! grep -q -- "--date 2026-06-01" "$external_checklist"; then
+if ! grep -q -- "--date 2026-06-03" "$external_checklist"; then
   echo "External evidence checklist did not include the deterministic host baseline status date option." >&2
   exit 1
 fi
@@ -1425,15 +1425,15 @@ external_checklist_existing_json="/tmp/picko-phase-5-external-checklist-existing
 scripts/phase-5-external-evidence-checklist.sh \
   --evidence docs/phase-5-evidence-2026-05-31.md \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp checklist-existing-json > "$external_checklist_existing_json"
 if ! grep -q "Host baseline JSON target already exists" "$external_checklist_existing_json"; then
   echo "External evidence checklist did not warn when the deterministic host baseline JSON target already exists." >&2
   exit 1
 fi
 rm -f "$checklist_existing_json"
-if ! grep -q "macos-first-photos-authorization-2026-06-01.png" "$external_checklist" \
-  || ! grep -q "macos-system-photos-delete-confirmation-2026-06-01.png" "$external_checklist"; then
+if ! grep -q "macos-first-photos-authorization-2026-06-03.png" "$external_checklist" \
+  || ! grep -q "macos-system-photos-delete-confirmation-2026-06-03.png" "$external_checklist"; then
   echo "External evidence checklist did not emit date-specific macOS capture paths." >&2
   exit 1
 fi
@@ -1445,12 +1445,12 @@ fi
 checklist_existing_macos_dir="/tmp/picko-phase-5-checklist-existing-macos"
 rm -rf "$checklist_existing_macos_dir"
 scripts/prepare-phase-5-manual-evidence.sh --output "$checklist_existing_macos_dir" >/dev/null
-printf 'existing capture\n' > "$checklist_existing_macos_dir/macos/authorization/macos-first-photos-authorization-2026-06-01.png"
+printf 'existing capture\n' > "$checklist_existing_macos_dir/macos/authorization/macos-first-photos-authorization-2026-06-03.png"
 external_checklist_existing_macos="/tmp/picko-phase-5-external-checklist-existing-macos.log"
 scripts/phase-5-external-evidence-checklist.sh \
   --evidence docs/phase-5-evidence-2026-05-31.md \
   --manual-dir "$checklist_existing_macos_dir" \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp checklist-host-smoke > "$external_checklist_existing_macos"
 if ! grep -q "macOS manual capture target already exists" "$external_checklist_existing_macos"; then
   echo "External evidence checklist did not warn when a deterministic macOS capture target already exists." >&2
@@ -1461,7 +1461,7 @@ missing_external_checklist="/tmp/picko-phase-5-external-checklist-missing-eviden
 scripts/phase-5-external-evidence-checklist.sh \
   --evidence /tmp/picko-phase-5-missing-evidence.md \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp checklist-host-smoke > "$missing_external_checklist"
 if ! grep -q "scripts/create-phase-5-evidence.sh /tmp/picko-phase-5-missing-evidence.md" "$missing_external_checklist"; then
   echo "External evidence checklist did not include evidence document creation for a missing evidence path." >&2
@@ -1482,7 +1482,7 @@ MARKDOWN
 scripts/phase-5-external-evidence-checklist.sh \
   --evidence "$ios_missing_external_evidence" \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp checklist-host-smoke > "$ios_missing_external_checklist"
 if ! grep -q '^[[:space:]]*--count 1000[[:space:]]*\\$' "$ios_missing_external_checklist"; then
   echo "External evidence checklist did not include a write-back command for missing 1,000 iOS benchmark evidence." >&2
@@ -1503,7 +1503,7 @@ MARKDOWN
 scripts/phase-5-external-evidence-checklist.sh \
   --evidence "$ios_unsupported_external_evidence" \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp checklist-host-smoke > "$ios_unsupported_external_checklist"
 if ! grep -q '^[[:space:]]*--count 1000[[:space:]]*\\$' "$ios_unsupported_external_checklist"; then
   echo "External evidence checklist treated unsupported 1,000 iOS benchmark evidence as ready." >&2
@@ -1536,11 +1536,11 @@ if ! grep -q -- '--scenario "First Photos authorization"' "$external_checklist" 
   echo "External evidence checklist did not include the remaining macOS manual verification steps." >&2
   exit 1
 fi
-if ! grep -q -- "--path docs/phase-5-evidence/manual-2026-05-31/macos/authorization/macos-first-photos-authorization-2026-06-01.png" "$external_checklist"; then
+if ! grep -q -- "--path docs/phase-5-evidence/manual-2026-05-31/macos/authorization/macos-first-photos-authorization-2026-06-03.png" "$external_checklist"; then
   echo "External evidence checklist did not emit the concrete macOS authorization write-back path." >&2
   exit 1
 fi
-if ! grep -q -- "--path docs/phase-5-evidence/manual-2026-05-31/macos/delete-confirmation/macos-system-photos-delete-confirmation-2026-06-01.png" "$external_checklist"; then
+if ! grep -q -- "--path docs/phase-5-evidence/manual-2026-05-31/macos/delete-confirmation/macos-system-photos-delete-confirmation-2026-06-03.png" "$external_checklist"; then
   echo "External evidence checklist did not emit the concrete macOS delete-confirmation write-back path." >&2
   exit 1
 fi
@@ -1574,7 +1574,7 @@ MARKDOWN
 scripts/phase-5-external-evidence-checklist.sh \
   --evidence "$external_partial_environment_evidence" \
   --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp checklist-host-smoke > /tmp/picko-phase-5-external-partial-environment.log
 if grep -q -- '--field "iOS Simulator"' /tmp/picko-phase-5-external-partial-environment.log; then
   echo "External evidence checklist asked to update iOS Simulator after that environment row was ready." >&2
@@ -1584,7 +1584,7 @@ if ! grep -q -- '--field "Test Photos Library"' /tmp/picko-phase-5-external-part
   echo "External evidence checklist did not ask to update the remaining Test Photos Library row." >&2
   exit 1
 fi
-if ! grep -q "scripts/finalize-phase-5-evidence.sh --evidence docs/phase-5-evidence-2026-05-31.md --date 2026-06-01 --host-timestamp checklist-host-smoke" "$external_checklist"; then
+if ! grep -q "scripts/finalize-phase-5-evidence.sh --evidence docs/phase-5-evidence-2026-05-31.md --date 2026-06-03 --host-timestamp checklist-host-smoke" "$external_checklist"; then
   echo "External evidence checklist did not include final evidence wrapper steps." >&2
   exit 1
 fi
@@ -1598,7 +1598,7 @@ if ! grep -q "Explicit finalization reproducibility:" "$external_checklist"; the
   echo "External evidence checklist did not label explicit finalization commands separately." >&2
   exit 1
 fi
-if ! grep -q "scripts/audit-mvp-next-completion.sh --plan docs/MVP-Next-Development-Plan.md --product-spec docs/MVP-Product-Spec.md --verification docs/Phase-5-Verification.md --runbook docs/Phase-5-External-Evidence-Runbook.md --evidence docs/phase-5-evidence-2026-05-31.md --manual-dir docs/phase-5-evidence/manual-2026-05-31 --handoff docs/phase-5-evidence/phase-5-external-handoff-2026-06-01.md --date 2026-06-01 --host-timestamp checklist-host-smoke" "$external_checklist"; then
+if ! grep -q "scripts/audit-mvp-next-completion.sh --plan docs/MVP-Next-Development-Plan.md --product-spec docs/MVP-Product-Spec.md --verification docs/Phase-5-Verification.md --runbook docs/Phase-5-External-Evidence-Runbook.md --evidence docs/phase-5-evidence-2026-05-31.md --manual-dir docs/phase-5-evidence/manual-2026-05-31 --handoff docs/phase-5-evidence/phase-5-external-handoff-2026-06-03.md --date 2026-06-03 --host-timestamp checklist-host-smoke" "$external_checklist"; then
   echo "External evidence checklist did not include whole-plan completion audit guidance." >&2
   exit 1
 fi
@@ -1606,7 +1606,7 @@ if ! grep -q "scripts/record-phase-5-completeness-gates.sh" "$external_checklist
   echo "External evidence checklist did not include equivalent manual completeness gate steps." >&2
   exit 1
 fi
-if ! grep -q "scripts/report-phase-5-status.sh --evidence docs/phase-5-evidence-2026-05-31.md --date 2026-06-01 --host-timestamp checklist-host-smoke --fail-on-incomplete" "$external_checklist"; then
+if ! grep -q "scripts/report-phase-5-status.sh --evidence docs/phase-5-evidence-2026-05-31.md --date 2026-06-03 --host-timestamp checklist-host-smoke --fail-on-incomplete" "$external_checklist"; then
   echo "External evidence checklist did not include deterministic final status report guidance." >&2
   exit 1
 fi
@@ -1922,7 +1922,7 @@ if scripts/finalize-phase-5-evidence.sh \
   --artifact-prefix "TBD" \
   --evidence "$complete_gate_evidence" \
   --manual-dir "$complete_gate_manual_dir" \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp finalizer-host-smoke >/dev/null; then
   echo "Final evidence wrapper accepted a placeholder artifact prefix." >&2
   exit 1
@@ -1933,7 +1933,7 @@ if scripts/finalize-phase-5-evidence.sh \
   --artifact-prefix "Terminal smoke" \
   --evidence "$complete_gate_evidence" \
   --manual-dir "$complete_gate_manual_dir" \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp "bad/path" >/dev/null; then
   echo "Final evidence wrapper accepted a non filename-safe host timestamp." >&2
   exit 1
@@ -1955,7 +1955,7 @@ if scripts/finalize-phase-5-evidence.sh \
   --artifact-prefix "Terminal smoke" \
   --evidence "$incomplete_gate_evidence" \
   --manual-dir "$complete_gate_manual_dir" \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp finalizer-host-smoke >/dev/null; then
   echo "Final evidence wrapper accepted incomplete evidence." >&2
   exit 1
@@ -1969,10 +1969,10 @@ if scripts/finalize-phase-5-evidence.sh \
   --artifact-prefix "Terminal smoke" \
   --evidence "$finalizer_default_timestamp_evidence" \
   --manual-dir "$complete_gate_manual_dir" \
-  --date 2026-06-01 > "$finalizer_default_timestamp_log"; then
+  --date 2026-06-03 > "$finalizer_default_timestamp_log"; then
   :
 fi
-if ! grep -q -- "--host-timestamp 20260601-photos-baseline" "$finalizer_default_timestamp_log"; then
+if ! grep -q -- "--host-timestamp 20260603-photos-baseline" "$finalizer_default_timestamp_log"; then
   echo "Final evidence wrapper default host timestamp did not use the latest handoff timestamp." >&2
   exit 1
 fi
@@ -1989,7 +1989,7 @@ cp docs/Phase-5-Evidence-Template.md "$finalizer_default_workspace/docs/Phase-5-
 cp "$complete_gate_evidence" "$finalizer_default_workspace/docs/phase-5-evidence-2026-05-31.md"
 rm -rf "$finalizer_default_workspace/docs/phase-5-evidence/manual-2026-05-31"
 cp -R "$complete_gate_manual_dir" "$finalizer_default_workspace/docs/phase-5-evidence/manual-2026-05-31"
-cp docs/phase-5-evidence/phase-5-external-handoff-2026-06-01.md "$finalizer_default_workspace/docs/phase-5-evidence/phase-5-external-handoff-2026-06-01.md"
+cp docs/phase-5-evidence/phase-5-external-handoff-2026-06-03.md "$finalizer_default_workspace/docs/phase-5-evidence/phase-5-external-handoff-2026-06-03.md"
 ln -s "$PWD/scripts" "$finalizer_default_workspace/scripts"
 finalizer_default_workspace_log="/tmp/picko-phase-5-finalizer-default-workspace.log"
 (
@@ -2002,7 +2002,7 @@ if ! grep -q "Final evidence document candidate: .*/docs/phase-5-evidence-2026-0
   echo "Final evidence wrapper did not default to the latest evidence document." >&2
   exit 1
 fi
-if ! grep -q -- "--host-timestamp 20260601-photos-baseline" "$finalizer_default_workspace_log"; then
+if ! grep -q -- "--host-timestamp 20260603-photos-baseline" "$finalizer_default_workspace_log"; then
   echo "Final evidence wrapper default command did not use the latest handoff timestamp." >&2
   exit 1
 fi
@@ -2015,7 +2015,7 @@ if scripts/finalize-phase-5-evidence.sh \
   --artifact-prefix "Terminal smoke" \
   --evidence "$complete_gate_evidence" \
   --manual-dir "$complete_gate_manual_dir" \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp finalizer-host-smoke >/dev/null; then
   rm -f "$project_finalizer_smoke"
   echo "Final evidence wrapper accepted a polluted project evidence directory." >&2
@@ -2239,9 +2239,9 @@ scripts/report-phase-5-status.sh > "$status_default_smoke"
 for expected_text in \
   "Final evidence document candidate: docs/phase-5-evidence-2026-05-31.md" \
   "For the default active-package command sequence, run scripts/phase-5-external-evidence-checklist.sh." \
-  "For explicit reproducibility, run scripts/phase-5-external-evidence-checklist.sh --evidence docs/phase-5-evidence-2026-05-31.md --manual-dir docs/phase-5-evidence/manual-2026-05-31 --date 2026-06-01 --host-timestamp 20260601-photos-baseline." \
+  "For explicit reproducibility, run scripts/phase-5-external-evidence-checklist.sh --evidence docs/phase-5-evidence-2026-05-31.md --manual-dir docs/phase-5-evidence/manual-2026-05-31 --date 2026-06-03 --host-timestamp 20260603-photos-baseline." \
   "After all rows and evidence files are written back, run scripts/finalize-phase-5-evidence.sh, then run scripts/audit-mvp-next-completion.sh." \
-  "Host Photos-backed baseline on a non-production Mac Photos library: run scripts/prepare-phase-5-host-baseline-capture.sh. Explicit reproducibility: scripts/prepare-phase-5-host-baseline-capture.sh --evidence docs/phase-5-evidence-2026-05-31.md --label \"Non-production Mac Photos test library\" --timestamp 20260601-photos-baseline --date 2026-06-01."
+  "Host Photos-backed baseline on a non-production Mac Photos library: run scripts/prepare-phase-5-host-baseline-capture.sh. Explicit reproducibility: scripts/prepare-phase-5-host-baseline-capture.sh --evidence docs/phase-5-evidence-2026-05-31.md --label \"Non-production Mac Photos test library\" --timestamp 20260603-photos-baseline --date 2026-06-03."
 do
   if ! grep -q "$expected_text" "$status_default_smoke"; then
     echo "Phase 5 default status report is missing expected text: $expected_text" >&2
@@ -2257,7 +2257,7 @@ cat > "$status_missing_environment_evidence" <<'MARKDOWN'
 MARKDOWN
 scripts/report-phase-5-status.sh \
   --evidence "$status_missing_environment_evidence" \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp status-host-smoke >/tmp/picko-phase-5-status-smoke.log
 if ! grep -q "Picko Phase 5 Status" /tmp/picko-phase-5-status-smoke.log; then
   echo "Phase 5 status report did not print the expected heading." >&2
@@ -2390,14 +2390,14 @@ if ! grep -q "scripts/prepare-phase-5-host-baseline-capture.sh" /tmp/picko-phase
 fi
 scripts/report-phase-5-status.sh \
   --evidence "$status_ready_preflight_evidence" \
-  --date 2026-06-01 \
+  --date 2026-06-03 \
   --host-timestamp ready-preflight-smoke >/tmp/picko-phase-5-status-ready-preflight-timestamp.log
 if ! grep -q -- "--timestamp ready-preflight-smoke" /tmp/picko-phase-5-status-ready-preflight-timestamp.log; then
   echo "Phase 5 status report did not include a deterministic timestamp in the ready-preflight host baseline guidance." >&2
   rm -f "$status_stray_baseline"
   exit 1
 fi
-if ! grep -q -- "--date 2026-06-01" /tmp/picko-phase-5-status-ready-preflight-timestamp.log; then
+if ! grep -q -- "--date 2026-06-03" /tmp/picko-phase-5-status-ready-preflight-timestamp.log; then
   echo "Phase 5 status report did not include the deterministic date in the ready-preflight host baseline guidance." >&2
   rm -f "$status_stray_baseline"
   exit 1
@@ -2423,17 +2423,17 @@ if ! grep -q "For the default active-package command sequence, run scripts/phase
 fi
 if ! grep -q "For explicit reproducibility, run scripts/phase-5-external-evidence-checklist.sh --evidence" /tmp/picko-phase-5-status-smoke.log \
   || ! grep -q -- "--manual-dir docs/phase-5-evidence/manual-2026-05-31" /tmp/picko-phase-5-status-smoke.log \
-  || ! grep -q -- "--date 2026-06-01 --host-timestamp status-host-smoke" /tmp/picko-phase-5-status-smoke.log; then
+  || ! grep -q -- "--date 2026-06-03 --host-timestamp status-host-smoke" /tmp/picko-phase-5-status-smoke.log; then
   echo "Phase 5 status report did not point to the guarded external evidence checklist." >&2
   exit 1
 fi
-if ! grep -q -- "--timestamp status-host-smoke --date 2026-06-01" /tmp/picko-phase-5-status-smoke.log; then
+if ! grep -q -- "--timestamp status-host-smoke --date 2026-06-03" /tmp/picko-phase-5-status-smoke.log; then
   echo "Phase 5 status report did not include the deterministic host baseline timestamp." >&2
   exit 1
 fi
 if ! grep -q "then run scripts/prepare-phase-5-host-baseline-capture.sh before capture and write-back." /tmp/picko-phase-5-status-smoke.log \
   || ! grep -q "Explicit reproducibility: scripts/prepare-phase-5-host-baseline-capture.sh --evidence" /tmp/picko-phase-5-status-smoke.log \
-  || ! grep -q -- "--timestamp status-host-smoke --date 2026-06-01" /tmp/picko-phase-5-status-smoke.log; then
+  || ! grep -q -- "--timestamp status-host-smoke --date 2026-06-03" /tmp/picko-phase-5-status-smoke.log; then
   echo "Phase 5 status report did not put the default host baseline helper before explicit reproducibility guidance." >&2
   exit 1
 fi
@@ -2443,7 +2443,7 @@ if ! grep -q "scripts/prepare-phase-5-macos-manual-capture.sh" /tmp/picko-phase-
 fi
 if ! grep -q "For macOS captures, run scripts/prepare-phase-5-macos-manual-capture.sh. Explicit reproducibility:" /tmp/picko-phase-5-status-smoke.log \
   || ! grep -q -- "--manual-dir docs/phase-5-evidence/manual-2026-05-31" /tmp/picko-phase-5-status-smoke.log \
-  || ! grep -q -- "--date 2026-06-01" /tmp/picko-phase-5-status-smoke.log; then
+  || ! grep -q -- "--date 2026-06-03" /tmp/picko-phase-5-status-smoke.log; then
   echo "Phase 5 status report did not put the default macOS capture helper before explicit reproducibility guidance." >&2
   exit 1
 fi
@@ -2456,7 +2456,7 @@ if ! grep -q "After all rows and evidence files are written back, run scripts/fi
   exit 1
 fi
 if ! grep -q "For explicit finalization reproducibility, run scripts/finalize-phase-5-evidence.sh --evidence" /tmp/picko-phase-5-status-smoke.log \
-  || ! grep -q -- "--date 2026-06-01 --host-timestamp status-host-smoke" /tmp/picko-phase-5-status-smoke.log; then
+  || ! grep -q -- "--date 2026-06-03 --host-timestamp status-host-smoke" /tmp/picko-phase-5-status-smoke.log; then
   echo "Phase 5 status report did not include final evidence wrapper guidance." >&2
   exit 1
 fi
@@ -2806,7 +2806,7 @@ fi
 scripts/phase-5-external-evidence-checklist.sh \
   --evidence "$status_complete_evidence" \
   --manual-dir "$status_complete_manual_dir" \
-  --date 2026-06-01 >/tmp/picko-phase-5-external-complete.log
+  --date 2026-06-03 >/tmp/picko-phase-5-external-complete.log
 if ! grep -q "Host Photos-backed baseline JSON is already referenced; no capture or write-back step is currently required." /tmp/picko-phase-5-external-complete.log; then
   echo "External evidence checklist did not skip host baseline steps for complete evidence." >&2
   exit 1
@@ -2818,7 +2818,7 @@ fi
 scripts/phase-5-external-evidence-checklist.sh \
   --evidence "$status_ready_preflight_evidence" \
   --manual-dir "$status_complete_manual_dir" \
-  --date 2026-06-01 >/tmp/picko-phase-5-external-ready-preflight.log
+  --date 2026-06-03 >/tmp/picko-phase-5-external-ready-preflight.log
 if ! grep -q "Host Photos-backed baseline preflight is already recorded as Passed." /tmp/picko-phase-5-external-ready-preflight.log; then
   echo "External evidence checklist did not skip the host baseline preflight after it was recorded." >&2
   exit 1
@@ -2845,7 +2845,7 @@ PY
 scripts/phase-5-external-evidence-checklist.sh \
   --evidence "$status_complete_bad_privacy_section_evidence" \
   --manual-dir "$status_complete_manual_dir" \
-  --date 2026-06-01 >/tmp/picko-phase-5-external-complete-bad-privacy-section.log
+  --date 2026-06-03 >/tmp/picko-phase-5-external-complete-bad-privacy-section.log
 if grep -q "Runtime privacy log audit evidence is already referenced" /tmp/picko-phase-5-external-complete-bad-privacy-section.log; then
   echo "External evidence checklist skipped runtime privacy write-back when evidence was outside Privacy Review." >&2
   exit 1
@@ -2868,7 +2868,7 @@ PY
 scripts/phase-5-external-evidence-checklist.sh \
   --evidence "$status_complete_empty_runtime_evidence" \
   --manual-dir "$status_complete_manual_dir" \
-  --date 2026-06-01 >/tmp/picko-phase-5-external-complete-empty-runtime.log
+  --date 2026-06-03 >/tmp/picko-phase-5-external-complete-empty-runtime.log
 if grep -q "Runtime privacy log audit evidence is already referenced" /tmp/picko-phase-5-external-complete-empty-runtime.log; then
   echo "External evidence checklist skipped runtime privacy write-back when the referenced runtime log was empty." >&2
   rm -f "$status_complete_empty_runtime_log"
@@ -2894,7 +2894,7 @@ PY
 scripts/phase-5-external-evidence-checklist.sh \
   --evidence "$status_complete_sensitive_runtime_evidence" \
   --manual-dir "$status_complete_manual_dir" \
-  --date 2026-06-01 >/tmp/picko-phase-5-external-complete-sensitive-runtime.log
+  --date 2026-06-03 >/tmp/picko-phase-5-external-complete-sensitive-runtime.log
 if grep -q "Runtime privacy log audit evidence is already referenced" /tmp/picko-phase-5-external-complete-sensitive-runtime.log; then
   echo "External evidence checklist skipped runtime privacy write-back when the referenced runtime log contained sensitive metadata." >&2
   rm -f "$status_complete_sensitive_runtime_log"
@@ -2920,7 +2920,7 @@ PY
 scripts/phase-5-external-evidence-checklist.sh \
   --evidence "$status_complete_bad_host_section_evidence" \
   --manual-dir "$status_complete_manual_dir" \
-  --date 2026-06-01 >/tmp/picko-phase-5-external-complete-bad-host-section.log
+  --date 2026-06-03 >/tmp/picko-phase-5-external-complete-bad-host-section.log
 if grep -q "Host Photos-backed baseline JSON is already referenced; no capture or write-back step is currently required." /tmp/picko-phase-5-external-complete-bad-host-section.log; then
   echo "External evidence checklist skipped host baseline steps when preflight evidence was outside the host baseline section." >&2
   exit 1
@@ -2941,7 +2941,7 @@ MARKDOWN
 scripts/phase-5-external-evidence-checklist.sh \
   --evidence "$status_complete_with_gates_evidence" \
   --manual-dir "$status_complete_manual_dir" \
-  --date 2026-06-01 >/tmp/picko-phase-5-external-complete-with-gates.log
+  --date 2026-06-03 >/tmp/picko-phase-5-external-complete-with-gates.log
 if ! grep -q "Final completeness gates are already recorded as Passed; no write-back step is currently required." /tmp/picko-phase-5-external-complete-with-gates.log; then
   echo "External evidence checklist did not skip final completeness gates for complete evidence." >&2
   exit 1
@@ -2978,7 +2978,7 @@ MARKDOWN
 scripts/phase-5-external-evidence-checklist.sh \
   --evidence "$status_complete_bad_gates_evidence" \
   --manual-dir "$status_complete_manual_dir" \
-  --date 2026-06-01 >/tmp/picko-phase-5-external-complete-bad-gates.log
+  --date 2026-06-03 >/tmp/picko-phase-5-external-complete-bad-gates.log
 if grep -q "Final completeness gates are already recorded as Passed" /tmp/picko-phase-5-external-complete-bad-gates.log; then
   echo "External evidence checklist skipped final completeness gates with mismatched gate commands." >&2
   exit 1
