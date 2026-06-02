@@ -2,7 +2,7 @@
 
 版本：v0.1
 日期：2026-05-31
-状态：已确认
+状态：进行中；PR #1 已打开，Phase 5 仍待外部 Photos evidence
 工作目录：`/Users/tanzz/workspaces/picko/.worktrees/mvp-core`
 
 ## 1. 当前基线
@@ -18,6 +18,12 @@
 7. `AGENTS.md` 已记录真实测试命令。
 
 下一步不应扩张新平台功能，而应进入真实 Photos 数据接入、SwiftData 状态绑定、删除确认链路和集成验证。原因是 Picko 的核心风险不是页面能否画出来，而是照片授权、元数据读取、预删除确认、隐私边界和大图库性能是否可靠。
+
+当前同步状态（2026-06-03）：
+
+1. PR #1 已打开：`https://github.com/tzzs/picko/pull/1`，head 为 `codex/mvp-core`，base 为 `main`。
+2. `scripts/report-mvp-next-development-status.sh --fail-on-incomplete` 和 `scripts/audit-mvp-next-completion.sh` 仍按预期非零退出；本地 package、文档、runbook、handoff、readiness、evidence template 和 evidence directory cleanliness gates 均为 ready。
+3. 当前不能标记 MVP Next 完成；剩余证明项仍是 host Mac Photos-backed 1k/10k/50k metadata baseline JSON，以及 macOS 首次 Photos 授权和预删除篮触发 Photos 系统删除确认两项手动截图/录屏 evidence。
 
 ## 2. 已确认开发顺序
 
