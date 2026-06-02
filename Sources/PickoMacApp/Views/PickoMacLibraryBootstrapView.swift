@@ -1,0 +1,118 @@
+import PickoApp
+import PickoPhotos
+import SwiftUI
+
+public struct PickoMacLibraryBootstrapView: View {
+    @State private var phase: Phase = .loading
+    private let makeBootstrapper: () throws -> PhotoLibraryBootstrapper
+    private let onModelLoaded: ((PickoMacWorkbenchModel) -> Void)?
+
+    public init(
+        makeBootstrapper: @escaping () throws -> PhotoLibraryBootstrapper = {
+            let adapter = PhotosLibraryAdapter()
+            return PhotoLibraryBootstrapper(
+                authorizer: adapter,
+                indexer: adapter,
+                deleter: adapter,
+                thumbnailProvider: MemoryCachingPhotoThumbnailProvider(source: adapter),
+                decisionStore: try ReviewDecisionStore.persistent()
+            )
+        },
+        onModelLoaded: ((PickoMacWorkbenchModel) -> Void)? = nil
+    ) {
+        self.makeBootstrapper = makeBootstrapper
+        self.onModelLoaded = onModelLoaded
+    }
+
+    public var body: some View {
+        Group {
+            switch phase {
+            case .loading:
+                ProgressView("Loading photo library...")
+                    .frame(minWidth: 640, minHeight: 420)
+            case .loaded(let model):
+                PickoMacRootView(model: model)
+            case .failed:
+                VStack(spacing: 16) {
+                    Image(systemName: "photo.on.rectangle.angled")
+                        .font(.system(size: 48, weight: .semibold))
+                        .foregroundStyle(.secondary)
+                    Text("Photo library access is needed to review your library.")
+                        .font(.headline)
+                    Button("Review Sample Library") {
+                        phase = .loaded(.preview())
+                    }
+                    .buttonStyle(.borderedProminent)
+                }
+                .frame(minWidth: 640, minHeight: 420)
+            }
+        }
+        .task {
+            await load()
+        }
+    }
+
+    @MainActor
+    private func load() async {
+        do {
+            let bootstrapper = try makeBootstrapper()
+            let appModel = try await bootstrapper.loadModel()
+            let model = PickoMacWorkbenchModel(appModel: appModel)
+            onModelLoaded?(model)
+            phase = .loaded(model)
+        } catch {
+            phase = .failed
+        }
+    }
+}
+
+private enum Phase {
+    case loading
+    case loaded(PickoMacWorkbenchModel)
+    case failed
+}
+
+#Preview {
+    PickoMacLibraryBootstrapView(
+        makeBootstrapper: {
+            PhotoLibraryBootstrapper(
+                authorizer: PreviewPhotoLibraryAuthorizer(),
+                indexer: PreviewPhotoAssetIndexer(),
+                decisionStore: nil
+            )
+        }
+    )
+}
+
+private struct PreviewPhotoLibraryAuthorizer: PhotoLibraryAuthorizing {
+    func authorizationStatus() -> PhotoLibraryAuthorizationStatus {
+        .authorized
+    }
+
+    func requestAuthorization() async -> PhotoLibraryAuthorizationStatus {
+        .authorized
+    }
+}
+
+private struct PreviewPhotoAssetIndexer: PhotoAssetIndexing {
+    func fetchAssetSnapshots() async throws -> [PhotoAssetSnapshot] {
+        PickoPreviewFixtures.assets.map { asset in
+            PhotoAssetSnapshot(
+                localIdentifier: asset.id,
+                mediaType: .image,
+                creationDate: asset.creationDate,
+                latitude: asset.location?.latitude,
+                longitude: asset.location?.longitude,
+                pixelWidth: asset.pixelWidth,
+                pixelHeight: asset.pixelHeight,
+                fileSizeBytes: asset.fileSizeBytes,
+                isFavorite: asset.isFavorite,
+                isEdited: asset.isEdited,
+                isScreenshot: asset.isScreenshot,
+                duration: asset.duration,
+                thumbnailHash: asset.thumbnailHash,
+                perceptualHash: asset.perceptualHash
+            )
+        }
+    }
+}
