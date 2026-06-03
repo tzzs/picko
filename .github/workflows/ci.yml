@@ -1,0 +1,65 @@
+name: CI
+
+on:
+  pull_request:
+    branches:
+      - main
+  push:
+    branches:
+      - main
+      - "codex/**"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  swiftpm:
+    name: SwiftPM and Local Phase 5 Gates
+    runs-on: macos-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Show toolchain
+        run: |
+          swift --version
+          xcodebuild -version
+
+      - name: Run Swift package tests
+        run: swift test --disable-sandbox
+
+      - name: Check shell syntax
+        run: |
+          for script in scripts/*.sh; do
+            bash -n "$script"
+          done
+
+      - name: Audit privacy logging
+        run: bash scripts/audit-privacy-logging.sh
+
+      - name: Verify local Phase 5 documentation gates
+        run: |
+          bash scripts/check-phase-5-shell-literal-safety.sh
+          bash scripts/check-phase-5-evidence-cleanliness.sh docs/phase-5-evidence
+          bash scripts/check-phase-5-verification-doc.sh docs/Phase-5-Verification.md
+          bash scripts/check-phase-5-evidence-template.sh docs/Phase-5-Evidence-Template.md
+          bash scripts/check-phase-5-external-runbook.sh docs/Phase-5-External-Evidence-Runbook.md
+          bash scripts/check-phase-5-external-evidence-readiness.sh \
+            --evidence docs/phase-5-evidence-2026-05-31.md \
+            --manual-dir docs/phase-5-evidence/manual-2026-05-31 \
+            --runbook docs/Phase-5-External-Evidence-Runbook.md \
+            --label "Non-production Mac Photos test library" \
+            --date 2026-06-03 \
+            --host-timestamp 20260603-photos-baseline
+
+      - name: Verify external evidence handoff
+        run: bash scripts/check-phase-5-external-handoff.sh
+
+      - name: Check whitespace
+        run: git diff --check
