@@ -31,6 +31,9 @@ jobs:
           swift --version
           xcodebuild -version
 
+      - name: Ensure ripgrep
+        run: command -v rg || brew install ripgrep
+
       - name: Run Swift package tests
         run: swift test --disable-sandbox
 
