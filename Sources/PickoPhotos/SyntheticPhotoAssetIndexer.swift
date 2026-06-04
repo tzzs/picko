@@ -11,24 +11,38 @@ public struct SyntheticPhotoAssetIndexer: PhotoAssetIndexing {
     }
 
     public func fetchAssetSnapshots() async throws -> [PhotoAssetSnapshot] {
-        (0..<assetCount).map { index in
-            PhotoAssetSnapshot(
+        var snapshots: [PhotoAssetSnapshot] = []
+        snapshots.reserveCapacity(assetCount)
+
+        for index in 0..<assetCount {
+            let mediaType = mediaType(for: index)
+            let creationDate = baseDate.addingTimeInterval(TimeInterval(index))
+            let latitude = latitude(for: index)
+            let longitude = longitude(for: index)
+            let pixelWidth = 3_024 + (index % 4) * 256
+            let pixelHeight = 4_032 + (index % 3) * 144
+            let fileSizeBytes = Int64(1_500_000 + (index % 400) * 8_192)
+            let duration: TimeInterval? = index.isMultiple(of: 11) ? 12.5 : nil
+
+            snapshots.append(PhotoAssetSnapshot(
                 localIdentifier: "synthetic-\(index)",
-                mediaType: mediaType(for: index),
-                creationDate: baseDate.addingTimeInterval(TimeInterval(index)),
-                latitude: latitude(for: index),
-                longitude: longitude(for: index),
-                pixelWidth: 3_024 + (index % 4) * 256,
-                pixelHeight: 4_032 + (index % 3) * 144,
-                fileSizeBytes: Int64(1_500_000 + (index % 400) * 8_192),
+                mediaType: mediaType,
+                creationDate: creationDate,
+                latitude: latitude,
+                longitude: longitude,
+                pixelWidth: pixelWidth,
+                pixelHeight: pixelHeight,
+                fileSizeBytes: fileSizeBytes,
                 isFavorite: index.isMultiple(of: 37),
                 isEdited: index.isMultiple(of: 23),
                 isScreenshot: index.isMultiple(of: 19),
-                duration: index.isMultiple(of: 11) ? 12.5 : nil,
+                duration: duration,
                 thumbnailHash: "thumb-\(index % 997)",
                 perceptualHash: "perceptual-\(index % 509)"
-            )
+            ))
         }
+
+        return snapshots
     }
 
     private func mediaType(for index: Int) -> PhotoAssetSnapshot.MediaType {
