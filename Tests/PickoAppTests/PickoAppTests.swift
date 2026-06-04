@@ -1,0 +1,774 @@
+import XCTest
+import PickoCore
+import PickoPhotos
+@testable import PickoApp
+
+final class PickoAppTests: XCTestCase {
+    func testPreDeleteActionUpdatesBasketCount() {
+        let model = PickoAppModel.preview()
+
+        model.preDeleteCurrentAsset()
+
+        XCTAssertEqual(model.deletionQueueCount, 1)
+    }
+
+    func testSwiftDataStorePersistsReviewDecision() throws {
+        let store = try ReviewDecisionStore.inMemory()
+
+        try store.save(assetId: "a1", status: .preDeleted)
+
+        XCTAssertEqual(try store.status(for: "a1"), .preDeleted)
+    }
+
+    func testSwiftDataStoreReopensPersistentReviewDecision() throws {
+        let directory = FileManager.default.temporaryDirectory
+            .appendingPathComponent(UUID().uuidString, isDirectory: true)
+        try FileManager.default.createDirectory(at: directory, withIntermediateDirectories: true)
+        defer {
+            try? FileManager.default.removeItem(at: directory)
+        }
+        let storeURL = directory.appendingPathComponent("ReviewDecisionStore.sqlite")
+
+        do {
+            let store = try ReviewDecisionStore.persistent(storeURL: storeURL)
+            try store.save(assetId: "persistent-a1", status: .kept)
+        }
+
+        let reopenedStore = try ReviewDecisionStore.persistent(storeURL: storeURL)
+
+        XCTAssertEqual(try reopenedStore.status(for: "persistent-a1"), .kept)
+    }
+
+    func testSwiftDataStoreClearsAllLocalReviewState() throws {
+        let store = try ReviewDecisionStore.inMemory()
+        let session = ReviewSession(
+            id: "session-clear",
+            mode: .single,
+            startedAt: Date(timeIntervalSince1970: 10),
+            reviewedCount: 1,
+            keptCount: 0,
+            preDeletedCount: 1,
+            skippedCount: 0,
+            freedBytesEstimate: 10
+        )
+        let group = SimilarGroup(
+            id: "group-clear",
+            assetIds: ["a1", "a2"],
+            groupType: .similar,
+            timeRange: nil,
+            locationSummary: nil,
+            recommendedKeepIds: ["a1"],
+            keepCount: 1,
+            confidenceScore: 0.7,
+            status: .reviewed
+        )
+        var state = ReviewStateStore(
+            assets: [
+                makeAsset(id: "a1", fileSizeBytes: 10),
+                makeAsset(id: "a2", fileSizeBytes: 20)
+            ],
+            groups: [group]
+        )
+        state.apply(.preDelete("a2"))
+
+        try store.save(state: state)
+        try store.save(session: session)
+        try store.clearAllReviewState()
+
+        XCTAssertNil(try store.status(for: "a2"))
+        XCTAssertNil(try store.reviewSession(id: "session-clear"))
+        XCTAssertNil(try store.groupDecision(id: "group-clear"))
+        XCTAssertTrue(try store.basketItems().isEmpty)
+    }
+
+    func testRootViewCanBeConstructedWithPreviewModel() {
+        let view = PickoRootView(model: .preview())
+
+        XCTAssertNotNil(view)
+    }
+
+    func testLibraryBootstrapViewCanBeConstructed() {
+        let view = PickoLibraryBootstrapView()
+
+        XCTAssertNotNil(view)
+    }
+
+    func testBenchmarkLaunchConfigurationParsesSyntheticCounts() {
+        let configuration = BenchmarkLaunchConfiguration.parse(arguments: [
+            "Picko",
+            "--picko-run-metadata-benchmark",
+            "--picko-benchmark-synthetic",
+            "--picko-benchmark-counts=10,20,30"
+        ])
+
+        XCTAssertEqual(configuration?.mode, .synthetic)
+        XCTAssertEqual(configuration?.assetCounts, [10, 20, 30])
+    }
+
+    func testBenchmarkLaunchConfigurationDefaultsToPhotosMode() {
+        let configuration = BenchmarkLaunchConfiguration.parse(arguments: [
+            "Picko",
+            "--picko-run-metadata-benchmark"
+        ])
+
+        XCTAssertEqual(configuration?.mode, .photos)
+        XCTAssertEqual(configuration?.assetCounts, [1_000, 10_000, 50_000])
+    }
+
+    func testMetadataBenchmarkViewCanBeConstructed() {
+        let view = MetadataBenchmarkView(
+            configuration: BenchmarkLaunchConfiguration(mode: .synthetic, assetCounts: [10])
+        )
+
+        XCTAssertNotNil(view)
+    }
+
+    func testMetadataBenchmarkSummaryFormatsStableEvidenceText() {
+        let summary = MetadataBenchmarkSummary(
+            mode: "Synthetic",
+            results: [
+                AssetIndexingBenchmarkResult(assetCount: 10, elapsedSeconds: 0.25)
+            ]
+        )
+
+        XCTAssertEqual(summary.text, "Mode: Synthetic; 10: 0.2500s, 40.0000 assets/s")
+        XCTAssertEqual(
+            summary.rowText(for: AssetIndexingBenchmarkResult(assetCount: 10, elapsedSeconds: 0.25)),
+            "10 assets | 0.2500 seconds | 40.0000 assets/second"
+        )
+    }
+
+    func testMetadataBenchmarkFailureMessagesAreSafeForEvidence() {
+        XCTAssertEqual(
+            MetadataBenchmarkFailure.photosAccessNotGranted(.denied).message,
+            "Photos benchmark could not run because photo library access is denied."
+        )
+        XCTAssertEqual(
+            MetadataBenchmarkFailure.photosAccessNotGranted(.restricted).message,
+            "Photos benchmark could not run because photo library access is restricted."
+        )
+        XCTAssertEqual(
+            MetadataBenchmarkFailure.benchmarkRunFailed.message,
+            "Metadata benchmark failed before results could be captured. Check the test library setup and retry."
+        )
+    }
+
+    func testPhotosConfirmationCopyMentionsRecentlyDeletedRecovery() {
+        XCTAssertTrue(ReviewCopy.photosConfirmationMessage.contains("Recently Deleted"))
+        XCTAssertTrue(ReviewCopy.photosConfirmationMessage.contains("recovered"))
+    }
+
+    func testThumbnailViewCanBeConstructedWithoutProvider() {
+        let view = PickoThumbnailView(asset: makeAsset(id: "a1"), thumbnailProvider: nil)
+
+        XCTAssertNotNil(view)
+    }
+
+    func testSimilarGroupViewCanBeConstructedWithThumbnailProvider() {
+        let model = PickoAppModel.preview()
+        model.thumbnailProvider = FakeThumbnailProvider()
+
+        let view = SimilarGroupReviewView(model: model)
+
+        XCTAssertNotNil(view)
+    }
+
+    func testBasketViewCanBeConstructedWithThumbnailProvider() {
+        let model = PickoAppModel.preview()
+        model.thumbnailProvider = FakeThumbnailProvider()
+        model.preDeleteCurrentAsset()
+
+        let view = PreDeleteBasketView(model: model)
+
+        XCTAssertNotNil(view)
+    }
+
+    func testModelLoadsAssetsFromPhotoIndexer() async throws {
+        let indexer = FakePhotoAssetIndexer(snapshots: [
+            PhotoAssetSnapshot(
+                localIdentifier: "real-1",
+                mediaType: .image,
+                creationDate: Date(timeIntervalSince1970: 10),
+                latitude: nil,
+                longitude: nil,
+                pixelWidth: 3024,
+                pixelHeight: 4032,
+                fileSizeBytes: 1_500_000,
+                isFavorite: true,
+                isEdited: false,
+                isScreenshot: false,
+                duration: nil,
+                thumbnailHash: "same",
+                perceptualHash: "same"
+            ),
+            PhotoAssetSnapshot(
+                localIdentifier: "real-2",
+                mediaType: .image,
+                creationDate: Date(timeIntervalSince1970: 12),
+                latitude: nil,
+                longitude: nil,
+                pixelWidth: 3024,
+                pixelHeight: 4032,
+                fileSizeBytes: 1_400_000,
+                isFavorite: false,
+                isEdited: false,
+                isScreenshot: false,
+                duration: nil,
+                thumbnailHash: "same",
+                perceptualHash: "same"
+            )
+        ])
+
+        let model = try await PickoAppModel.loadingFromPhotoLibrary(indexer: indexer)
+
+        XCTAssertEqual(model.assets.map(\.id), ["real-1", "real-2"])
+        XCTAssertEqual(model.groups.count, 1)
+        XCTAssertEqual(model.groups.first?.recommendedKeepIds, ["real-1"])
+    }
+
+    func testSwiftDataStoreAppliesPersistedReviewState() throws {
+        let store = try ReviewDecisionStore.inMemory()
+        var state = ReviewStateStore(assets: [
+            makeAsset(id: "a1"),
+            makeAsset(id: "a2")
+        ])
+        state.apply(.preDelete("a1"))
+        state.apply(.skip("a2"))
+
+        try store.save(state: state)
+        let restored = try store.applyingSavedDecisions(
+            to: ReviewStateStore(assets: [
+                makeAsset(id: "a1"),
+                makeAsset(id: "a2")
+            ])
+        )
+
+        XCTAssertEqual(restored.asset(id: "a1")?.status, .preDeleted)
+        XCTAssertEqual(restored.asset(id: "a2")?.status, .skipped)
+        XCTAssertEqual(restored.deletionQueue.itemIds, ["a1"])
+    }
+
+    func testSwiftDataStoreRestoresPersistedBasketOrder() throws {
+        let store = try ReviewDecisionStore.inMemory()
+        var state = ReviewStateStore(assets: [
+            makeAsset(id: "a1", fileSizeBytes: 10),
+            makeAsset(id: "a2", fileSizeBytes: 20),
+            makeAsset(id: "a3", fileSizeBytes: 30)
+        ])
+        state.apply(.preDelete("a2"))
+        state.apply(.preDelete("a1"))
+
+        try store.save(state: state)
+        let restored = try store.applyingSavedDecisions(
+            to: ReviewStateStore(assets: [
+                makeAsset(id: "a1", fileSizeBytes: 10),
+                makeAsset(id: "a2", fileSizeBytes: 20),
+                makeAsset(id: "a3", fileSizeBytes: 30)
+            ])
+        )
+
+        XCTAssertEqual(restored.deletionQueue.itemIds, ["a2", "a1"])
+        XCTAssertEqual(restored.deletionQueue.estimatedBytes, 30)
+    }
+
+    func testSwiftDataStorePersistsReviewSession() throws {
+        let store = try ReviewDecisionStore.inMemory()
+        let session = ReviewSession(
+            id: "session-1",
+            mode: .similarGroup,
+            startedAt: Date(timeIntervalSince1970: 10),
+            completedAt: Date(timeIntervalSince1970: 20),
+            reviewedCount: 4,
+            keptCount: 1,
+            preDeletedCount: 2,
+            skippedCount: 1,
+            freedBytesEstimate: 42
+        )
+
+        try store.save(session: session)
+
+        XCTAssertEqual(try store.reviewSession(id: "session-1"), session)
+    }
+
+    func testSwiftDataStoreReturnsLatestIncompleteReviewSession() throws {
+        let store = try ReviewDecisionStore.inMemory()
+        try store.save(session: ReviewSession(
+            id: "older",
+            mode: .single,
+            startedAt: Date(timeIntervalSince1970: 10),
+            reviewedCount: 1
+        ))
+        try store.save(session: ReviewSession(
+            id: "completed",
+            mode: .single,
+            startedAt: Date(timeIntervalSince1970: 30),
+            completedAt: Date(timeIntervalSince1970: 40),
+            reviewedCount: 2
+        ))
+        try store.save(session: ReviewSession(
+            id: "newer",
+            mode: .similarGroup,
+            startedAt: Date(timeIntervalSince1970: 20),
+            reviewedCount: 3
+        ))
+
+        XCTAssertEqual(try store.latestIncompleteReviewSession()?.id, "newer")
+    }
+
+    func testModelPersistsCurrentSessionAfterSingleAssetAction() throws {
+        let decisionStore = try ReviewDecisionStore.inMemory()
+        let session = ReviewSession(
+            id: "session-current",
+            mode: .single,
+            startedAt: Date(timeIntervalSince1970: 10)
+        )
+        let model = PickoAppModel(
+            store: ReviewStateStore(assets: [
+                makeAsset(id: "a1", fileSizeBytes: 10)
+            ]),
+            currentSession: session,
+            decisionStore: decisionStore
+        )
+
+        model.preDeleteCurrentAsset()
+
+        let persisted = try XCTUnwrap(decisionStore.reviewSession(id: "session-current"))
+        XCTAssertEqual(persisted.reviewedCount, 1)
+        XCTAssertEqual(persisted.preDeletedCount, 1)
+        XCTAssertEqual(persisted.freedBytesEstimate, 10)
+    }
+
+    func testPhotoLibraryBootstrapperRestoresLatestIncompleteSession() async throws {
+        let decisionStore = try ReviewDecisionStore.inMemory()
+        try decisionStore.save(session: ReviewSession(
+            id: "session-restore",
+            mode: .single,
+            startedAt: Date(timeIntervalSince1970: 10),
+            reviewedCount: 4,
+            keptCount: 2
+        ))
+        let bootstrapper = PhotoLibraryBootstrapper(
+            authorizer: FakePhotoLibraryAuthorizer(status: .authorized),
+            indexer: FakePhotoAssetIndexer(snapshots: [makeSnapshot(id: "real-session")]),
+            decisionStore: decisionStore
+        )
+
+        let model = try await bootstrapper.loadModel()
+
+        XCTAssertEqual(model.currentSession.id, "session-restore")
+        XCTAssertEqual(model.currentSession.reviewedCount, 4)
+        XCTAssertEqual(model.currentSession.keptCount, 2)
+    }
+
+    func testSwiftDataStorePersistsGroupDecision() throws {
+        let store = try ReviewDecisionStore.inMemory()
+        var group = SimilarGroup(
+            id: "group-1",
+            assetIds: ["a1", "a2", "a3"],
+            groupType: .similar,
+            timeRange: DateInterval(
+                start: Date(timeIntervalSince1970: 10),
+                end: Date(timeIntervalSince1970: 20)
+            ),
+            locationSummary: "Shanghai",
+            recommendedKeepIds: ["a1"],
+            keepCount: 1,
+            confidenceScore: 0.8,
+            status: .unreviewed
+        )
+        group.recommendedKeepIds = ["a2"]
+        group.keepCount = 1
+        group.status = .reviewed
+
+        try store.save(group: group)
+
+        XCTAssertEqual(try store.groupDecision(id: "group-1"), group)
+    }
+
+    func testSwiftDataStorePersistsOrderedBasketItems() throws {
+        let store = try ReviewDecisionStore.inMemory()
+        var state = ReviewStateStore(assets: [
+            makeAsset(id: "a1", fileSizeBytes: 10),
+            makeAsset(id: "a2", fileSizeBytes: 20),
+            makeAsset(id: "a3", fileSizeBytes: 30)
+        ])
+        state.apply(.preDelete("a2"))
+        state.apply(.preDelete("a1"))
+
+        try store.saveBasket(from: state)
+
+        XCTAssertEqual(try store.basketItems().map(\.assetId), ["a2", "a1"])
+        XCTAssertEqual(try store.basketItems().map(\.fileSizeBytes), [20, 10])
+    }
+
+    func testSavingReviewStatePersistsGroupDecisionAndBasketOrder() throws {
+        let store = try ReviewDecisionStore.inMemory()
+        let group = SimilarGroup(
+            id: "group-state",
+            assetIds: ["a1", "a2"],
+            groupType: .similar,
+            timeRange: nil,
+            locationSummary: nil,
+            recommendedKeepIds: ["a1"],
+            keepCount: 1,
+            confidenceScore: 0.6,
+            status: .unreviewed
+        )
+        var state = ReviewStateStore(
+            assets: [
+                makeAsset(id: "a1", fileSizeBytes: 10),
+                makeAsset(id: "a2", fileSizeBytes: 20)
+            ],
+            groups: [group]
+        )
+        state.apply(.keepOnly(assetIds: ["a1"], inGroup: group.id))
+
+        try store.save(state: state)
+
+        XCTAssertEqual(try store.groupDecision(id: "group-state")?.status, .reviewed)
+        XCTAssertEqual(try store.basketItems().map(\.assetId), ["a2"])
+    }
+
+    func testModelPersistsStateAfterSingleAssetAction() throws {
+        let decisionStore = try ReviewDecisionStore.inMemory()
+        let model = PickoAppModel(
+            store: ReviewStateStore(assets: [
+                makeAsset(id: "a1", fileSizeBytes: 10),
+                makeAsset(id: "a2", fileSizeBytes: 20)
+            ]),
+            decisionStore: decisionStore
+        )
+
+        model.preDeleteCurrentAsset()
+
+        XCTAssertEqual(try decisionStore.status(for: "a1"), .preDeleted)
+        XCTAssertEqual(try decisionStore.basketItems().map(\.assetId), ["a1"])
+    }
+
+    func testModelPersistsStateAfterSimilarGroupAction() throws {
+        let decisionStore = try ReviewDecisionStore.inMemory()
+        let group = SimilarGroup(
+            id: "group-auto",
+            assetIds: ["a1", "a2"],
+            groupType: .similar,
+            timeRange: nil,
+            locationSummary: nil,
+            recommendedKeepIds: ["a1"],
+            keepCount: 1,
+            confidenceScore: 0.7,
+            status: .unreviewed
+        )
+        let model = PickoAppModel(
+            store: ReviewStateStore(
+                assets: [
+                    makeAsset(id: "a1", fileSizeBytes: 10),
+                    makeAsset(id: "a2", fileSizeBytes: 20)
+                ],
+                groups: [group]
+            ),
+            decisionStore: decisionStore
+        )
+
+        model.keep(assetIds: ["a1"], in: group)
+
+        XCTAssertEqual(try decisionStore.groupDecision(id: "group-auto")?.status, .reviewed)
+        XCTAssertEqual(try decisionStore.basketItems().map(\.assetId), ["a2"])
+    }
+
+    func testModelClearsLocalReviewStateFromMemoryAndPersistence() throws {
+        let decisionStore = try ReviewDecisionStore.inMemory()
+        let group = SimilarGroup(
+            id: "group-reset",
+            assetIds: ["a1", "a2"],
+            groupType: .similar,
+            timeRange: nil,
+            locationSummary: nil,
+            recommendedKeepIds: ["a1"],
+            keepCount: 1,
+            confidenceScore: 0.6,
+            status: .unreviewed
+        )
+        let model = PickoAppModel(
+            store: ReviewStateStore(
+                assets: [
+                    makeAsset(id: "a1", fileSizeBytes: 10),
+                    makeAsset(id: "a2", fileSizeBytes: 20)
+                ],
+                groups: [group]
+            ),
+            decisionStore: decisionStore
+        )
+        model.keep(assetIds: ["a1"], in: group)
+
+        model.clearLocalReviewState()
+
+        XCTAssertEqual(model.assets.map(\.status), [.unreviewed, .unreviewed])
+        XCTAssertEqual(model.groups.first?.status, .unreviewed)
+        XCTAssertEqual(model.deletionQueueCount, 0)
+        XCTAssertEqual(model.currentAssetIndex, 0)
+        XCTAssertNil(try decisionStore.status(for: "a2"))
+        XCTAssertNil(try decisionStore.groupDecision(id: "group-reset"))
+        XCTAssertTrue(try decisionStore.basketItems().isEmpty)
+    }
+
+    func testPhotoLibraryBootstrapperLoadsAuthorizedLibraryAndAppliesSavedDecisions() async throws {
+        let decisionStore = try ReviewDecisionStore.inMemory()
+        try decisionStore.save(assetId: "real-1", status: .preDeleted)
+        let bootstrapper = PhotoLibraryBootstrapper(
+            authorizer: FakePhotoLibraryAuthorizer(status: .authorized),
+            indexer: FakePhotoAssetIndexer(snapshots: [makeSnapshot(id: "real-1")]),
+            decisionStore: decisionStore
+        )
+
+        let model = try await bootstrapper.loadModel()
+
+        XCTAssertEqual(model.assets.map(\.id), ["real-1"])
+        XCTAssertEqual(model.assets.first?.status, .preDeleted)
+        XCTAssertEqual(model.deletionQueueCount, 1)
+    }
+
+    func testPhotoLibraryBootstrapperRestoresSavedGroupDecision() async throws {
+        let decisionStore = try ReviewDecisionStore.inMemory()
+        let savedGroup = SimilarGroup(
+            id: "similar-1",
+            assetIds: ["real-1", "real-2"],
+            groupType: .similar,
+            timeRange: nil,
+            locationSummary: "Saved group",
+            recommendedKeepIds: ["real-2"],
+            keepCount: 1,
+            confidenceScore: 0.9,
+            status: .reviewed
+        )
+        try decisionStore.save(group: savedGroup)
+        let bootstrapper = PhotoLibraryBootstrapper(
+            authorizer: FakePhotoLibraryAuthorizer(status: .authorized),
+            indexer: FakePhotoAssetIndexer(snapshots: [
+                makeSnapshot(id: "real-1", thumbnailHash: "same", perceptualHash: "same"),
+                makeSnapshot(id: "real-2", thumbnailHash: "same", perceptualHash: "same")
+            ]),
+            decisionStore: decisionStore
+        )
+
+        let model = try await bootstrapper.loadModel()
+
+        let group = try XCTUnwrap(model.groups.first)
+        XCTAssertEqual(group.id, savedGroup.id)
+        XCTAssertEqual(group.recommendedKeepIds, ["real-2"])
+        XCTAssertEqual(group.keepCount, 1)
+        XCTAssertEqual(group.status, .reviewed)
+    }
+
+    func testPhotoLibraryBootstrapperLoadedModelPersistsFutureActions() async throws {
+        let decisionStore = try ReviewDecisionStore.inMemory()
+        let bootstrapper = PhotoLibraryBootstrapper(
+            authorizer: FakePhotoLibraryAuthorizer(status: .authorized),
+            indexer: FakePhotoAssetIndexer(snapshots: [makeSnapshot(id: "real-2")]),
+            decisionStore: decisionStore
+        )
+        let model = try await bootstrapper.loadModel()
+
+        model.preDeleteCurrentAsset()
+
+        XCTAssertEqual(try decisionStore.status(for: "real-2"), .preDeleted)
+        XCTAssertEqual(try decisionStore.basketItems().map(\.assetId), ["real-2"])
+    }
+
+    func testPhotoLibraryBootstrapperLoadedModelKeepsThumbnailProvider() async throws {
+        let thumbnailProvider = FakeThumbnailProvider()
+        let bootstrapper = PhotoLibraryBootstrapper(
+            authorizer: FakePhotoLibraryAuthorizer(status: .authorized),
+            indexer: FakePhotoAssetIndexer(snapshots: [makeSnapshot(id: "real-thumb")]),
+            thumbnailProvider: thumbnailProvider,
+            decisionStore: nil
+        )
+
+        let model = try await bootstrapper.loadModel()
+
+        XCTAssertTrue(model.thumbnailProvider === thumbnailProvider)
+    }
+
+    func testPhotoLibraryBootstrapperRequestsAuthorizationBeforeLoading() async throws {
+        let authorizer = FakePhotoLibraryAuthorizer(status: .notDetermined, requestedStatus: .limited)
+        let bootstrapper = PhotoLibraryBootstrapper(
+            authorizer: authorizer,
+            indexer: FakePhotoAssetIndexer(snapshots: [makeSnapshot(id: "limited-1")]),
+            decisionStore: nil
+        )
+
+        let model = try await bootstrapper.loadModel()
+
+        XCTAssertEqual(authorizer.requestCount, 1)
+        XCTAssertEqual(model.assets.map(\.id), ["limited-1"])
+    }
+
+    func testPhotoLibraryBootstrapperStopsWhenAccessIsDenied() async {
+        let bootstrapper = PhotoLibraryBootstrapper(
+            authorizer: FakePhotoLibraryAuthorizer(status: .denied),
+            indexer: FakePhotoAssetIndexer(snapshots: [makeSnapshot(id: "blocked")]),
+            decisionStore: nil
+        )
+
+        do {
+            _ = try await bootstrapper.loadModel()
+            XCTFail("Expected photo library access to stop before indexing")
+        } catch PhotoLibraryBootstrapError.accessUnavailable(let status) {
+            XCTAssertEqual(status, .denied)
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+    }
+
+    func testConfirmPreDeleteBasketRequestsDeletionOnlyForQueuedAssets() async throws {
+        let model = PickoAppModel.preview()
+        let firstId = try XCTUnwrap(model.currentAsset?.id)
+        model.preDeleteCurrentAsset()
+        model.skipCurrentAsset()
+        let deleter = FakePhotoDeleter()
+
+        let deletedIds = try await model.confirmPreDeleteBasket(deleter: deleter)
+
+        XCTAssertEqual(deletedIds, [firstId])
+        XCTAssertEqual(deleter.requestedAssetIds, [firstId])
+        XCTAssertEqual(model.deletionQueueCount, 0)
+    }
+
+    func testConfirmPreDeleteBasketPersistsClearedBasketAfterSuccessfulDeletion() async throws {
+        let decisionStore = try ReviewDecisionStore.inMemory()
+        let model = PickoAppModel(
+            store: ReviewStateStore(assets: [
+                makeAsset(id: "delete-1", fileSizeBytes: 10)
+            ]),
+            decisionStore: decisionStore
+        )
+        model.preDeleteCurrentAsset()
+        XCTAssertEqual(try decisionStore.basketItems().map(\.assetId), ["delete-1"])
+
+        _ = try await model.confirmPreDeleteBasket(deleter: FakePhotoDeleter())
+
+        XCTAssertEqual(model.deletionQueueCount, 0)
+        XCTAssertEqual(try decisionStore.basketItems().map(\.assetId), [])
+        XCTAssertNotEqual(try decisionStore.status(for: "delete-1"), .preDeleted)
+    }
+
+    func testConfirmPreDeleteBasketKeepsQueuedStateWhenDeletionFails() async throws {
+        let decisionStore = try ReviewDecisionStore.inMemory()
+        let model = PickoAppModel(
+            store: ReviewStateStore(assets: [
+                makeAsset(id: "delete-failure", fileSizeBytes: 10)
+            ]),
+            decisionStore: decisionStore
+        )
+        model.preDeleteCurrentAsset()
+
+        do {
+            _ = try await model.confirmPreDeleteBasket(deleter: FakePhotoDeleter(error: DeletionError.requestFailed))
+            XCTFail("Expected deletion failure")
+        } catch DeletionError.requestFailed {
+        } catch {
+            XCTFail("Unexpected error: \(error)")
+        }
+
+        XCTAssertEqual(model.deletionQueueCount, 1)
+        XCTAssertEqual(try decisionStore.basketItems().map(\.assetId), ["delete-failure"])
+        XCTAssertEqual(try decisionStore.status(for: "delete-failure"), .preDeleted)
+    }
+
+    private func makeAsset(id: String, fileSizeBytes: Int64 = 10) -> PhotoAsset {
+        PhotoAsset(
+            id: id,
+            mediaType: .photo,
+            creationDate: Date(timeIntervalSince1970: 0),
+            location: nil,
+            pixelWidth: 1,
+            pixelHeight: 1,
+            fileSizeBytes: fileSizeBytes,
+            isFavorite: false,
+            isEdited: false,
+            isScreenshot: false,
+            duration: nil,
+            thumbnailHash: nil,
+            perceptualHash: nil
+        )
+    }
+
+    private func makeSnapshot(
+        id: String,
+        thumbnailHash: String? = nil,
+        perceptualHash: String? = nil
+    ) -> PhotoAssetSnapshot {
+        PhotoAssetSnapshot(
+            localIdentifier: id,
+            mediaType: .image,
+            creationDate: Date(timeIntervalSince1970: 0),
+            latitude: nil,
+            longitude: nil,
+            pixelWidth: 1,
+            pixelHeight: 1,
+            fileSizeBytes: 10,
+            isFavorite: false,
+            isEdited: false,
+            isScreenshot: false,
+            duration: nil,
+            thumbnailHash: thumbnailHash,
+            perceptualHash: perceptualHash
+        )
+    }
+}
+
+private struct FakePhotoAssetIndexer: PhotoAssetIndexing {
+    var snapshots: [PhotoAssetSnapshot]
+
+    func fetchAssetSnapshots() async throws -> [PhotoAssetSnapshot] {
+        snapshots
+    }
+}
+
+private final class FakePhotoLibraryAuthorizer: PhotoLibraryAuthorizing {
+    private let statusValue: PhotoLibraryAuthorizationStatus
+    private let requestedStatus: PhotoLibraryAuthorizationStatus
+    private(set) var requestCount = 0
+
+    init(
+        status: PhotoLibraryAuthorizationStatus,
+        requestedStatus: PhotoLibraryAuthorizationStatus = .authorized
+    ) {
+        self.statusValue = status
+        self.requestedStatus = requestedStatus
+    }
+
+    func authorizationStatus() -> PhotoLibraryAuthorizationStatus {
+        statusValue
+    }
+
+    func requestAuthorization() async -> PhotoLibraryAuthorizationStatus {
+        requestCount += 1
+        return requestedStatus
+    }
+}
+
+private final class FakePhotoDeleter: PhotoDeleting {
+    var error: Error?
+    private(set) var requestedAssetIds: [String] = []
+
+    init(error: Error? = nil) {
+        self.error = error
+    }
+
+    func requestDeletion(assetIds: [String]) async throws {
+        if let error {
+            throw error
+        }
+        requestedAssetIds = assetIds
+    }
+}
+
+private final class FakeThumbnailProvider: PhotoThumbnailProviding {
+    func thumbnailData(for request: PhotoThumbnailRequest) async throws -> Data? {
+        Data([1])
+    }
+}
+
+private enum DeletionError: Error {
+    case requestFailed
+}

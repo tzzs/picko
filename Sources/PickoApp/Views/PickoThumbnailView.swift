@@ -1,0 +1,101 @@
+import PickoCore
+import PickoPhotos
+import SwiftUI
+#if canImport(UIKit)
+import UIKit
+#elseif canImport(AppKit)
+import AppKit
+#endif
+
+public struct PickoThumbnailView: View {
+    private let asset: PhotoAsset
+    private let thumbnailProvider: (any PhotoThumbnailProviding)?
+    private let targetPixelWidth: Int
+    private let targetPixelHeight: Int
+    @State private var thumbnailData: Data?
+
+    public init(
+        asset: PhotoAsset,
+        thumbnailProvider: (any PhotoThumbnailProviding)?,
+        targetPixelWidth: Int = 600,
+        targetPixelHeight: Int = 450
+    ) {
+        self.asset = asset
+        self.thumbnailProvider = thumbnailProvider
+        self.targetPixelWidth = targetPixelWidth
+        self.targetPixelHeight = targetPixelHeight
+    }
+
+    public var body: some View {
+        ZStack {
+            placeholder
+
+            if let image = platformImage(from: thumbnailData) {
+                image
+                    .resizable()
+                    .scaledToFill()
+            }
+        }
+        .clipped()
+        .task(id: asset.id) {
+            await loadThumbnail()
+        }
+        .accessibilityLabel("Photo preview")
+    }
+
+    private var placeholder: some View {
+        RoundedRectangle(cornerRadius: 8)
+            .fill(asset.isScreenshot ? Color.indigo.opacity(0.2) : Color.blue.opacity(0.18))
+            .overlay {
+                Image(systemName: iconName)
+                    .font(.system(size: 56, weight: .semibold))
+                    .foregroundStyle(.blue)
+            }
+    }
+
+    private var iconName: String {
+        switch asset.mediaType {
+        case .photo, .livePhoto:
+            return "photo"
+        case .video:
+            return "video"
+        case .screenshot:
+            return "iphone"
+        }
+    }
+
+    @MainActor
+    private func loadThumbnail() async {
+        guard let thumbnailProvider else {
+            thumbnailData = nil
+            return
+        }
+
+        let request = PhotoThumbnailRequest(
+            assetId: asset.id,
+            targetPixelWidth: targetPixelWidth,
+            targetPixelHeight: targetPixelHeight
+        )
+        thumbnailData = try? await thumbnailProvider.thumbnailData(for: request)
+    }
+
+    private func platformImage(from data: Data?) -> Image? {
+        guard let data else {
+            return nil
+        }
+
+        #if canImport(UIKit)
+        guard let image = UIImage(data: data) else {
+            return nil
+        }
+        return Image(uiImage: image)
+        #elseif canImport(AppKit)
+        guard let image = NSImage(data: data) else {
+            return nil
+        }
+        return Image(nsImage: image)
+        #else
+        return nil
+        #endif
+    }
+}

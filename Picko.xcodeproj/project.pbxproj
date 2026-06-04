@@ -1,0 +1,747 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		05F94B38F7BC2325CA889279 /* PickoMacApp in Frameworks */ = {isa = PBXBuildFile; productRef = 991B9D217E993274A38023F4 /* PickoMacApp */; };
+		14B7825A6ADA429AF15029AE /* PickoApp in Frameworks */ = {isa = PBXBuildFile; productRef = 35B64FC32BA470D68CA623F4 /* PickoApp */; };
+		155BE7DE1D1AA1ED84D4F1A9 /* PickoMacTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = A557E0FE7475626F8D65C882 /* PickoMacTests.swift */; };
+		40CCB3231FE27BE00DE72EFF /* PickoMacApp in Frameworks */ = {isa = PBXBuildFile; productRef = AA456DF551E03C5A5A229BC6 /* PickoMacApp */; };
+		4E2D797F20078F399B2B0AAE /* PickoMacApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 67F85C63E04D875375508C8C /* PickoMacApp.swift */; };
+		A20039F575AED9EBBEC21121 /* PickoUITests.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0546CA5660EF0CD0974927B5 /* PickoUITests.swift */; };
+		A9C5BB2C8AA5B5A91CD40DA7 /* PickoApp in Frameworks */ = {isa = PBXBuildFile; productRef = F2F0998D196957EA1AE605E7 /* PickoApp */; };
+		B90571C44D3FDD78F2887E44 /* PickoApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 61ED054DB8FCE76A19818302 /* PickoApp.swift */; };
+		FCE4FF888877E23B8665E2EA /* PickoTests.swift in Sources */ = {isa = PBXBuildFile; fileRef = E93985753B29CF35B498AE00 /* PickoTests.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXContainerItemProxy section */
+		0994F5B1ABDB6E0482BE2492 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F3EBE41EB85C342F862B913D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C32AC0F54E739DDD88DFB561;
+			remoteInfo = Picko;
+		};
+		1831CB125E5B10AB177BD106 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F3EBE41EB85C342F862B913D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = C32AC0F54E739DDD88DFB561;
+			remoteInfo = Picko;
+		};
+		A774DAAE267651B2453E1826 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = F3EBE41EB85C342F862B913D /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = 28BB3D9CB7967D7BC5AC217E;
+			remoteInfo = PickoMac;
+		};
+/* End PBXContainerItemProxy section */
+
+/* Begin PBXFileReference section */
+		0546CA5660EF0CD0974927B5 /* PickoUITests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickoUITests.swift; sourceTree = "<group>"; };
+		257D60ADAEF6436A14D6FFCB /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		2742E484155F7CAF7C51407B /* PickoTests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = PickoTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		328B3F5A11E3F6682686BB41 /* PickoMacTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = PickoMacTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		61ED054DB8FCE76A19818302 /* PickoApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickoApp.swift; sourceTree = "<group>"; };
+		67F85C63E04D875375508C8C /* PickoMacApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickoMacApp.swift; sourceTree = "<group>"; };
+		6ABB9024F1D9859DE31C8C95 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist; path = Info.plist; sourceTree = "<group>"; };
+		A557E0FE7475626F8D65C882 /* PickoMacTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickoMacTests.swift; sourceTree = "<group>"; };
+		A917854C68EBEA160B3F17F6 /* Picko.app */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.application; path = Picko.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		D5D13554941542CEE4BA2986 /* PickoMac.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = PickoMac.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		E93985753B29CF35B498AE00 /* PickoTests.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PickoTests.swift; sourceTree = "<group>"; };
+		F0D1506864CF989889581004 /* PickoUITests.xctest */ = {isa = PBXFileReference; includeInIndex = 0; lastKnownFileType = wrapper.cfbundle; path = PickoUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
+		FEC89D01B6DFBE7B504A98C9 /* mvp-core */ = {isa = PBXFileReference; lastKnownFileType = folder; name = "mvp-core"; path = .; sourceTree = SOURCE_ROOT; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		49E4475CC8C9B02A49B0F294 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				40CCB3231FE27BE00DE72EFF /* PickoMacApp in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		B5DCB8B00DDB263499677016 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				14B7825A6ADA429AF15029AE /* PickoApp in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C7822A38494E224460AB7A18 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A9C5BB2C8AA5B5A91CD40DA7 /* PickoApp in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E611878306BE390B243054E1 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				05F94B38F7BC2325CA889279 /* PickoMacApp in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		241A3A2A19FD6C4C08F68246 /* PickoTests */ = {
+			isa = PBXGroup;
+			children = (
+				E93985753B29CF35B498AE00 /* PickoTests.swift */,
+			);
+			name = PickoTests;
+			path = Tests/PickoTests;
+			sourceTree = "<group>";
+		};
+		35B2CEBF23932B139E446AD5 /* macOS */ = {
+			isa = PBXGroup;
+			children = (
+				257D60ADAEF6436A14D6FFCB /* Info.plist */,
+				67F85C63E04D875375508C8C /* PickoMacApp.swift */,
+			);
+			name = macOS;
+			path = Apps/Picko/macOS;
+			sourceTree = "<group>";
+		};
+		44838CF23811C256AD64DA1F = {
+			isa = PBXGroup;
+			children = (
+				F4640F887CA566A374A37DB9 /* iOS */,
+				35B2CEBF23932B139E446AD5 /* macOS */,
+				572730DD2757039480163153 /* Packages */,
+				73E0D274C91331F9C5278084 /* PickoMacTests */,
+				241A3A2A19FD6C4C08F68246 /* PickoTests */,
+				6AFA4EBF0D745B8D8CA7AEE2 /* PickoUITests */,
+				C946E9D51C2896F66597F660 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		572730DD2757039480163153 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				FEC89D01B6DFBE7B504A98C9 /* mvp-core */,
+			);
+			name = Packages;
+			sourceTree = "<group>";
+		};
+		6AFA4EBF0D745B8D8CA7AEE2 /* PickoUITests */ = {
+			isa = PBXGroup;
+			children = (
+				0546CA5660EF0CD0974927B5 /* PickoUITests.swift */,
+			);
+			name = PickoUITests;
+			path = Tests/PickoUITests;
+			sourceTree = "<group>";
+		};
+		73E0D274C91331F9C5278084 /* PickoMacTests */ = {
+			isa = PBXGroup;
+			children = (
+				A557E0FE7475626F8D65C882 /* PickoMacTests.swift */,
+			);
+			name = PickoMacTests;
+			path = Tests/PickoMacTests;
+			sourceTree = "<group>";
+		};
+		C946E9D51C2896F66597F660 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				A917854C68EBEA160B3F17F6 /* Picko.app */,
+				D5D13554941542CEE4BA2986 /* PickoMac.app */,
+				328B3F5A11E3F6682686BB41 /* PickoMacTests.xctest */,
+				2742E484155F7CAF7C51407B /* PickoTests.xctest */,
+				F0D1506864CF989889581004 /* PickoUITests.xctest */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		F4640F887CA566A374A37DB9 /* iOS */ = {
+			isa = PBXGroup;
+			children = (
+				6ABB9024F1D9859DE31C8C95 /* Info.plist */,
+				61ED054DB8FCE76A19818302 /* PickoApp.swift */,
+			);
+			name = iOS;
+			path = Apps/Picko/iOS;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		1EC57C96C8153FADC3B7FB53 /* PickoUITests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = AC070A23F96DD8C91F47E964 /* Build configuration list for PBXNativeTarget "PickoUITests" */;
+			buildPhases = (
+				3527C294E2EB44542266A2B7 /* Sources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				CBBCA7FF2197DA249686A573 /* PBXTargetDependency */,
+			);
+			name = PickoUITests;
+			packageProductDependencies = (
+			);
+			productName = PickoUITests;
+			productReference = F0D1506864CF989889581004 /* PickoUITests.xctest */;
+			productType = "com.apple.product-type.bundle.ui-testing";
+		};
+		28BB3D9CB7967D7BC5AC217E /* PickoMac */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 412F3EA15932A160EC816F97 /* Build configuration list for PBXNativeTarget "PickoMac" */;
+			buildPhases = (
+				949C2DFC4F3557B04856ABB3 /* Sources */,
+				49E4475CC8C9B02A49B0F294 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = PickoMac;
+			packageProductDependencies = (
+				AA456DF551E03C5A5A229BC6 /* PickoMacApp */,
+			);
+			productName = PickoMac;
+			productReference = D5D13554941542CEE4BA2986 /* PickoMac.app */;
+			productType = "com.apple.product-type.application";
+		};
+		75197FA063A275EB3DC1CEBA /* PickoMacTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 99BDC042E4041FC11FDB8AF9 /* Build configuration list for PBXNativeTarget "PickoMacTests" */;
+			buildPhases = (
+				222351D35547DB839C65A014 /* Sources */,
+				E611878306BE390B243054E1 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				4B180AEA7C43536474FB3807 /* PBXTargetDependency */,
+			);
+			name = PickoMacTests;
+			packageProductDependencies = (
+				991B9D217E993274A38023F4 /* PickoMacApp */,
+			);
+			productName = PickoMacTests;
+			productReference = 328B3F5A11E3F6682686BB41 /* PickoMacTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		A1595FAF7BBBFD40CA7A39DF /* PickoTests */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E79C391367E800AF1AA0B6EF /* Build configuration list for PBXNativeTarget "PickoTests" */;
+			buildPhases = (
+				C5A335367710562A2BA36540 /* Sources */,
+				C7822A38494E224460AB7A18 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+				18B3D723C4F34942C7033E65 /* PBXTargetDependency */,
+			);
+			name = PickoTests;
+			packageProductDependencies = (
+				F2F0998D196957EA1AE605E7 /* PickoApp */,
+			);
+			productName = PickoTests;
+			productReference = 2742E484155F7CAF7C51407B /* PickoTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
+		};
+		C32AC0F54E739DDD88DFB561 /* Picko */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = 0186EA31573F30047525A2E9 /* Build configuration list for PBXNativeTarget "Picko" */;
+			buildPhases = (
+				FFB7CE5D70B07BB9EF50C13B /* Sources */,
+				B5DCB8B00DDB263499677016 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = Picko;
+			packageProductDependencies = (
+				35B64FC32BA470D68CA623F4 /* PickoApp */,
+			);
+			productName = Picko;
+			productReference = A917854C68EBEA160B3F17F6 /* Picko.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		F3EBE41EB85C342F862B913D /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					1EC57C96C8153FADC3B7FB53 = {
+						TestTargetID = C32AC0F54E739DDD88DFB561;
+					};
+				};
+			};
+			buildConfigurationList = E2C592494F39BB73171D8D88 /* Build configuration list for PBXProject "Picko" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = 44838CF23811C256AD64DA1F;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				8F087BE2CBE152F5CE70B169 /* XCLocalSwiftPackageReference "." */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = C946E9D51C2896F66597F660 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				C32AC0F54E739DDD88DFB561 /* Picko */,
+				28BB3D9CB7967D7BC5AC217E /* PickoMac */,
+				75197FA063A275EB3DC1CEBA /* PickoMacTests */,
+				A1595FAF7BBBFD40CA7A39DF /* PickoTests */,
+				1EC57C96C8153FADC3B7FB53 /* PickoUITests */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXSourcesBuildPhase section */
+		222351D35547DB839C65A014 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				155BE7DE1D1AA1ED84D4F1A9 /* PickoMacTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		3527C294E2EB44542266A2B7 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				A20039F575AED9EBBEC21121 /* PickoUITests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		949C2DFC4F3557B04856ABB3 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				4E2D797F20078F399B2B0AAE /* PickoMacApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		C5A335367710562A2BA36540 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				FCE4FF888877E23B8665E2EA /* PickoTests.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		FFB7CE5D70B07BB9EF50C13B /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				B90571C44D3FDD78F2887E44 /* PickoApp.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin PBXTargetDependency section */
+		18B3D723C4F34942C7033E65 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C32AC0F54E739DDD88DFB561 /* Picko */;
+			targetProxy = 1831CB125E5B10AB177BD106 /* PBXContainerItemProxy */;
+		};
+		4B180AEA7C43536474FB3807 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = 28BB3D9CB7967D7BC5AC217E /* PickoMac */;
+			targetProxy = A774DAAE267651B2453E1826 /* PBXContainerItemProxy */;
+		};
+		CBBCA7FF2197DA249686A573 /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = C32AC0F54E739DDD88DFB561 /* Picko */;
+			targetProxy = 0994F5B1ABDB6E0482BE2492 /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
+/* Begin XCBuildConfiguration section */
+		052499595CD020F0BFC1FC9C /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Apps/Picko/iOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.tanzz.Picko;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		06A66F2B7E76E53C9083C887 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Debug;
+		};
+		0C141AA45E55E031B579FEA4 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.tanzz.PickoUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Picko;
+			};
+			name = Release;
+		};
+		0F8F4F19F627AB906294C09E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.tanzz.PickoMacTests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PickoMac.app/Contents/MacOS/PickoMac";
+			};
+			name = Debug;
+		};
+		4F50A73EAF84E0B7E6305104 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				INFOPLIST_FILE = Apps/Picko/iOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.tanzz.Picko;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		529389207F9F6B08DBEDDEC6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.tanzz.PickoUITests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_TARGET_NAME = Picko;
+			};
+			name = Debug;
+		};
+		6FC09EAADE823A8B7CAE3AB6 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = Apps/Picko/macOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.tanzz.PickoMac;
+				SDKROOT = macosx;
+			};
+			name = Debug;
+		};
+		72D0E7E6611FE525018A8790 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				COMBINE_HIDPI_IMAGES = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+					"@loader_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.tanzz.PickoMacTests;
+				SDKROOT = macosx;
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/PickoMac.app/Contents/MacOS/PickoMac";
+			};
+			name = Release;
+		};
+		9383C62C47C3CE5206A2BF40 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				COMBINE_HIDPI_IMAGES = YES;
+				INFOPLIST_FILE = Apps/Picko/macOS/Info.plist;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.tanzz.PickoMac;
+				SDKROOT = macosx;
+			};
+			name = Release;
+		};
+		BA2ADBD7CA9BF84EB3E92CC6 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				IPHONEOS_DEPLOYMENT_TARGET = 17.0;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.9;
+			};
+			name = Release;
+		};
+		BF4DEAFE03147FD21C4D9884 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.tanzz.PickoTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Picko.app/Picko";
+			};
+			name = Debug;
+		};
+		C8B978308E387DCDD4B9E31D /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				BUNDLE_LOADER = "$(TEST_HOST)";
+				GENERATE_INFOPLIST_FILE = YES;
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/Frameworks",
+					"@loader_path/Frameworks",
+				);
+				PRODUCT_BUNDLE_IDENTIFIER = com.tanzz.PickoTests;
+				SDKROOT = iphoneos;
+				TARGETED_DEVICE_FAMILY = "1,2";
+				TEST_HOST = "$(BUILT_PRODUCTS_DIR)/Picko.app/Picko";
+			};
+			name = Release;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		0186EA31573F30047525A2E9 /* Build configuration list for PBXNativeTarget "Picko" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				052499595CD020F0BFC1FC9C /* Debug */,
+				4F50A73EAF84E0B7E6305104 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		412F3EA15932A160EC816F97 /* Build configuration list for PBXNativeTarget "PickoMac" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				6FC09EAADE823A8B7CAE3AB6 /* Debug */,
+				9383C62C47C3CE5206A2BF40 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		99BDC042E4041FC11FDB8AF9 /* Build configuration list for PBXNativeTarget "PickoMacTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				0F8F4F19F627AB906294C09E /* Debug */,
+				72D0E7E6611FE525018A8790 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		AC070A23F96DD8C91F47E964 /* Build configuration list for PBXNativeTarget "PickoUITests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				529389207F9F6B08DBEDDEC6 /* Debug */,
+				0C141AA45E55E031B579FEA4 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E2C592494F39BB73171D8D88 /* Build configuration list for PBXProject "Picko" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				06A66F2B7E76E53C9083C887 /* Debug */,
+				BA2ADBD7CA9BF84EB3E92CC6 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		E79C391367E800AF1AA0B6EF /* Build configuration list for PBXNativeTarget "PickoTests" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				BF4DEAFE03147FD21C4D9884 /* Debug */,
+				C8B978308E387DCDD4B9E31D /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		8F087BE2CBE152F5CE70B169 /* XCLocalSwiftPackageReference "." */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = .;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		35B64FC32BA470D68CA623F4 /* PickoApp */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PickoApp;
+		};
+		991B9D217E993274A38023F4 /* PickoMacApp */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PickoMacApp;
+		};
+		AA456DF551E03C5A5A229BC6 /* PickoMacApp */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PickoMacApp;
+		};
+		F2F0998D196957EA1AE605E7 /* PickoApp */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = PickoApp;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = F3EBE41EB85C342F862B913D /* Project object */;
+}

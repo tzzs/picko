@@ -1,0 +1,1330 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Picko 拾影 MVP UI 设计草稿</title>
+  <style>
+    :root {
+      --ink: #191816;
+      --muted: #706b62;
+      --subtle: #a29a8f;
+      --paper: #fbfaf7;
+      --panel: #ffffff;
+      --line: #e6e0d6;
+      --sage: #496f5d;
+      --sage-soft: #dfe9e2;
+      --rose: #b85b64;
+      --rose-soft: #f5dfe2;
+      --amber: #c18a2b;
+      --blue: #406f94;
+      --shadow: 0 22px 55px rgba(40, 35, 28, .12);
+      --radius: 8px;
+      font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "PingFang SC", "Helvetica Neue", Arial, sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      color: var(--ink);
+      background:
+        linear-gradient(180deg, #f6f1e8 0%, #fbfaf7 38%, #f3f6f4 100%);
+    }
+
+    .page {
+      max-width: 1440px;
+      margin: 0 auto;
+      padding: 32px;
+    }
+
+    header {
+      display: grid;
+      grid-template-columns: 1.1fr .9fr;
+      gap: 24px;
+      align-items: end;
+      min-height: 220px;
+      padding: 28px 0 18px;
+    }
+
+    h1, h2, h3, p {
+      margin: 0;
+    }
+
+    h1 {
+      font-size: 56px;
+      line-height: 1;
+      letter-spacing: 0;
+      font-weight: 760;
+    }
+
+    .intro {
+      max-width: 680px;
+      margin-top: 18px;
+      color: var(--muted);
+      font-size: 18px;
+      line-height: 1.65;
+    }
+
+    .principles {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 10px;
+    }
+
+    .principle {
+      min-height: 96px;
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, .76);
+    }
+
+    .principle strong {
+      display: block;
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    .principle span {
+      display: block;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.45;
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+      margin: 42px 0 18px;
+    }
+
+    .section-title h2 {
+      font-size: 28px;
+      letter-spacing: 0;
+    }
+
+    .section-title p {
+      max-width: 560px;
+      color: var(--muted);
+      line-height: 1.55;
+      text-align: right;
+    }
+
+    .board {
+      display: grid;
+      grid-template-columns: repeat(3, minmax(280px, 1fr));
+      gap: 22px;
+      align-items: start;
+    }
+
+    .phone {
+      width: 100%;
+      max-width: 390px;
+      min-height: 780px;
+      margin: 0 auto;
+      padding: 14px;
+      border: 1px solid #d4ccc0;
+      border-radius: 34px;
+      background: #111;
+      box-shadow: var(--shadow);
+    }
+
+    .screen {
+      position: relative;
+      overflow: hidden;
+      min-height: 748px;
+      border-radius: 24px;
+      background: var(--paper);
+    }
+
+    .status {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 18px 8px;
+      font-size: 12px;
+      font-weight: 650;
+    }
+
+    .appbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 12px 18px;
+    }
+
+    .brand {
+      display: flex;
+      gap: 10px;
+      align-items: center;
+      font-weight: 760;
+    }
+
+    .mark {
+      display: grid;
+      place-items: center;
+      width: 32px;
+      height: 32px;
+      border: 1px solid rgba(255, 255, 255, .5);
+      border-radius: 10px;
+      color: #fdfcf8;
+      background:
+        linear-gradient(145deg, rgba(255, 255, 255, .28), rgba(255, 255, 255, .04)),
+        linear-gradient(135deg, #274b3f 0%, #5e8a72 100%);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .32),
+        0 8px 20px rgba(49, 76, 63, .22);
+      font-size: 17px;
+      font-weight: 820;
+      font-family: ui-rounded, -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+    }
+
+    .icon-btn {
+      display: grid;
+      place-items: center;
+      width: 36px;
+      height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .74);
+      color: var(--ink);
+      font-size: 18px;
+    }
+
+    .content {
+      padding: 8px 18px 22px;
+    }
+
+    .hero-copy {
+      margin: 22px 0;
+    }
+
+    .eyebrow {
+      color: var(--sage);
+      font-size: 13px;
+      font-weight: 720;
+    }
+
+    .hero-copy h2 {
+      margin-top: 8px;
+      font-size: 34px;
+      line-height: 1.08;
+      letter-spacing: 0;
+    }
+
+    .hero-copy p {
+      margin-top: 12px;
+      color: var(--muted);
+      font-size: 15px;
+      line-height: 1.55;
+    }
+
+    .permission-preview {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 7px;
+      margin: 28px 0;
+      transform: rotate(-2deg);
+    }
+
+    .photo-chip {
+      aspect-ratio: 1;
+      border-radius: 7px;
+      background: linear-gradient(135deg, #8aa59a, #f0c987);
+    }
+
+    .photo-chip:nth-child(2n) {
+      background: linear-gradient(135deg, #748ca3, #f0ddd1);
+    }
+
+    .photo-chip:nth-child(3n) {
+      background: linear-gradient(135deg, #d7966c, #e8dcc6);
+    }
+
+    .primary {
+      width: 100%;
+      min-height: 52px;
+      border: 0;
+      border-radius: 14px;
+      color: #fff;
+      background: var(--ink);
+      font-size: 16px;
+      font-weight: 720;
+    }
+
+    .secondary {
+      width: 100%;
+      min-height: 48px;
+      margin-top: 10px;
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: #fff;
+      color: var(--ink);
+      font-size: 15px;
+      font-weight: 650;
+    }
+
+    .privacy-note {
+      margin-top: 16px;
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.45;
+      text-align: center;
+    }
+
+    .task-summary {
+      padding: 18px;
+      border: 1px solid var(--line);
+      border-radius: 18px;
+      background: linear-gradient(135deg, #ffffff 0%, #edf4ee 100%);
+    }
+
+    .task-summary h2 {
+      margin-top: 12px;
+      font-size: 30px;
+      line-height: 1.12;
+    }
+
+    .task-summary p {
+      margin-top: 10px;
+      color: var(--muted);
+      line-height: 1.5;
+    }
+
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .metric {
+      padding: 12px 8px;
+      border-radius: 12px;
+      background: rgba(255, 255, 255, .72);
+      text-align: center;
+    }
+
+    .metric strong {
+      display: block;
+      font-size: 20px;
+    }
+
+    .metric span {
+      color: var(--muted);
+      font-size: 11px;
+    }
+
+    .task-list {
+      display: grid;
+      gap: 10px;
+      margin-top: 16px;
+    }
+
+    .task {
+      display: grid;
+      grid-template-columns: 42px 1fr auto;
+      gap: 12px;
+      align-items: center;
+      padding: 13px;
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: #fff;
+    }
+
+    .task-icon {
+      display: grid;
+      place-items: center;
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      background: var(--sage-soft);
+      color: var(--sage);
+      font-size: 20px;
+    }
+
+    .task:nth-child(2) .task-icon {
+      background: #e7edf3;
+      color: var(--blue);
+    }
+
+    .task:nth-child(3) .task-icon {
+      background: #fbecd3;
+      color: var(--amber);
+    }
+
+    .task:nth-child(4) .task-icon {
+      background: var(--rose-soft);
+      color: var(--rose);
+    }
+
+    .task h3 {
+      font-size: 15px;
+    }
+
+    .task p {
+      margin-top: 3px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .arrow {
+      color: var(--subtle);
+      font-size: 22px;
+    }
+
+    .tabbar {
+      position: absolute;
+      left: 16px;
+      right: 16px;
+      bottom: 14px;
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0;
+      min-height: 68px;
+      padding: 6px 8px;
+      border: 1px solid rgba(255, 255, 255, .58);
+      border-radius: 24px;
+      background:
+        linear-gradient(180deg, rgba(255, 255, 255, .64), rgba(255, 255, 255, .36)),
+        rgba(255, 255, 255, .24);
+      box-shadow:
+        inset 0 1px 0 rgba(255, 255, 255, .7),
+        0 12px 32px rgba(43, 50, 43, .14);
+      backdrop-filter: blur(22px) saturate(1.45);
+      -webkit-backdrop-filter: blur(22px) saturate(1.45);
+      isolation: isolate;
+    }
+
+    .tabbar:before {
+      content: "";
+      position: absolute;
+      inset: 0;
+      z-index: -1;
+      border-radius: 24px;
+      background:
+        linear-gradient(90deg, rgba(73, 111, 93, .08), rgba(255, 255, 255, 0) 34%, rgba(193, 138, 43, .08));
+      pointer-events: none;
+    }
+
+    .tab {
+      position: relative;
+      display: grid;
+      gap: 2px;
+      place-items: center;
+      min-width: 0;
+      min-height: 54px;
+      padding: 5px 2px 4px;
+      color: rgba(25, 24, 22, .58);
+      font-size: 10px;
+      font-weight: 590;
+    }
+
+    .tab strong {
+      display: grid;
+      place-items: center;
+      width: 30px;
+      height: 27px;
+      color: currentColor;
+      font-size: 18px;
+      line-height: 1;
+    }
+
+    .tab.active {
+      color: var(--sage);
+      font-weight: 690;
+    }
+
+    .review-screen {
+      background: #151513;
+      color: #fff;
+    }
+
+    .review-screen .appbar,
+    .review-screen .status {
+      color: rgba(255, 255, 255, .9);
+    }
+
+    .photo-stage {
+      position: relative;
+      height: 520px;
+      margin: 8px 14px 0;
+      border-radius: 24px;
+      background:
+        linear-gradient(160deg, rgba(0, 0, 0, .05), rgba(0, 0, 0, .38)),
+        linear-gradient(135deg, #7d9d91 0%, #e1c27a 48%, #c98362 100%);
+      box-shadow: 0 20px 42px rgba(0, 0, 0, .28);
+    }
+
+    .photo-stage:before {
+      content: "";
+      position: absolute;
+      inset: 42px 28px auto;
+      height: 120px;
+      border-radius: 999px 999px 30px 30px;
+      background: rgba(255, 255, 255, .22);
+      filter: blur(1px);
+    }
+
+    .decision-pill {
+      position: absolute;
+      left: 18px;
+      top: 18px;
+      padding: 9px 12px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, .88);
+      color: var(--sage);
+      font-weight: 760;
+      font-size: 13px;
+    }
+
+    .photo-meta {
+      position: absolute;
+      left: 18px;
+      right: 18px;
+      bottom: 18px;
+      display: flex;
+      justify-content: space-between;
+      align-items: end;
+    }
+
+    .photo-meta h2 {
+      font-size: 20px;
+      line-height: 1.2;
+    }
+
+    .photo-meta p {
+      margin-top: 4px;
+      color: rgba(255, 255, 255, .78);
+      font-size: 12px;
+    }
+
+    .badge {
+      padding: 7px 9px;
+      border-radius: 999px;
+      background: rgba(0, 0, 0, .34);
+      font-size: 12px;
+    }
+
+    .gesture-hints {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 10px;
+      margin: 16px 18px 0;
+    }
+
+    .gesture {
+      padding: 12px;
+      border: 1px solid rgba(255, 255, 255, .12);
+      border-radius: 14px;
+      background: rgba(255, 255, 255, .08);
+      font-size: 13px;
+    }
+
+    .gesture strong {
+      display: block;
+      margin-bottom: 4px;
+      font-size: 17px;
+    }
+
+    .review-actions {
+      display: grid;
+      grid-template-columns: 54px 1fr 54px;
+      gap: 12px;
+      align-items: center;
+      margin: 16px 18px;
+    }
+
+    .review-actions .primary {
+      min-height: 54px;
+      background: #fff;
+      color: var(--ink);
+    }
+
+    .round {
+      display: grid;
+      place-items: center;
+      height: 54px;
+      border: 1px solid rgba(255, 255, 255, .14);
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .08);
+      color: #fff;
+      font-size: 20px;
+    }
+
+    .segmented {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 5px;
+      padding: 5px;
+      border-radius: 14px;
+      background: #ede7dd;
+    }
+
+    .segment {
+      padding: 10px 8px;
+      border-radius: 10px;
+      text-align: center;
+      color: var(--muted);
+      font-size: 13px;
+      font-weight: 680;
+    }
+
+    .segment.active {
+      color: var(--ink);
+      background: #fff;
+      box-shadow: 0 4px 12px rgba(40, 35, 28, .08);
+    }
+
+    .group-hero {
+      display: grid;
+      grid-template-columns: 1.25fr .75fr;
+      gap: 8px;
+      margin-top: 16px;
+      height: 300px;
+    }
+
+    .group-main,
+    .group-side {
+      border-radius: 16px;
+      background: linear-gradient(135deg, #76968d, #e4be75);
+    }
+
+    .group-side {
+      display: grid;
+      gap: 8px;
+      background: transparent;
+    }
+
+    .mini-photo {
+      position: relative;
+      border-radius: 14px;
+      background: linear-gradient(135deg, #7d90aa, #dec6b5);
+    }
+
+    .mini-photo:nth-child(2) {
+      background: linear-gradient(135deg, #bc7466, #efdfbe);
+    }
+
+    .mini-photo.selected:after {
+      content: "保留";
+      position: absolute;
+      right: 8px;
+      bottom: 8px;
+      padding: 5px 7px;
+      border-radius: 999px;
+      background: #fff;
+      color: var(--sage);
+      font-size: 11px;
+      font-weight: 760;
+    }
+
+    .score-row {
+      display: grid;
+      gap: 9px;
+      margin-top: 14px;
+    }
+
+    .score {
+      display: grid;
+      grid-template-columns: 90px 1fr 36px;
+      gap: 8px;
+      align-items: center;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .bar {
+      height: 7px;
+      overflow: hidden;
+      border-radius: 999px;
+      background: #e4ded4;
+    }
+
+    .bar span {
+      display: block;
+      height: 100%;
+      border-radius: inherit;
+      background: var(--sage);
+    }
+
+    .basket-summary {
+      display: grid;
+      gap: 10px;
+      margin: 14px 0;
+      padding: 16px;
+      border-radius: 18px;
+      color: #fff;
+      background: linear-gradient(135deg, #2f3f38, #576f60);
+    }
+
+    .basket-summary strong {
+      font-size: 32px;
+    }
+
+    .basket-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 8px;
+    }
+
+    .basket-item {
+      position: relative;
+      aspect-ratio: 1;
+      border-radius: 10px;
+      background: linear-gradient(135deg, #829b92, #d6b476);
+    }
+
+    .basket-item:nth-child(2n) {
+      background: linear-gradient(135deg, #72859b, #e3cabe);
+    }
+
+    .basket-item:nth-child(3n) {
+      background: linear-gradient(135deg, #b76d63, #e6d9bd);
+    }
+
+    .basket-item:after {
+      content: "↩";
+      position: absolute;
+      right: 6px;
+      top: 6px;
+      display: grid;
+      place-items: center;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: rgba(255, 255, 255, .86);
+      color: var(--ink);
+      font-size: 13px;
+      font-weight: 780;
+    }
+
+    .mac-shell {
+      overflow: hidden;
+      border: 1px solid #d7d1c8;
+      border-radius: 18px;
+      background: #fff;
+      box-shadow: var(--shadow);
+    }
+
+    .mac-titlebar {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      height: 42px;
+      padding: 0 16px;
+      border-bottom: 1px solid var(--line);
+      background: #f5f1eb;
+    }
+
+    .dot {
+      width: 12px;
+      height: 12px;
+      border-radius: 50%;
+      background: #e66d5e;
+    }
+
+    .dot:nth-child(2) { background: #e2b24e; }
+    .dot:nth-child(3) { background: #62bd6e; }
+
+    .mac-body {
+      display: grid;
+      grid-template-columns: 220px 1fr 270px;
+      min-height: 680px;
+    }
+
+    .sidebar {
+      padding: 18px;
+      border-right: 1px solid var(--line);
+      background: #fbfaf7;
+    }
+
+    .sidebar h3,
+    .inspector h3 {
+      margin-bottom: 14px;
+      font-size: 14px;
+      color: var(--muted);
+    }
+
+    .side-link {
+      display: flex;
+      justify-content: space-between;
+      padding: 10px 12px;
+      border-radius: 10px;
+      color: var(--muted);
+      font-size: 14px;
+    }
+
+    .side-link.active {
+      background: var(--sage-soft);
+      color: var(--sage);
+      font-weight: 720;
+    }
+
+    .workspace {
+      padding: 18px;
+    }
+
+    .toolbar {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 16px;
+    }
+
+    .toolbar h2 {
+      font-size: 24px;
+    }
+
+    .toolbar-actions {
+      display: flex;
+      gap: 8px;
+    }
+
+    .tool {
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 9px;
+      background: #fff;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(5, 1fr);
+      gap: 10px;
+    }
+
+    .tile {
+      position: relative;
+      min-height: 118px;
+      border-radius: 8px;
+      background: linear-gradient(135deg, #80988f, #d7b976);
+    }
+
+    .tile:nth-child(2n) {
+      background: linear-gradient(135deg, #738ca4, #e3cfc3);
+    }
+
+    .tile:nth-child(3n) {
+      background: linear-gradient(135deg, #b66f66, #e2d6b8);
+    }
+
+    .tile.keep:after,
+    .tile.review:after {
+      position: absolute;
+      left: 8px;
+      top: 8px;
+      padding: 5px 7px;
+      border-radius: 999px;
+      background: #fff;
+      font-size: 11px;
+      font-weight: 740;
+    }
+
+    .tile.keep:after {
+      content: "保留";
+      color: var(--sage);
+    }
+
+    .tile.review:after {
+      content: "复核";
+      color: var(--amber);
+    }
+
+    .inspector {
+      padding: 18px;
+      border-left: 1px solid var(--line);
+      background: #fbfaf7;
+    }
+
+    .preview {
+      aspect-ratio: 4 / 3;
+      border-radius: 12px;
+      background: linear-gradient(135deg, #80988f, #d7b976);
+    }
+
+    .info-list {
+      display: grid;
+      gap: 10px;
+      margin: 16px 0;
+    }
+
+    .info {
+      display: flex;
+      justify-content: space-between;
+      color: var(--muted);
+      font-size: 13px;
+    }
+
+    .kbd-row {
+      display: grid;
+      grid-template-columns: repeat(2, 1fr);
+      gap: 8px;
+      margin-top: 16px;
+    }
+
+    .kbd {
+      padding: 10px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    .kbd strong {
+      display: block;
+      margin-bottom: 3px;
+      color: var(--ink);
+      font-size: 15px;
+    }
+
+    .notes {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 14px;
+      margin: 22px 0 48px;
+    }
+
+    .note {
+      padding: 16px;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: rgba(255, 255, 255, .7);
+    }
+
+    .note h3 {
+      margin-bottom: 8px;
+      font-size: 15px;
+    }
+
+    .note p {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    @media (max-width: 1100px) {
+      header,
+      .board,
+      .notes {
+        grid-template-columns: 1fr;
+      }
+
+      .section-title {
+        display: block;
+      }
+
+      .section-title p {
+        margin-top: 8px;
+        text-align: left;
+      }
+
+      .mac-body {
+        grid-template-columns: 170px 1fr;
+      }
+
+      .inspector {
+        display: none;
+      }
+    }
+
+    @media (max-width: 760px) {
+      .page {
+        padding: 18px;
+      }
+
+      h1 {
+        font-size: 40px;
+      }
+
+      .principles {
+        grid-template-columns: 1fr;
+      }
+
+      .mac-body {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        display: none;
+      }
+
+      .grid {
+        grid-template-columns: repeat(3, 1fr);
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header>
+      <div>
+        <p class="eyebrow">Picko 拾影 · MVP UI 设计草稿</p>
+        <h1>留下更值得保留的照片。</h1>
+        <p class="intro">
+          本草稿基于当前产品方案，聚焦 iPhone 快速判断、相似组保留 N 张、预删除篮复核和 macOS 批量工作台。整体文案避免“清理垃圾”心智，强调保留、复核、低风险。
+        </p>
+      </div>
+      <div class="principles">
+        <div class="principle">
+          <strong>保留优先</strong>
+          <span>主按钮、状态和推荐都围绕“保留好照片”设计。</span>
+        </div>
+        <div class="principle">
+          <strong>低风险</strong>
+          <span>所有预删除项先进入篮子，最后再系统确认。</span>
+        </div>
+        <div class="principle">
+          <strong>跨端互补</strong>
+          <span>手机轻决策，Mac 做大规模复核和批量整理。</span>
+        </div>
+      </div>
+    </header>
+
+    <section>
+      <div class="section-title">
+        <h2>iPhone 关键流程</h2>
+        <p>从授权进入首页，再进入单张整理和相似组整理，最后进入预删除篮复核。</p>
+      </div>
+
+      <div class="board">
+        <article class="phone">
+          <div class="screen">
+            <div class="status"><span>9:41</span><span>●●● 100%</span></div>
+            <div class="appbar">
+              <div class="brand"><span class="mark">P</span><span>Picko</span></div>
+              <div class="icon-btn">?</div>
+            </div>
+            <div class="content">
+              <div class="hero-copy">
+                <p class="eyebrow">本地分析 · 删除前复核</p>
+                <h2>先看一遍，再决定保留什么。</h2>
+                <p>Picko 会读取相册缩略图和基础信息，在设备本地帮你找出相似照片、截图和待复核内容。</p>
+              </div>
+              <div class="permission-preview">
+                <div class="photo-chip"></div>
+                <div class="photo-chip"></div>
+                <div class="photo-chip"></div>
+                <div class="photo-chip"></div>
+                <div class="photo-chip"></div>
+                <div class="photo-chip"></div>
+                <div class="photo-chip"></div>
+                <div class="photo-chip"></div>
+                <div class="photo-chip"></div>
+              </div>
+              <button class="primary">允许访问相册</button>
+              <button class="secondary">先查看隐私说明</button>
+              <p class="privacy-note">照片内容默认不上传。预删除项目会等你最终确认后再交给系统处理。</p>
+            </div>
+          </div>
+        </article>
+
+        <article class="phone">
+          <div class="screen">
+            <div class="status"><span>9:41</span><span>●●● 100%</span></div>
+            <div class="appbar">
+              <div class="brand"><span class="mark">P</span><span>今日整理</span></div>
+              <div class="icon-btn">⌕</div>
+            </div>
+            <div class="content">
+              <div class="task-summary">
+                <p class="eyebrow">本周建议</p>
+                <h2>新增 382 张，发现 47 组相似照片。</h2>
+                <p>预计 12 分钟完成第一轮复核，所有待处理项目会进入预删除篮。</p>
+                <div class="metrics">
+                  <div class="metric"><strong>47</strong><span>相似组</span></div>
+                  <div class="metric"><strong>126</strong><span>截图</span></div>
+                  <div class="metric"><strong>3.8G</strong><span>可复核</span></div>
+                </div>
+              </div>
+              <div class="task-list">
+                <div class="task">
+                  <div class="task-icon">↕</div>
+                  <div><h3>快速单张整理</h3><p>用滑动处理未复核照片</p></div>
+                  <div class="arrow">›</div>
+                </div>
+                <div class="task">
+                  <div class="task-icon">◎</div>
+                  <div><h3>相似照片</h3><p>每组保留 1 张或多张</p></div>
+                  <div class="arrow">›</div>
+                </div>
+                <div class="task">
+                  <div class="task-icon">◷</div>
+                  <div><h3>按时间整理</h3><p>今天、本周、上个月</p></div>
+                  <div class="arrow">›</div>
+                </div>
+                <div class="task">
+                  <div class="task-icon">▦</div>
+                  <div><h3>预删除篮</h3><p>68 项，预计释放 1.2G</p></div>
+                  <div class="arrow">›</div>
+                </div>
+              </div>
+            </div>
+            <div class="tabbar">
+              <div class="tab active"><strong>⌂</strong><span>首页</span></div>
+              <div class="tab"><strong>◎</strong><span>相似</span></div>
+              <div class="tab"><strong>◷</strong><span>时间</span></div>
+              <div class="tab"><strong>▦</strong><span>篮子</span></div>
+            </div>
+          </div>
+        </article>
+
+        <article class="phone">
+          <div class="screen review-screen">
+            <div class="status"><span>9:41</span><span>●●● 100%</span></div>
+            <div class="appbar">
+              <div class="icon-btn">×</div>
+              <div>周六下午 · 18/82</div>
+              <div class="icon-btn">↶</div>
+            </div>
+            <div class="photo-stage">
+              <div class="decision-pill">建议保留</div>
+              <div class="photo-meta">
+                <div>
+                  <h2>上海旅行 · Live Photo</h2>
+                  <p>2026.05.18 · 4.6 MB · 相似组 3/8</p>
+                </div>
+                <div class="badge">已编辑</div>
+              </div>
+            </div>
+            <div class="gesture-hints">
+              <div class="gesture"><strong>↑ 保留</strong><span>留下这张照片</span></div>
+              <div class="gesture"><strong>↓ 预删除</strong><span>先进篮子复核</span></div>
+            </div>
+            <div class="review-actions">
+              <div class="round">↤</div>
+              <button class="primary">跳过这张</button>
+              <div class="round">♡</div>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>相似组与预删除篮</h2>
+        <p>核心差异化是“保留 N 张”和可恢复的预删除篮，降低误删焦虑。</p>
+      </div>
+
+      <div class="board">
+        <article class="phone">
+          <div class="screen">
+            <div class="status"><span>9:41</span><span>●●● 100%</span></div>
+            <div class="appbar">
+              <div class="icon-btn">‹</div>
+              <div class="brand"><span>相似组 12/47</span></div>
+              <div class="icon-btn">↶</div>
+            </div>
+            <div class="content">
+              <div class="segmented">
+                <div class="segment active">保留 1 张</div>
+                <div class="segment">保留 N 张</div>
+              </div>
+              <div class="group-hero">
+                <div class="group-main mini-photo selected"></div>
+                <div class="group-side">
+                  <div class="mini-photo"></div>
+                  <div class="mini-photo"></div>
+                </div>
+              </div>
+              <div class="hero-copy">
+                <p class="eyebrow">系统推荐</p>
+                <h2>这张更清晰，且已经被收藏。</h2>
+                <p>未选中的 5 张会进入预删除篮，你可以稍后统一恢复或确认。</p>
+              </div>
+              <div class="score-row">
+                <div class="score"><span>清晰度</span><div class="bar"><span style="width: 92%"></span></div><strong>92</strong></div>
+                <div class="score"><span>曝光</span><div class="bar"><span style="width: 84%"></span></div><strong>84</strong></div>
+                <div class="score"><span>分辨率</span><div class="bar"><span style="width: 88%"></span></div><strong>88</strong></div>
+              </div>
+            </div>
+          </div>
+        </article>
+
+        <article class="phone">
+          <div class="screen">
+            <div class="status"><span>9:41</span><span>●●● 100%</span></div>
+            <div class="appbar">
+              <div class="icon-btn">‹</div>
+              <div class="brand"><span>预删除篮</span></div>
+              <div class="icon-btn">⋯</div>
+            </div>
+            <div class="content">
+              <div class="basket-summary">
+                <span>待你最终确认</span>
+                <strong>68 项 · 1.2 GB</strong>
+                <p>这些照片不会被自动删除。确认后仍会进入系统“最近删除”。</p>
+              </div>
+              <div class="segmented">
+                <div class="segment active">全部</div>
+                <div class="segment">按来源</div>
+              </div>
+              <div class="basket-grid" style="margin-top: 14px">
+                <div class="basket-item"></div>
+                <div class="basket-item"></div>
+                <div class="basket-item"></div>
+                <div class="basket-item"></div>
+                <div class="basket-item"></div>
+                <div class="basket-item"></div>
+                <div class="basket-item"></div>
+                <div class="basket-item"></div>
+                <div class="basket-item"></div>
+              </div>
+              <button class="secondary" style="margin-top: 16px">恢复全部</button>
+              <button class="primary" style="margin-top: 10px; background: var(--rose)">确认交给系统删除</button>
+            </div>
+          </div>
+        </article>
+
+        <article class="phone">
+          <div class="screen">
+            <div class="status"><span>9:41</span><span>●●● 100%</span></div>
+            <div class="appbar">
+              <div class="icon-btn">‹</div>
+              <div class="brand"><span>整理完成</span></div>
+              <div class="icon-btn">✓</div>
+            </div>
+            <div class="content">
+              <div class="hero-copy" style="margin-top: 70px">
+                <p class="eyebrow">今天的复核已完成</p>
+                <h2>你保留了 214 张，复核了 68 张。</h2>
+                <p>预删除篮会保留你的选择，等你准备好后再最终确认。</p>
+              </div>
+              <div class="task-list">
+                <div class="task">
+                  <div class="task-icon">✓</div>
+                  <div><h3>保留照片</h3><p>214 张已标记为保留</p></div>
+                  <div class="arrow">214</div>
+                </div>
+                <div class="task">
+                  <div class="task-icon">▦</div>
+                  <div><h3>预删除篮</h3><p>68 项等待最终确认</p></div>
+                  <div class="arrow">1.2G</div>
+                </div>
+                <div class="task">
+                  <div class="task-icon">↶</div>
+                  <div><h3>最近操作</h3><p>可撤销上一步选择</p></div>
+                  <div class="arrow">›</div>
+                </div>
+              </div>
+              <button class="primary" style="margin-top: 28px">查看预删除篮</button>
+              <button class="secondary">继续整理本周照片</button>
+            </div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>macOS 批量工作台</h2>
+        <p>Mac 端不复制手机卡片体验，而是强调网格、键盘、多选和右侧复核信息。</p>
+      </div>
+
+      <div class="mac-shell">
+        <div class="mac-titlebar">
+          <span class="dot"></span>
+          <span class="dot"></span>
+          <span class="dot"></span>
+        </div>
+        <div class="mac-body">
+          <aside class="sidebar">
+            <h3>整理任务</h3>
+            <div class="side-link active"><span>本周建议</span><strong>47</strong></div>
+            <div class="side-link"><span>相似照片</span><strong>126</strong></div>
+            <div class="side-link"><span>截图</span><strong>84</strong></div>
+            <div class="side-link"><span>上海旅行</span><strong>312</strong></div>
+            <div class="side-link"><span>预删除篮</span><strong>68</strong></div>
+          </aside>
+
+          <section class="workspace">
+            <div class="toolbar">
+              <div>
+                <p class="eyebrow">相似照片 · 上海旅行</p>
+                <h2>12 组待复核，建议保留 34 张</h2>
+              </div>
+              <div class="toolbar-actions">
+                <button class="tool">保留 1 张</button>
+                <button class="tool">保留 N 张</button>
+                <button class="tool">加入预删除篮</button>
+              </div>
+            </div>
+            <div class="grid">
+              <div class="tile keep"></div>
+              <div class="tile review"></div>
+              <div class="tile"></div>
+              <div class="tile"></div>
+              <div class="tile keep"></div>
+              <div class="tile"></div>
+              <div class="tile review"></div>
+              <div class="tile"></div>
+              <div class="tile keep"></div>
+              <div class="tile"></div>
+              <div class="tile"></div>
+              <div class="tile"></div>
+              <div class="tile review"></div>
+              <div class="tile keep"></div>
+              <div class="tile"></div>
+            </div>
+          </section>
+
+          <aside class="inspector">
+            <h3>当前选中</h3>
+            <div class="preview"></div>
+            <div class="info-list">
+              <div class="info"><span>日期</span><strong>2026.05.18</strong></div>
+              <div class="info"><span>地点</span><strong>上海</strong></div>
+              <div class="info"><span>大小</span><strong>4.6 MB</strong></div>
+              <div class="info"><span>评分</span><strong>92 / 100</strong></div>
+            </div>
+            <button class="primary">保留这张</button>
+            <button class="secondary">加入预删除篮</button>
+            <div class="kbd-row">
+              <div class="kbd"><strong>K</strong>保留</div>
+              <div class="kbd"><strong>D</strong>预删除</div>
+              <div class="kbd"><strong>Space</strong>预览</div>
+              <div class="kbd"><strong>Z</strong>撤销</div>
+            </div>
+          </aside>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <div class="section-title">
+        <h2>设计确认点</h2>
+        <p>建议优先确认这些方向，再进入更细的 SwiftUI 原型或视觉规范。</p>
+      </div>
+      <div class="notes">
+        <div class="note">
+          <h3>品牌气质</h3>
+          <p>温和、可信、整理回忆，而不是强刺激的空间清理工具。</p>
+        </div>
+        <div class="note">
+          <h3>首页结构</h3>
+          <p>任务流优先，不做传统相册入口；让用户直接开始复核。</p>
+        </div>
+        <div class="note">
+          <h3>决策手势</h3>
+          <p>保留与预删除是主要动作，跳过、撤销和收藏作为辅助动作。</p>
+        </div>
+        <div class="note">
+          <h3>Mac 工作台</h3>
+          <p>以批量选择、键盘快捷键和右侧信息面板形成跨端差异。</p>
+        </div>
+        <div class="note">
+          <h3>原生 Tab Bar</h3>
+          <p>iOS 26 实现应使用 SwiftUI TabView 或 UITabBarController，由系统提供 Liquid Glass，不手写底部导航。</p>
+        </div>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
