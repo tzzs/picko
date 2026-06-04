@@ -149,7 +149,7 @@ if [[ "$structure_only" -eq 0 ]]; then
           status=1
         fi
       fi
-    done < <(find "$evidence_dir" -type f ! -name '.DS_Store' -print)
+    done < <(find "$evidence_dir" -type f ! -name '.DS_Store' ! -name '.gitkeep' -print)
 
     if [[ "$has_artifact" -eq 0 ]]; then
       echo "Missing captured manual evidence file in: $evidence_dir" >&2
