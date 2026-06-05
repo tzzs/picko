@@ -25,6 +25,13 @@ This directory captures the Google Stitch design source used for the first Picko
 The SwiftUI implementation maps these into `Sources/PickoApp/PickoDesignTokens.swift`.
 Bundled custom fonts are not included yet, so the app uses system rounded and monospaced faces as the native fallback.
 
+## Stitch Generation Rules
+
+Use `DESIGN.md` in this directory as the semantic design-system prompt when asking
+Google Stitch to generate new Picko screens. It expands the Heritage Core palette
+into agent-friendly rules for atmosphere, typography, layout, motion, components,
+and banned generic UI patterns.
+
 ## Screen Exports
 
 The downloaded HTML exports in `export/` are implementation references, not app code:
