@@ -7,13 +7,12 @@ struct PickoMacSimilarGroupsView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Similar Groups")
-                        .font(.title2.bold())
-                    Text("Review recommendations, then decide whether to keep one or keep a few before moving the rest to the basket.")
-                        .foregroundStyle(.secondary)
-                }
+            VStack(alignment: .leading, spacing: PickoMacDesign.Spacing.lg) {
+                PickoMacPageHeader(
+                    eyebrow: "Similarity review",
+                    title: "Similar Groups",
+                    subtitle: "Review recommendations, then decide whether to keep one or keep a few before moving the rest to the basket."
+                )
 
                 LazyVStack(spacing: 12) {
                     ForEach(model.groups) { group in
@@ -21,7 +20,7 @@ struct PickoMacSimilarGroupsView: View {
                     }
                 }
             }
-            .padding()
+            .padding(PickoMacDesign.Spacing.page)
         }
     }
 
@@ -34,39 +33,40 @@ struct PickoMacSimilarGroupsView: View {
             VStack(alignment: .leading, spacing: 8) {
                 HStack(alignment: .firstTextBaseline) {
                     Text(presentation.title)
-                        .font(.headline)
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .foregroundStyle(PickoMacDesign.ColorToken.ink)
                     Spacer()
-                    Text(presentation.statusLabel)
-                        .font(.caption.weight(.semibold))
-                        .foregroundStyle(.orange)
+                    PickoMacStatusPill(
+                        presentation.statusLabel,
+                        color: PickoMacDesign.ColorToken.coralDeep
+                    )
                 }
 
                 Text(presentation.summary)
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 13, weight: .regular, design: .rounded))
+                    .foregroundStyle(PickoMacDesign.ColorToken.secondaryInk)
 
                 Label(presentation.recommendation, systemImage: "checkmark.seal.fill")
-                    .font(.callout.weight(.semibold))
-                    .foregroundStyle(.green)
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundStyle(PickoMacDesign.ColorToken.primary)
 
                 Text(presentation.context)
-                    .font(.caption)
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 11, weight: .regular, design: .rounded))
+                    .foregroundStyle(PickoMacDesign.ColorToken.secondaryInk)
 
                 HStack(spacing: 8) {
-                    Text("Keep 1")
-                    Text("Keep N")
-                    Text("Manual review")
+                    PickoMacStatusPill("Keep 1", color: PickoMacDesign.ColorToken.primary)
+                    PickoMacStatusPill("Keep N", color: PickoMacDesign.ColorToken.gold)
+                    PickoMacStatusPill("Manual review", color: PickoMacDesign.ColorToken.secondaryInk)
                 }
-                .font(.caption.weight(.semibold))
-                .foregroundStyle(.secondary)
                 .controlSize(.small)
             }
         }
         .padding(12)
-        .background(.background, in: RoundedRectangle(cornerRadius: 8))
+        .background(PickoMacDesign.ColorToken.surface, in: RoundedRectangle(cornerRadius: PickoMacDesign.Radius.lg))
         .overlay {
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(Color.secondary.opacity(0.16))
+            RoundedRectangle(cornerRadius: PickoMacDesign.Radius.lg)
+                .stroke(PickoMacDesign.ColorToken.outline.opacity(0.45), lineWidth: 1)
         }
     }
 
@@ -80,10 +80,10 @@ struct PickoMacSimilarGroupsView: View {
                     targetPixelHeight: 120
                 )
                 .frame(width: 48, height: 48)
-                .clipShape(RoundedRectangle(cornerRadius: 8))
+                .clipShape(RoundedRectangle(cornerRadius: PickoMacDesign.Radius.sm))
                 .overlay {
-                    RoundedRectangle(cornerRadius: 8)
-                        .stroke(.background, lineWidth: 2)
+                    RoundedRectangle(cornerRadius: PickoMacDesign.Radius.sm)
+                        .stroke(PickoMacDesign.ColorToken.surface, lineWidth: 2)
                 }
             }
         }

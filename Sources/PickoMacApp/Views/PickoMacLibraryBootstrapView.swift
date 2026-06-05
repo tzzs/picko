@@ -28,25 +28,42 @@ public struct PickoMacLibraryBootstrapView: View {
         Group {
             switch phase {
             case .loading:
-                ProgressView("Loading photo library...")
+                VStack(spacing: PickoMacDesign.Spacing.md) {
+                    ProgressView()
+                        .controlSize(.large)
+                        .tint(PickoMacDesign.ColorToken.primary)
+
+                    VStack(spacing: 6) {
+                        Text("Loading photo library...")
+                            .font(.system(size: 20, weight: .semibold, design: .rounded))
+                            .foregroundStyle(PickoMacDesign.ColorToken.primary)
+                        Text("Picko is preparing a local review workspace.")
+                            .font(.system(size: 13, weight: .regular, design: .rounded))
+                            .foregroundStyle(PickoMacDesign.ColorToken.secondaryInk)
+                    }
+                }
                     .frame(minWidth: 640, minHeight: 420)
+                    .background(PickoMacDesign.ColorToken.background)
             case .loaded(let model):
                 PickoMacRootView(model: model)
             case .failed:
-                VStack(spacing: 16) {
-                    Image(systemName: "photo.on.rectangle.angled")
-                        .font(.system(size: 48, weight: .semibold))
-                        .foregroundStyle(.secondary)
-                    Text("Photo library access is needed to review your library.")
-                        .font(.headline)
+                VStack(spacing: PickoMacDesign.Spacing.md) {
+                    PickoMacEmptyStateView(
+                        title: "Photo library access is needed to review your library.",
+                        message: "Use the sample library to inspect Picko's review workflow without changing Photos.",
+                        systemImage: "photo.on.rectangle.angled"
+                    )
+
                     Button("Review Sample Library") {
                         phase = .loaded(.preview())
                     }
                     .buttonStyle(.borderedProminent)
                 }
                 .frame(minWidth: 640, minHeight: 420)
+                .background(PickoMacDesign.ColorToken.background)
             }
         }
+        .tint(PickoMacDesign.ColorToken.primary)
         .task {
             await load()
         }

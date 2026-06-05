@@ -11,13 +11,12 @@ struct PickoMacGridReviewView: View {
 
     var body: some View {
         ScrollView {
-            VStack(alignment: .leading, spacing: 16) {
-                VStack(alignment: .leading, spacing: 4) {
-                    Text("Workbench Review")
-                        .font(.title2.bold())
-                    Text("Scan the library, keep the best shots, and send uncertain items to the basket for final review.")
-                        .foregroundStyle(.secondary)
-                }
+            VStack(alignment: .leading, spacing: PickoMacDesign.Spacing.lg) {
+                PickoMacPageHeader(
+                    eyebrow: "Review desk",
+                    title: "Workbench Review",
+                    subtitle: "Scan the library, keep the best shots, and send uncertain items to the basket for final review."
+                )
 
                 LazyVGrid(columns: columns, spacing: 14) {
                     ForEach(model.assets) { asset in
@@ -40,7 +39,7 @@ struct PickoMacGridReviewView: View {
                     }
                 }
             }
-            .padding()
+            .padding(PickoMacDesign.Spacing.page)
         }
     }
 
@@ -54,42 +53,55 @@ struct PickoMacGridReviewView: View {
                 targetPixelWidth: 320,
                 targetPixelHeight: 260
             )
-                .background(asset.id == model.selectedAssetId ? Color.accentColor.opacity(0.25) : Color.secondary.opacity(0.14))
+                .background(
+                    asset.id == model.selectedAssetId
+                    ? PickoMacDesign.ColorToken.primarySoft.opacity(0.72)
+                    : PickoMacDesign.ColorToken.surfaceContainer
+                )
                 .aspectRatio(1.2, contentMode: .fit)
+                .clipShape(RoundedRectangle(cornerRadius: PickoMacDesign.Radius.md))
 
             Text(asset.id)
-                .font(.headline)
+                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                .foregroundStyle(PickoMacDesign.ColorToken.ink)
                 .lineLimit(1)
 
             HStack {
-                Label(presentation.statusLabel, systemImage: presentation.statusSystemImage)
-                    .font(.caption.weight(.semibold))
-                    .foregroundStyle(statusColor(for: asset.status))
+                PickoMacStatusPill(
+                    presentation.statusLabel,
+                    systemImage: presentation.statusSystemImage,
+                    color: statusColor(for: asset.status)
+                )
                 Spacer()
             }
 
             Text(presentation.metadataSummary)
-                .font(.caption)
-                .foregroundStyle(.secondary)
+                .font(.system(size: 11, weight: .regular, design: .rounded))
+                .foregroundStyle(PickoMacDesign.ColorToken.secondaryInk)
         }
-        .padding(8)
-        .background(.background, in: RoundedRectangle(cornerRadius: 8))
+        .padding(10)
+        .background(PickoMacDesign.ColorToken.surface, in: RoundedRectangle(cornerRadius: PickoMacDesign.Radius.lg))
         .overlay {
-            RoundedRectangle(cornerRadius: 8)
-                .stroke(asset.id == model.selectedAssetId ? Color.accentColor : Color.clear, lineWidth: 2)
+            RoundedRectangle(cornerRadius: PickoMacDesign.Radius.lg)
+                .stroke(
+                    asset.id == model.selectedAssetId
+                    ? PickoMacDesign.ColorToken.gold
+                    : PickoMacDesign.ColorToken.outline.opacity(0.45),
+                    lineWidth: asset.id == model.selectedAssetId ? 2 : 1
+                )
         }
     }
 
     private func statusColor(for status: PhotoAsset.ReviewStatus) -> Color {
         switch status {
         case .unreviewed:
-            return .secondary
+            return PickoMacDesign.ColorToken.secondaryInk
         case .kept:
-            return .green
+            return PickoMacDesign.ColorToken.primary
         case .preDeleted:
-            return .red
+            return PickoMacDesign.ColorToken.destructive
         case .skipped:
-            return .orange
+            return PickoMacDesign.ColorToken.coralDeep
         }
     }
 }

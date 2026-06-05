@@ -8,12 +8,18 @@ struct PickoMacBasketView: View {
     @State private var deletionErrorMessage: String?
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 16) {
-            Text("\(model.deletionQueueCount) items waiting for review")
-                .font(.title2.bold())
+        VStack(alignment: .leading, spacing: PickoMacDesign.Spacing.md) {
+            PickoMacPageHeader(
+                eyebrow: "Pre-delete basket",
+                title: "\(model.deletionQueueCount) items waiting for review",
+                subtitle: "Confirm only after reviewing the queue. Picko will ask Photos to complete the final action."
+            )
 
-            Text(ByteCountFormatter.string(fromByteCount: model.estimatedPreDeleteBytes, countStyle: .file))
-                .foregroundStyle(.secondary)
+            PickoMacStatusPill(
+                ByteCountFormatter.string(fromByteCount: model.estimatedPreDeleteBytes, countStyle: .file),
+                systemImage: "externaldrive",
+                color: PickoMacDesign.ColorToken.primary
+            )
 
             List(model.appModel.store.deletionQueue.itemIds, id: \.self) { id in
                 if let asset = model.appModel.store.asset(id: id) {
@@ -25,13 +31,16 @@ struct PickoMacBasketView: View {
                             targetPixelHeight: 140
                         )
                         .frame(width: 84, height: 64)
-                        .clipShape(RoundedRectangle(cornerRadius: 8))
+                        .background(PickoMacDesign.ColorToken.surfaceContainer)
+                        .clipShape(RoundedRectangle(cornerRadius: PickoMacDesign.Radius.sm))
 
                         VStack(alignment: .leading) {
                             Text(asset.id)
+                                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                                .foregroundStyle(PickoMacDesign.ColorToken.ink)
                             Text(ByteCountFormatter.string(fromByteCount: asset.fileSizeBytes, countStyle: .file))
-                                .font(.caption)
-                                .foregroundStyle(.secondary)
+                                .font(.system(size: 11, weight: .regular, design: .rounded))
+                                .foregroundStyle(PickoMacDesign.ColorToken.secondaryInk)
                         }
 
                         Spacer()
@@ -39,8 +48,15 @@ struct PickoMacBasketView: View {
                         Button("Restore") {
                             model.appModel.restoreFromBasket(assetId: id)
                         }
+                        .buttonStyle(.bordered)
                     }
+                    .padding(.vertical, 4)
                 }
+            }
+            .clipShape(RoundedRectangle(cornerRadius: PickoMacDesign.Radius.lg))
+            .overlay {
+                RoundedRectangle(cornerRadius: PickoMacDesign.Radius.lg)
+                    .stroke(PickoMacDesign.ColorToken.outline.opacity(0.45), lineWidth: 1)
             }
 
             HStack {
@@ -54,13 +70,16 @@ struct PickoMacBasketView: View {
                 }
                 .disabled(model.deletionQueueCount == 0 || isConfirmingDeletion)
             }
+            .buttonStyle(.bordered)
 
             if let deletionErrorMessage {
                 Text(deletionErrorMessage)
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 12, weight: .regular, design: .rounded))
+                    .foregroundStyle(PickoMacDesign.ColorToken.destructive)
             }
         }
-        .padding()
+        .padding(PickoMacDesign.Spacing.page)
+        .tint(PickoMacDesign.ColorToken.primary)
         .confirmationDialog(
             "Confirm reviewed items with Photos",
             isPresented: $showsDeletionConfirmation,

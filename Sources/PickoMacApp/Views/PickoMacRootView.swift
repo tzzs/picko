@@ -15,12 +15,14 @@ public struct PickoMacRootView: View {
             HStack(spacing: 0) {
                 detailView
                     .navigationTitle(model.sidebarSelection.title)
+                    .pickoMacScreenBackground()
 
                 Divider()
+                    .overlay(PickoMacDesign.ColorToken.outline.opacity(0.45))
 
                 PickoMacInspectorView(model: model)
-                    .frame(width: 280)
-                    .background(Color(nsColor: .controlBackgroundColor))
+                    .frame(width: 292)
+                    .background(PickoMacDesign.ColorToken.surfaceLow)
             }
         }
         .toolbar {
@@ -62,6 +64,7 @@ public struct PickoMacRootView: View {
         } message: {
             Text("This only resets local Picko review progress. It does not delete or modify photos.")
         }
+        .tint(PickoMacDesign.ColorToken.primary)
     }
 
     @ViewBuilder
