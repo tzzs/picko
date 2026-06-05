@@ -1,0 +1,282 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error": "#ffffff",
+                    "secondary-container": "#fddd7c",
+                    "inverse-primary": "#accbe0",
+                    "on-tertiary-fixed": "#370e00",
+                    "on-surface-variant": "#42474b",
+                    "outline-variant": "#c2c7cc",
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed": "#231b00",
+                    "on-tertiary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "error": "#ba1a1a",
+                    "surface-container-high": "#e8e8e6",
+                    "on-primary": "#ffffff",
+                    "tertiary-fixed": "#ffdbce",
+                    "secondary-fixed": "#ffe085",
+                    "on-background": "#1a1c1b",
+                    "tertiary-container": "#3f1200",
+                    "on-tertiary-container": "#be7658",
+                    "surface-container-low": "#f4f4f2",
+                    "surface-container": "#eeeeec",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "background": "#f9f9f7",
+                    "tertiary-fixed-dim": "#ffb598",
+                    "on-primary-fixed": "#001e2c",
+                    "surface": "#f9f9f7",
+                    "outline": "#72787c",
+                    "on-surface": "#1a1c1b",
+                    "primary-fixed": "#c7e7fc",
+                    "surface-dim": "#dadad8",
+                    "on-primary-fixed-variant": "#2c4a5c",
+                    "on-tertiary-fixed-variant": "#70371e",
+                    "secondary-fixed-dim": "#e3c466",
+                    "primary-fixed-dim": "#accbe0",
+                    "inverse-on-surface": "#f1f1ef",
+                    "inverse-surface": "#2f3130",
+                    "tertiary": "#180400",
+                    "surface-container-highest": "#e2e3e1",
+                    "surface-bright": "#f9f9f7",
+                    "surface-variant": "#e2e3e1",
+                    "primary-container": "#002434",
+                    "on-secondary-container": "#776005",
+                    "secondary": "#735c00",
+                    "primary": "#000b13",
+                    "surface-tint": "#446274",
+                    "on-secondary-fixed-variant": "#574500",
+                    "on-primary-container": "#6e8ca0"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-md": "16px",
+                    "gutter": "12px",
+                    "stack-lg": "32px",
+                    "stack-sm": "8px",
+                    "container-margin": "20px",
+                    "safe-area-bottom": "34px"
+            },
+            "fontFamily": {
+                    "title-sm": ["Manrope"],
+                    "headline-md": ["Manrope"],
+                    "display-lg": ["Manrope"],
+                    "body-sm": ["Manrope"],
+                    "metadata": ["Manrope"],
+                    "body-md": ["Manrope"],
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-md-mobile": ["Manrope"]
+            },
+            "fontSize": {
+                    "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "display-lg": ["34px", {"lineHeight": "41px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "metadata": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "headline-md-mobile": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-panel {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .hide-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .hide-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background text-on-surface min-h-screen font-body-md">
+<!-- Top App Bar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 backdrop-blur-md flex justify-between items-center px-container-margin h-16 w-full">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full bg-primary-fixed overflow-hidden">
+<img alt="User" class="w-full h-full object-cover" data-alt="A sophisticated close-up portrait of a professional woman with a warm expression, set against a softly blurred minimalist studio background. The lighting is high-end and ethereal, following a heritage curation aesthetic with muted tones and a clean, airy feel. The image embodies digital preservation and personal legacy, presented in a high-lightness environment with subtle glassmorphism textures." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBh2tcTMkaSyQp5xSjxB-i6iLM-EgOZtshkDOtF_oNQh7dL5M0sNM_5uycwfZFnK7TXGV9n-zpNBig4PS517yZNMDtHYk5_knZBVSTqZavSJuM9UDOhRLDuvgabSTEsfWc6MwIpCnus3aAex6iyOw2KpNM5xZ6ZeKvFTjKONRgQlqNbbXPsPCLs3XT_-7Bt9kQfBkcUmLTJOOUwfmGQRgdi3CG65fgeQWdo24VHrkW4fROccugt5rO4iZ5sXu0n1ATgCyhYTO8YM_XD"/>
+</div>
+<h1 class="font-headline-md-mobile text-headline-md-mobile text-primary tracking-tight">拾影</h1>
+</div>
+<button class="active:scale-95 transition-transform text-on-surface-variant hover:opacity-80">
+<span class="material-symbols-outlined" data-icon="settings">settings</span>
+</button>
+</header>
+<main class="pt-20 pb-32 px-container-margin max-w-2xl mx-auto">
+<!-- Today's Suggestion Section -->
+<section class="mb-stack-lg">
+<h2 class="font-label-caps text-label-caps text-on-surface-variant mb-stack-sm">今日建议</h2>
+<div class="relative w-full aspect-[16/9] rounded-xl overflow-hidden shadow-sm group">
+<img class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="An editorial-style landscape photograph of a misty morning in a minimalist mountain range. The lighting is soft and diffused, creating a serene and archival atmosphere in line with heritage curation. The palette features muted greys, soft whites, and deep blacks. The overall mood is peaceful and structured, representing a beautiful curated legacy in a high-end digital gallery." src="https://lh3.googleusercontent.com/aida-public/AB6AXuBSC3d6oaUxez6OHVnRSbtAXcW6aderGLY8nDD3d6gIvYD6_Fyrm6IrfER2IfNDbDAuSN6Nl26IiSGGWGBCR87J64nBTIv_PkFYdSm4Wgy10MqVYbTke5MUrOiKHvin771xboQyOVw5EqJUtDg3jRJ3pJTG5XDHl9ZBYz7zTPsxBRuTHBbxsgIjhvAsxlvsjFWW5Ne463UwGWw6b0-6ju1pxqgQQ4OdPdlyxYyHd2GqlUE7lwEtWukb9zVVbCXLT7d26XupA0Cu6bhP"/>
+<div class="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent"></div>
+<div class="absolute bottom-0 left-0 p-stack-md">
+<p class="font-title-sm text-white mb-1">本周新增 382 张照片</p>
+<div class="flex items-center gap-2">
+<span class="bg-secondary-container text-on-secondary-container px-2 py-0.5 rounded-full font-label-caps text-[10px]">47 组相似照片</span>
+<span class="text-white/80 font-metadata text-metadata">点击整理</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Quick Start Bento Grid -->
+<section class="mb-stack-lg">
+<h2 class="font-label-caps text-label-caps text-on-surface-variant mb-stack-sm">快速开始</h2>
+<div class="grid grid-cols-2 gap-stack-md">
+<button class="flex flex-col items-start p-stack-md bg-surface-container-lowest border border-outline-variant rounded-xl active:scale-95 transition-all text-left">
+<div class="w-10 h-10 rounded-full bg-secondary-fixed flex items-center justify-center mb-stack-md">
+<span class="material-symbols-outlined text-on-secondary-fixed" data-icon="content_copy">content_copy</span>
+</div>
+<span class="font-title-sm text-on-surface">单张整理</span>
+<span class="font-metadata text-on-surface-variant">逐一筛选珍贵回忆</span>
+</button>
+<button class="flex flex-col items-start p-stack-md bg-primary-container border border-primary-container rounded-xl active:scale-95 transition-all text-left">
+<div class="w-10 h-10 rounded-full bg-on-primary-container/20 flex items-center justify-center mb-stack-md">
+<span class="material-symbols-outlined text-primary-fixed" data-icon="auto_fix_high">auto_fix_high</span>
+</div>
+<span class="font-title-sm text-white">智能整理</span>
+<span class="font-metadata text-white/60">AI 自动识别重复与模糊</span>
+</button>
+</div>
+</section>
+<!-- Similar Groups Horizontal Scroll -->
+<section class="mb-stack-lg -mx-container-margin overflow-hidden">
+<div class="px-container-margin flex justify-between items-center mb-stack-sm">
+<h2 class="font-label-caps text-label-caps text-on-surface-variant">相似照片</h2>
+<button class="text-primary font-metadata text-metadata">查看全部</button>
+</div>
+<div class="flex gap-stack-md overflow-x-auto hide-scrollbar px-container-margin snap-x">
+<!-- Group 1 -->
+<div class="flex-shrink-0 w-44 snap-start">
+<div class="relative aspect-square rounded-3xl overflow-hidden mb-stack-sm">
+<img class="w-full h-full object-cover" data-alt="A breathtaking photograph of a golden hour sunset over Erhai Lake, capturing the vibrant oranges and deep blues of the sky reflecting on the calm water. The style is editorial and sophisticated, evoking a sense of calm and preservation. The composition is clean and focused, characteristic of a high-end photo curation application. The lighting is dramatic yet soft." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAwLTJSo96Y52DBY8sHz18DbtGP8XFgxmsJCfH3z-sKT0Xa0seafTd8GUcB3dc5Kk4-atY4m-89R40kr1aM2IltbPalAkV8xwYOE7rHrAM0992M22UsU5ws5FD2SExzn9K-DDpqpNP03CV9EJ2dfXYUfhJtOjlyvgebpRwQN6YjEHd9DVEHPUll6lf275-n-tmG6SaHvpK1XxReD9hfegiQ8y7hKz4h3AGfmrczIAkC-yOlaZbnb9uCudOTtB6C26fQZUNKiu-eqMTA"/>
+<span class="absolute top-3 right-3 bg-surface/90 backdrop-blur-sm px-2 py-0.5 rounded-full font-label-caps text-[10px] text-on-surface">12 张相似</span>
+</div>
+<h3 class="font-title-sm text-on-surface">万能湖日落</h3>
+<p class="font-metadata text-on-surface-variant">2023年11月14日</p>
+</div>
+<!-- Group 2 -->
+<div class="flex-shrink-0 w-44 snap-start">
+<div class="relative aspect-square rounded-3xl overflow-hidden mb-stack-sm">
+<img class="w-full h-full object-cover" data-alt="A high-angle editorial shot of a traditional Cantonese morning tea spread with dim sum baskets, delicate teacups, and vibrant dishes on a minimalist marble table. The scene is bathed in natural, soft daylight, creating a clean and modern heritage curation aesthetic. The color palette is composed of warm earth tones and crisp whites, conveying a feeling of serene weekend organization." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAlauod8NL0lXI2Oi_iv32oUjf0mHnGJ8PSbkRBkMrxsCWCpRpZ6QXHZtdwbmTtsojTToKexPgNA8OyvjILHBBmk5fr5DGtR7OiFQd3GgOGsTzM1Qodh4ciP1VM_YiJXtrGRRQ1mKYsq83Tx5nVZ5IwXSUpih19Q4sLpyP8cqlspucDWcTmixGychowjGzUkbMbIFvaM7zkLacTun5ElwoszA_Aukv6QcYbfStMaWtPC4mEZQsbMEiO6p2JLwQKBYIRozDKT2DqsuOC"/>
+<span class="absolute top-3 right-3 bg-surface/90 backdrop-blur-sm px-2 py-0.5 rounded-full font-label-caps text-[10px] text-on-surface">8 张相似</span>
+</div>
+<h3 class="font-title-sm text-on-surface">周末早茶</h3>
+<p class="font-metadata text-on-surface-variant">2023年11月12日</p>
+</div>
+<!-- Group 3 -->
+<div class="flex-shrink-0 w-44 snap-start">
+<div class="relative aspect-square rounded-3xl overflow-hidden mb-stack-sm opacity-50">
+<div class="w-full h-full bg-surface-container flex items-center justify-center">
+<span class="material-symbols-outlined text-outline" data-icon="more_horiz">more_horiz</span>
+</div>
+</div>
+<h3 class="font-title-sm text-outline">更多发现</h3>
+<p class="font-metadata text-outline">继续探索相册</p>
+</div>
+</div>
+</section>
+<!-- Explore Heritage -->
+<section class="mb-stack-lg">
+<h2 class="font-label-caps text-label-caps text-on-surface-variant mb-stack-sm">探索合集</h2>
+<div class="grid grid-cols-1 gap-stack-sm">
+<div class="flex justify-between items-center p-stack-md bg-surface-container-low rounded-xl border border-outline-variant/30 active:scale-[0.98] transition-transform">
+<div class="flex items-center gap-stack-md">
+<span class="material-symbols-outlined text-primary" data-icon="schedule">schedule</span>
+<span class="font-title-sm">时间</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-metadata text-on-surface-variant">2014 - 2024</span>
+<span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+<div class="flex justify-between items-center p-stack-md bg-surface-container-low rounded-xl border border-outline-variant/30 active:scale-[0.98] transition-transform">
+<div class="flex items-center gap-stack-md">
+<span class="material-symbols-outlined text-primary" data-icon="location_on">location_on</span>
+<span class="font-title-sm">地点</span>
+</div>
+<div class="flex items-center gap-2">
+<span class="font-metadata text-on-surface-variant">12 个国家 / 地区</span>
+<span class="material-symbols-outlined text-outline" data-icon="chevron_right">chevron_right</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Review Basket FAB -->
+<div class="fixed bottom-24 right-container-margin z-40">
+<button class="group flex items-center gap-3 pl-5 pr-2 py-2 bg-tertiary-container text-tertiary-fixed rounded-full shadow-lg active:scale-95 transition-all">
+<span class="font-label-caps">查看预删除篮</span>
+<div class="w-10 h-10 rounded-full bg-tertiary-fixed text-tertiary-container flex items-center justify-center transition-transform group-hover:rotate-12">
+<span class="material-symbols-outlined" data-icon="shopping_basket">shopping_basket</span>
+</div>
+</button>
+</div>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 w-full z-50 bg-surface/80 backdrop-blur-md flex justify-around items-center w-full h-20 px-gutter pb-safe-area-bottom">
+<!-- Home (Active) -->
+<a class="flex flex-col items-center justify-center text-secondary" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="home" style="font-variation-settings: 'FILL' 1;">home</span>
+<span class="font-label-caps text-label-caps">Home</span>
+</a>
+<!-- Tasks -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-secondary transition-colors" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="task_alt">task_alt</span>
+<span class="font-label-caps text-label-caps">Tasks</span>
+</a>
+<!-- Basket -->
+<a class="flex flex-col items-center justify-center text-on-surface-variant hover:text-secondary transition-colors" href="#">
+<span class="material-symbols-outlined mb-1" data-icon="shopping_basket">shopping_basket</span>
+<span class="font-label-caps text-label-caps">Basket</span>
+</a>
+</nav>
+<script>
+        // Simple micro-interaction for cards
+        document.querySelectorAll('button, a').forEach(el => {
+            el.addEventListener('touchstart', () => {
+                el.style.opacity = '0.7';
+            });
+            el.addEventListener('touchend', () => {
+                el.style.opacity = '1';
+            });
+        });
+
+        // Dynamic header background on scroll
+        window.addEventListener('scroll', () => {
+            const header = document.querySelector('header');
+            if (window.scrollY > 20) {
+                header.classList.add('shadow-sm');
+            } else {
+                header.classList.remove('shadow-sm');
+            }
+        });
+    </script>
+</body></html>

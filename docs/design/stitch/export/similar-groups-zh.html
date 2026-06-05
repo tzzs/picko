@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>拾影 - 上海之行</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error": "#ffffff",
+                    "secondary-container": "#fddd7c",
+                    "inverse-primary": "#accbe0",
+                    "on-tertiary-fixed": "#370e00",
+                    "on-surface-variant": "#42474b",
+                    "outline-variant": "#c2c7cc",
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed": "#231b00",
+                    "on-tertiary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "error": "#ba1a1a",
+                    "surface-container-high": "#e8e8e6",
+                    "on-primary": "#ffffff",
+                    "tertiary-fixed": "#ffdbce",
+                    "secondary-fixed": "#ffe085",
+                    "on-background": "#1a1c1b",
+                    "tertiary-container": "#3f1200",
+                    "on-tertiary-container": "#be7658",
+                    "surface-container-low": "#f4f4f2",
+                    "surface-container": "#eeeeec",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "background": "#f9f9f7",
+                    "tertiary-fixed-dim": "#ffb598",
+                    "on-primary-fixed": "#001e2c",
+                    "surface": "#f9f9f7",
+                    "outline": "#72787c",
+                    "on-surface": "#1a1c1b",
+                    "primary-fixed": "#c7e7fc",
+                    "surface-dim": "#dadad8",
+                    "on-primary-fixed-variant": "#2c4a5c",
+                    "on-tertiary-fixed-variant": "#70371e",
+                    "secondary-fixed-dim": "#e3c466",
+                    "primary-fixed-dim": "#accbe0",
+                    "inverse-on-surface": "#f1f1ef",
+                    "inverse-surface": "#2f3130",
+                    "tertiary": "#180400",
+                    "surface-container-highest": "#e2e3e1",
+                    "surface-bright": "#f9f9f7",
+                    "surface-variant": "#e2e3e1",
+                    "primary-container": "#002434",
+                    "on-secondary-container": "#776005",
+                    "secondary": "#735c00",
+                    "primary": "#000b13",
+                    "surface-tint": "#446274",
+                    "on-secondary-fixed-variant": "#574500",
+                    "on-primary-container": "#6e8ca0"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-md": "16px",
+                    "gutter": "12px",
+                    "stack-lg": "32px",
+                    "stack-sm": "8px",
+                    "container-margin": "20px",
+                    "safe-area-bottom": "34px"
+            },
+            "fontFamily": {
+                    "title-sm": ["Manrope"],
+                    "headline-md": ["Manrope"],
+                    "display-lg": ["Manrope"],
+                    "body-sm": ["Manrope"],
+                    "metadata": ["Manrope"],
+                    "body-md": ["Manrope"],
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-md-mobile": ["Manrope"]
+            },
+            "fontSize": {
+                    "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "display-lg": ["34px", {"lineHeight": "41px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "metadata": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "headline-md-mobile": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .glass-panel {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .curation-image-container {
+            aspect-ratio: 4/5;
+            overflow: hidden;
+            border-radius: 24px;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .active-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background-color: currentColor;
+        }
+        @supports (padding: env(safe-area-inset-bottom)) {
+            .pb-safe-area-bottom {
+                padding-bottom: env(safe-area-inset-bottom);
+            }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen">
+<!-- Top Navigation Shell -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-md flex justify-between items-center px-container-margin h-16">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full overflow-hidden border border-outline-variant">
+<img alt="Profile" data-alt="A professional portrait of a curator in a minimalist studio, softly lit with cool, neutral tones. The aesthetic is clean and corporate modern, emphasizing a sense of high-end reliability and archival expertise. The background is a blurred gallery wall with black and white photography." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAc-shTCaw51zfwnsUBfLOkjv73lCXg4AUPTvkzGHbOQeL7bJS_OmBj5pmNMs2ivRNJ5TITs9Lnh8iwB7IDYzkwLAayr5fva1sJtPf3-di_beA5nIpR8EvGTzFLymLiZ8A9IqYojcIW0uelYNTeTEbl3JYtcZnyolxUNuSsig18vebv13sG76awzrt_qLe23K8gjyhfXMF_xwHD0o4GAHu7EcdxQK_GFZk6OnQ_kAesDvMD2zeGFipe17Kuq6RLnaUherHtsZynePpP"/>
+</div>
+<h1 class="font-headline-md-mobile text-headline-md-mobile text-primary tracking-tight">拾影</h1>
+</div>
+<button class="material-symbols-outlined text-on-surface-variant hover:opacity-80 transition-opacity active:scale-95" data-icon="settings">settings</button>
+</header>
+<main class="pt-20 pb-40 px-container-margin max-w-2xl mx-auto">
+<!-- Header Section -->
+<section class="mb-stack-lg flex justify-between items-end">
+<div>
+<h2 class="font-headline-md text-headline-md text-primary mb-1">上海之行</h2>
+<p class="font-body-sm text-on-surface-variant">8 张照片 · 32.4 MB</p>
+</div>
+<a class="font-label-caps text-label-caps text-secondary hover:opacity-80 transition-opacity" href="#">跳过此组</a>
+</section>
+<!-- Primary Curation Card -->
+<section class="mb-stack-lg">
+<div class="relative curation-image-container shadow-sm border border-outline-variant bg-surface-container-low group overflow-hidden">
+<img alt="Primary Recommendation" class="w-full h-full object-cover transition-transform duration-700 group-hover:scale-105" data-alt="A cinematic, high-resolution wide shot of the Shanghai Bund skyline at blue hour. The Oriental Pearl Tower and surrounding skyscrapers are illuminated with sophisticated amber and blue lights against a deep navy sky. The river reflects the glowing cityscape, creating a serene, archival quality architectural photograph with high dynamic range." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCoAYUnUfjhTBcOFQ9i1hJ4y_dkVwkrJHrHSgvAT11tnl1CyI1jlc-bHYpwO9EwGGNJS9bG9t8Q4tcIyD-D1L1RQZRMueaLLlCN7WRPwzs3s1sFTJW0zKtpRaHcOql5QVRpHONAbcF-_7yVGUShDjK4Qz08fONH95K-5xnVUNSWv3ms4dfKopNvLR7q_YtiNFg0elQBCC7gAf5yDo2Vr6FcxZOuBnIilYuNZ4xv113o0TtW6lVfG8H70wmKAImaNcuAEof6KgU2Ktb1"/>
+<!-- Label Badge -->
+<div class="absolute top-4 right-4 bg-secondary-container text-on-secondary-container px-3 py-1.5 rounded-full flex items-center gap-1.5 shadow-sm">
+<span class="material-symbols-outlined text-[18px]" style="font-variation-settings: 'FILL' 1;">stars</span>
+<span class="font-label-caps text-label-caps font-bold">推荐保留</span>
+</div>
+<!-- Info Overlay -->
+<div class="absolute bottom-0 left-0 w-full p-6 bg-gradient-to-t from-black/60 to-transparent text-white">
+<div class="flex justify-between items-center">
+<div>
+<p class="font-label-caps text-[10px] opacity-80 mb-1 uppercase">Best Quality</p>
+<p class="font-title-sm text-title-sm">外滩全景 · 黄金时刻</p>
+</div>
+<div class="w-8 h-8 rounded-full bg-white/20 backdrop-blur-md flex items-center justify-center">
+<span class="material-symbols-outlined text-[20px]">check_circle</span>
+</div>
+</div>
+</div>
+</div>
+</section>
+<!-- Grid Section: Other Similar Shots -->
+<section class="mb-stack-lg">
+<div class="flex justify-between items-center mb-stack-md">
+<h3 class="font-label-caps text-label-caps text-on-surface-variant tracking-widest">其他相似照片</h3>
+<button class="font-label-caps text-label-caps text-secondary active:scale-95 transition-transform" id="deselectAllBtn">取消全选</button>
+</div>
+<div class="grid grid-cols-2 gap-stack-md">
+<!-- Grid Item 1 -->
+<div class="relative aspect-square rounded-xl overflow-hidden border border-outline-variant curation-item cursor-pointer" data-selected="true">
+<img alt="Similar Shot 1" class="w-full h-full object-cover" data-alt="A close-up, artistic shot of a modern glass skyscraper in Shanghai, capturing the complex reflections of the morning sky. The image has a cool, corporate aesthetic with steel-blue tones and sharp geometric lines. The lighting is diffused and professional, evoking a sense of structured urban beauty." src="https://lh3.googleusercontent.com/aida-public/AB6AXuA_PPCtvHAsfwdsk2l4L0NieaHvyduUMn7CNaSUoCrhUZibOZVrb5UYKrwbOmxNnKb_vR344yeLZYOjda3m91NyNJIsenw3nyLNUhrU6mGA3hJkVCKNyk9LslvSXUBXrPTmcPnLnG9PJW5XnLuGEZtDDhCWt_AskLhqs8t7LATOD_senh-cmRILSKPciThbQMsiGogMBz_McBw7hT_n7RSKyX8y1htZuCxfGTPbYx2bLovZN5jSqh32qSz3R0rycFqJVJH0S3mKs7Ut"/>
+<div class="absolute inset-0 bg-secondary/20 transition-opacity duration-300 select-overlay"></div>
+<div class="absolute top-2 right-2 w-6 h-6 rounded-full bg-secondary text-on-secondary flex items-center justify-center shadow-md select-check">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+</div>
+<!-- Grid Item 2 -->
+<div class="relative aspect-square rounded-xl overflow-hidden border border-outline-variant curation-item cursor-pointer" data-selected="true">
+<img alt="Similar Shot 2" class="w-full h-full object-cover" data-alt="A night street photography scene in Shanghai, featuring glowing neon signs and a narrow alley with traditional architecture. The mood is atmospheric and curated, with a rich palette of deep reds and golden yellows. The shot is crisp with professional-grade focus, suggesting a cherished travel memory." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDZ7nSq3YLnmswGGLXXIfDOpUe1VgIDZwdk-a-zytdI-4lAiNc-vwQ0YVxDc7J_QyrjTCA6I-lw0DLJ6L4xzMDpAjyvI5OXHrBgYSQb4xs_06WH8-EDrh_EG2iYlaqAU2WuGy0yhDwZ9Ge43UUPUiLvsQFbembVik_9l2uNXV_5MLrXwFR52jXbvsh0sSs5u-PDfK0KOs2AdlFvnVqIXuO-ocoJD9-kBOQjRfLBncYJijUvNfbx9T6FHe4Q2eTgZK5HSKQkSbP0GCZS"/>
+<div class="absolute inset-0 bg-secondary/20 transition-opacity duration-300 select-overlay"></div>
+<div class="absolute top-2 right-2 w-6 h-6 rounded-full bg-secondary text-on-secondary flex items-center justify-center shadow-md select-check">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+</div>
+<!-- Grid Item 3 -->
+<div class="relative aspect-square rounded-xl overflow-hidden border border-outline-variant curation-item cursor-pointer" data-selected="false">
+<img alt="Similar Shot 3" class="w-full h-full object-cover grayscale opacity-60" data-alt="A slightly blurry, high-motion shot of a Shanghai subway station. The aesthetic is intentional but less prioritized for preservation compared to architectural landmarks. Muted neutral tones and a sense of transit provide contextual contrast to the primary hero images of the collection." src="https://lh3.googleusercontent.com/aida-public/AB6AXuB2W63LO-jVD9O4RCps1PDImMHpqVlHG6RXtiTNC7hXkn4ckSa4G3zgYbpxtbF5qcb47pDsq88QnaWuV0f80VvGZYO2ua_4fqriuxqau1qKYpCyhHGn2yFThgXD5xGRp8e-cGmwXV8r61vhRwlWXNPllvGawMoMX3uM2L0LEybNdMbjafvEQqtcIEyOklO7_QOvQ2aOfwTTU-NCFEyNBr0ldEOffGUkqJ0g4ExJHxY618NpDda1Cl-VQUXjOZQpXLbTRXc4li-QPzYp"/>
+<div class="absolute inset-0 bg-transparent transition-opacity duration-300 select-overlay"></div>
+<div class="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/40 backdrop-blur-sm border border-white/60 flex items-center justify-center select-check opacity-0">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+</div>
+<!-- Grid Item 4 -->
+<div class="relative aspect-square rounded-xl overflow-hidden border border-outline-variant curation-item cursor-pointer" data-selected="false">
+<img alt="Similar Shot 4" class="w-full h-full object-cover opacity-60" data-alt="A candid, overhead shot of a coffee table with a Shanghai map and a vintage camera. The lighting is warm and natural, suggesting a moment of planning. The color story includes soft wood tones and paper textures, fitting the 'Heritage Curation' brand theme of mindful organization." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPILMivVnRJJDgQOI3bUBm58pzfm3OKpR_i4cAGVJqM-OnKG6WiKL6Za47DJjTh1zZWK4W8bCjcChsX4EY5E_uU-Psmzu8YjI5vPypCWCLotW09sg6j-_0tt7--LXIGJIqmU6youCwsqI01bSIWaedCcRdsfBt6tFbJv6oo_0CbJMUJ7JjOyuW5B4Go99TxQZvfM3ZwOCO8polMhzlJHX_FlKpb0vhIzwHdO5Qtfr87HUDr-BwB5pIAY7ra55q0c0ogbiP14ghImPe"/>
+<div class="absolute inset-0 bg-transparent transition-opacity duration-300 select-overlay"></div>
+<div class="absolute top-2 right-2 w-6 h-6 rounded-full bg-white/40 backdrop-blur-sm border border-white/60 flex items-center justify-center select-check opacity-0">
+<span class="material-symbols-outlined text-[16px]">check</span>
+</div>
+</div>
+</div>
+</section>
+</main>
+<!-- Bottom Floating Basket / Selection Bar -->
+<div class="fixed bottom-0 w-full z-50">
+<!-- Basket Summary -->
+<div class="mx-container-margin mb-6 flex justify-center">
+<div class="bg-tertiary-container text-on-tertiary-container px-6 py-4 rounded-3xl shadow-lg glass-panel flex items-center gap-6 border border-white/10 w-full max-w-sm">
+<div class="flex items-center gap-3">
+<div class="relative">
+<span class="material-symbols-outlined text-[24px] text-tertiary-fixed-dim">shopping_basket</span>
+<div class="absolute -top-1 -right-1 w-4 h-4 bg-error text-on-error text-[10px] flex items-center justify-center rounded-full font-bold">2</div>
+</div>
+<span class="font-title-sm text-title-sm">已选择 2 张</span>
+</div>
+<div class="h-8 w-[1px] bg-white/20"></div>
+<div class="flex-1 flex gap-2 overflow-hidden">
+<div class="w-10 h-10 rounded-lg bg-surface-container-high border border-white/10 shrink-0">
+<img alt="Mini 1" class="w-full h-full object-cover rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAaWpI2OP1aE6P3uPYC2JpFGiJ1A3apEqoRQ3ffFDd1XEZ3iab92NmYFKcXsDYt48PypeVEoYznqpoLq_hCCQioByv-xkFJ7WTwTCIJhuaBOwh19RbehdnvHedCTxBSdiA1vW8wKqzLHDdcSgjrOb0lOLfAnizUKS34mYxM9nOIUWq8uXc81HnxISA6gX7KlODc6IgsvGDg6lYCiIs8EUTG9BPg_nSkXzIC_WIzm-A6uFSdssp-n32BAa-BbmmattC40Df3RUrCkd-6"/>
+</div>
+<div class="w-10 h-10 rounded-lg bg-surface-container-high border border-white/10 shrink-0">
+<img alt="Mini 2" class="w-full h-full object-cover rounded-lg" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDVS9D5SQYRGYf5tudtCptFGb0_PTB3TQYi4h3jO_zAeXGqhk2lLPnlQ_FgmtrWzv5wj2lXGf0zB_Cb2DQCF8RWzK2J7MEHZMNdVGW1YVsF6wgpOTys_-KVzCdC9PgYgVBKKpFizc_HRT0QIN5FGHMBP4UwivqLRkWuotomJdHzDPUPBSsbMAZcBgwbE09934YIHyfwrwpCAcLHBy7ITXPuNzC9_mwjwMVz8AjpGuqtAQjUO0RmS5IUhEbaLLYqMFf21YbLXRtgRlrP"/>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Bar Shell -->
+<div class="bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-md pb-safe-area-bottom h-32 flex flex-col justify-center px-container-margin gap-3 shadow-[0_-8px_24px_rgba(0,0,0,0.05)]">
+<div class="flex gap-stack-md">
+<button class="flex-1 h-14 rounded-2xl bg-surface-container-highest text-primary font-title-sm hover:opacity-80 active:scale-95 transition-all flex items-center justify-center gap-2">
+<span class="material-symbols-outlined text-[20px]">star_outline</span>
+                    保留推荐
+                </button>
+<button class="flex-[1.5] h-14 rounded-2xl bg-primary-container text-on-primary-fixed font-title-sm hover:opacity-90 active:scale-95 transition-all flex items-center justify-center gap-2">
+                    确认选择
+                    <span class="material-symbols-outlined text-[20px]">arrow_forward</span>
+</button>
+</div>
+</div>
+</div>
+<!-- Global Nav Mockup (Hidden on focused curation) -->
+<!-- Determined to be suppressed based on Task-Focused curation journey -->
+<script>
+        // Simple Interaction logic for Grid Selection
+        document.querySelectorAll('.curation-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const isSelected = item.getAttribute('data-selected') === 'true';
+                const nextState = !isSelected;
+                item.setAttribute('data-selected', nextState);
+
+                const overlay = item.querySelector('.select-overlay');
+                const check = item.querySelector('.select-check');
+                const img = item.querySelector('img');
+
+                if (nextState) {
+                    overlay.classList.remove('bg-transparent');
+                    overlay.classList.add('bg-secondary/20');
+                    check.classList.remove('opacity-0');
+                    check.classList.add('bg-secondary', 'text-on-secondary');
+                    img.classList.remove('grayscale', 'opacity-60');
+                } else {
+                    overlay.classList.remove('bg-secondary/20');
+                    overlay.classList.add('bg-transparent');
+                    check.classList.add('opacity-0');
+                    check.classList.remove('bg-secondary', 'text-on-secondary');
+                    img.classList.add('opacity-60');
+                }
+            });
+        });
+
+        document.getElementById('deselectAllBtn').addEventListener('click', () => {
+            document.querySelectorAll('.curation-item').forEach(item => {
+                item.setAttribute('data-selected', 'false');
+                item.querySelector('.select-overlay').className = 'absolute inset-0 bg-transparent transition-opacity duration-300 select-overlay';
+                item.querySelector('.select-check').classList.add('opacity-0');
+                item.querySelector('img').classList.add('opacity-60');
+            });
+        });
+    </script>
+</body></html>
