@@ -173,3 +173,37 @@ struct PickoFloatingBasketButton: View {
         .buttonStyle(.plain)
     }
 }
+
+struct PickoEmptyStateView: View {
+    let title: String
+    let message: String
+    let systemImage: String
+
+    var body: some View {
+        VStack(spacing: PickoDesign.Spacing.md) {
+            Image(systemName: systemImage)
+                .font(.system(size: 34, weight: .semibold))
+                .frame(width: 72, height: 72)
+                .background(PickoDesign.ColorToken.primarySoft.opacity(0.7), in: Circle())
+                .foregroundStyle(PickoDesign.ColorToken.primary)
+
+            VStack(spacing: 6) {
+                Text(title)
+                    .font(.system(size: 20, weight: .semibold, design: .rounded))
+                    .foregroundStyle(PickoDesign.ColorToken.primary)
+                Text(message)
+                    .font(.system(size: 14, weight: .regular, design: .rounded))
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+            }
+        }
+        .frame(maxWidth: .infinity)
+        .padding(PickoDesign.Spacing.lg)
+        .background(PickoDesign.ColorToken.surface, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.xl))
+        .overlay {
+            RoundedRectangle(cornerRadius: PickoDesign.Radius.xl)
+                .stroke(PickoDesign.ColorToken.outline.opacity(0.45), lineWidth: 1)
+        }
+        .padding(PickoDesign.Spacing.page)
+    }
+}

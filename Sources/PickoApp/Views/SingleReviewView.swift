@@ -119,7 +119,11 @@ public struct SingleReviewView: View {
                 }
                 .padding(PickoDesign.Spacing.page)
             } else {
-                ContentUnavailableView("No items ready", systemImage: "photo")
+                PickoEmptyStateView(
+                    title: "暂无待复核照片",
+                    message: "当前图库没有可继续整理的项目。你可以返回首页查看相似组或预删除篮。",
+                    systemImage: "photo.on.rectangle"
+                )
             }
         }
         .navigationTitle("Review")
@@ -162,15 +166,19 @@ struct AssetSummaryView: View {
         VStack(spacing: 12) {
             PickoThumbnailView(asset: asset, thumbnailProvider: thumbnailProvider)
                 .aspectRatio(4 / 3, contentMode: .fit)
+                .clipShape(RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
 
             VStack(spacing: 4) {
                 Text(asset.id)
-                    .font(.headline)
+                    .font(.system(size: 18, weight: .semibold, design: .rounded))
+                    .foregroundStyle(PickoDesign.ColorToken.primary)
                 Text("\(asset.pixelWidth)x\(asset.pixelHeight) · \(byteText)")
-                    .font(.subheadline)
-                    .foregroundStyle(.secondary)
+                    .font(.system(size: 12, weight: .medium, design: .monospaced))
+                    .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
             }
         }
+        .padding(PickoDesign.Spacing.md)
+        .background(PickoDesign.ColorToken.surface, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.xl))
     }
 
     private var byteText: String {

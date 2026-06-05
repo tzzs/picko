@@ -65,7 +65,11 @@ public struct SimilarGroupReviewView: View {
                     stickyActionBar(presentation)
                 }
             } else {
-                ContentUnavailableView("No similar groups", systemImage: "square.grid.2x2")
+                PickoEmptyStateView(
+                    title: "暂无相似照片组",
+                    message: "Picko 还没有发现需要成组复核的相似照片。继续单张整理或等待新的图库索引。",
+                    systemImage: "square.grid.2x2"
+                )
             }
         }
         .navigationTitle("Similar")

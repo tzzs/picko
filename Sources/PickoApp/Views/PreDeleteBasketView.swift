@@ -78,10 +78,12 @@ public struct PreDeleteBasketView: View {
                     }
 
                     if presentation.items.isEmpty {
-                        ContentUnavailableView("No reviewed items", systemImage: "basket")
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, PickoDesign.Spacing.lg)
-                            .background(PickoDesign.ColorToken.surfaceLow, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.xl))
+                        PickoEmptyStateView(
+                            title: "预删除篮为空",
+                            message: "复核时放入预删除篮的照片会先在这里等待最终确认。",
+                            systemImage: "basket"
+                        )
+                        .padding(0)
                     } else {
                         ScrollView(.horizontal, showsIndicators: false) {
                             HStack(spacing: PickoDesign.Spacing.md) {
