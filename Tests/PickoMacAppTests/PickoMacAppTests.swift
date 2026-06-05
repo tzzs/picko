@@ -122,7 +122,65 @@ final class PickoMacAppTests: XCTestCase {
         XCTAssertEqual(model.deletionQueueCount, 0)
     }
 
-    private func makeAsset(id: String) -> PhotoAsset {
+    func testMacSidebarRowsSummarizeReviewTasks() {
+        let model = PickoMacWorkbenchModel.preview()
+
+        model.preDeleteSelectedAsset()
+
+        let rows = model.sidebarRows
+
+        XCTAssertEqual(rows.map(\.title), ["Review", "Similar", "Time", "Location", "Basket"])
+        XCTAssertEqual(rows.first { $0.selection == .home }?.detail, "3 assets · 1 waiting")
+        XCTAssertEqual(rows.first { $0.selection == .similar }?.detail, "1 group · keep 1")
+        XCTAssertEqual(rows.first { $0.selection == .time }?.detail, "Timeline review")
+        XCTAssertEqual(rows.first { $0.selection == .location }?.detail, "Places and trips")
+        XCTAssertEqual(rows.first { $0.selection == .basket }?.detail, "1 item · 3.9 MB")
+    }
+
+    func testMacAssetPresentationExposesStatusLabels() {
+        let model = PickoMacWorkbenchModel(
+            appModel: PickoAppModel(
+                store: ReviewStateStore(assets: [
+                    makeAsset(id: "new", status: .unreviewed),
+                    makeAsset(id: "kept", status: .kept),
+                    makeAsset(id: "basket", status: .preDeleted),
+                    makeAsset(id: "skipped", status: .skipped)
+                ])
+            )
+        )
+
+        XCTAssertEqual(model.assetPresentation(for: model.assets[0]).statusLabel, "Unreviewed")
+        XCTAssertEqual(model.assetPresentation(for: model.assets[1]).statusLabel, "Kept")
+        XCTAssertEqual(model.assetPresentation(for: model.assets[2]).statusLabel, "In basket")
+        XCTAssertEqual(model.assetPresentation(for: model.assets[3]).statusLabel, "Skipped")
+    }
+
+    func testMacSimilarGroupPresentationExplainsRecommendation() {
+        let model = PickoMacWorkbenchModel.preview()
+
+        let presentation = model.similarGroupPresentation(for: model.groups[0])
+
+        XCTAssertEqual(presentation.title, "group-1")
+        XCTAssertEqual(presentation.summary, "2 similar items · keep 1")
+        XCTAssertEqual(presentation.recommendation, "Suggested keep: preview-1")
+        XCTAssertEqual(presentation.context, "Shanghai · 80% confidence")
+    }
+
+    func testMacInspectorPresentationIncludesDecisionCuesAndShortcuts() throws {
+        let model = PickoMacWorkbenchModel.preview()
+        model.selectAsset(id: "preview-1")
+
+        let presentation = try XCTUnwrap(model.inspectorPresentation)
+
+        XCTAssertEqual(presentation.statusLabel, "Unreviewed")
+        XCTAssertEqual(presentation.recommendationLabel, "Suggested keep in group-1")
+        XCTAssertEqual(presentation.shortcutHints.map(\.label), ["K Keep", "D Review Later", "Space Preview", "Z Undo"])
+    }
+
+    private func makeAsset(
+        id: String,
+        status: PhotoAsset.ReviewStatus = .unreviewed
+    ) -> PhotoAsset {
         PhotoAsset(
             id: id,
             mediaType: .photo,
@@ -136,7 +194,8 @@ final class PickoMacAppTests: XCTestCase {
             isScreenshot: false,
             duration: nil,
             thumbnailHash: nil,
-            perceptualHash: nil
+            perceptualHash: nil,
+            status: status
         )
     }
 }

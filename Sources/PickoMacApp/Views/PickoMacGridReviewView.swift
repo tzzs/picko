@@ -11,22 +11,31 @@ struct PickoMacGridReviewView: View {
 
     var body: some View {
         ScrollView {
-            LazyVGrid(columns: columns, spacing: 14) {
-                ForEach(model.assets) { asset in
-                    Button {
-                        model.selectAsset(id: asset.id)
-                    } label: {
-                        assetCard(asset)
-                    }
-                    .buttonStyle(.plain)
-                    .contextMenu {
-                        Button("Keep") {
+            VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Workbench Review")
+                        .font(.title2.bold())
+                    Text("Scan the library, keep the best shots, and send uncertain items to the basket for final review.")
+                        .foregroundStyle(.secondary)
+                }
+
+                LazyVGrid(columns: columns, spacing: 14) {
+                    ForEach(model.assets) { asset in
+                        Button {
                             model.selectAsset(id: asset.id)
-                            model.keepSelectedAsset()
+                        } label: {
+                            assetCard(asset)
                         }
-                        Button("Review Later") {
-                            model.selectAsset(id: asset.id)
-                            model.preDeleteSelectedAsset()
+                        .buttonStyle(.plain)
+                        .contextMenu {
+                            Button("Keep") {
+                                model.selectAsset(id: asset.id)
+                                model.keepSelectedAsset()
+                            }
+                            Button("Review Later") {
+                                model.selectAsset(id: asset.id)
+                                model.preDeleteSelectedAsset()
+                            }
                         }
                     }
                 }
@@ -36,7 +45,9 @@ struct PickoMacGridReviewView: View {
     }
 
     private func assetCard(_ asset: PhotoAsset) -> some View {
-        VStack(alignment: .leading, spacing: 8) {
+        let presentation = model.assetPresentation(for: asset)
+
+        return VStack(alignment: .leading, spacing: 8) {
             PickoThumbnailView(
                 asset: asset,
                 thumbnailProvider: model.thumbnailProvider,
@@ -50,7 +61,14 @@ struct PickoMacGridReviewView: View {
                 .font(.headline)
                 .lineLimit(1)
 
-            Text(ByteCountFormatter.string(fromByteCount: asset.fileSizeBytes, countStyle: .file))
+            HStack {
+                Label(presentation.statusLabel, systemImage: presentation.statusSystemImage)
+                    .font(.caption.weight(.semibold))
+                    .foregroundStyle(statusColor(for: asset.status))
+                Spacer()
+            }
+
+            Text(presentation.metadataSummary)
                 .font(.caption)
                 .foregroundStyle(.secondary)
         }
@@ -59,6 +77,19 @@ struct PickoMacGridReviewView: View {
         .overlay {
             RoundedRectangle(cornerRadius: 8)
                 .stroke(asset.id == model.selectedAssetId ? Color.accentColor : Color.clear, lineWidth: 2)
+        }
+    }
+
+    private func statusColor(for status: PhotoAsset.ReviewStatus) -> Color {
+        switch status {
+        case .unreviewed:
+            return .secondary
+        case .kept:
+            return .green
+        case .preDeleted:
+            return .red
+        case .skipped:
+            return .orange
         }
     }
 }

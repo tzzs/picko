@@ -1,4 +1,3 @@
-import PickoCore
 import SwiftUI
 
 struct PickoMacInspectorView: View {
@@ -6,29 +5,52 @@ struct PickoMacInspectorView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 16) {
-            if let asset = model.selectedAsset {
+            if let presentation = model.inspectorPresentation {
                 Text("Inspector")
                     .font(.title3.bold())
 
-                LabeledContent("Identifier", value: asset.id)
-                LabeledContent("Type", value: mediaTypeText(asset.mediaType))
-                LabeledContent("Dimensions", value: "\(asset.pixelWidth)x\(asset.pixelHeight)")
-                LabeledContent("Size", value: ByteCountFormatter.string(fromByteCount: asset.fileSizeBytes, countStyle: .file))
-                LabeledContent("Status", value: statusText(asset.status))
-                LabeledContent("Favorite", value: asset.isFavorite ? "Yes" : "No")
-                LabeledContent("Edited", value: asset.isEdited ? "Yes" : "No")
+                VStack(alignment: .leading, spacing: 10) {
+                    LabeledContent("Identifier", value: presentation.assetId)
+                    LabeledContent("Type", value: presentation.mediaTypeLabel)
+                    LabeledContent("Dimensions", value: presentation.dimensionsLabel)
+                    LabeledContent("Size", value: presentation.fileSizeLabel)
+                    LabeledContent("Status", value: presentation.statusLabel)
+                }
+
+                VStack(alignment: .leading, spacing: 6) {
+                    Text("Recommendation")
+                        .font(.headline)
+                    Text(presentation.recommendationLabel)
+                        .foregroundStyle(.secondary)
+                }
 
                 Divider()
 
-                Button("Keep") {
-                    model.keepSelectedAsset()
+                VStack(alignment: .leading, spacing: 8) {
+                    Text("Keyboard")
+                        .font(.headline)
+                    ForEach(presentation.shortcutHints) { hint in
+                        HStack {
+                            Text(hint.key)
+                                .font(.caption.monospaced().weight(.semibold))
+                                .frame(minWidth: 44, alignment: .leading)
+                            Text(hint.title)
+                                .foregroundStyle(.secondary)
+                        }
+                    }
                 }
-                .keyboardShortcut("k", modifiers: [])
 
-                Button("Review Later") {
-                    model.preDeleteSelectedAsset()
+                HStack {
+                    Button("Keep") {
+                        model.keepSelectedAsset()
+                    }
+                    .keyboardShortcut("k", modifiers: [])
+
+                    Button("Review Later") {
+                        model.preDeleteSelectedAsset()
+                    }
+                    .keyboardShortcut("d", modifiers: [])
                 }
-                .keyboardShortcut("d", modifiers: [])
             } else {
                 ContentUnavailableView("No selection", systemImage: "sidebar.right")
             }
@@ -36,31 +58,5 @@ struct PickoMacInspectorView: View {
             Spacer()
         }
         .padding()
-    }
-
-    private func mediaTypeText(_ mediaType: PhotoAsset.MediaType) -> String {
-        switch mediaType {
-        case .photo:
-            return "Photo"
-        case .video:
-            return "Video"
-        case .livePhoto:
-            return "Live Photo"
-        case .screenshot:
-            return "Screenshot"
-        }
-    }
-
-    private func statusText(_ status: PhotoAsset.ReviewStatus) -> String {
-        switch status {
-        case .unreviewed:
-            return "Unreviewed"
-        case .kept:
-            return "Kept"
-        case .preDeleted:
-            return "In basket"
-        case .skipped:
-            return "Skipped"
-        }
     }
 }
