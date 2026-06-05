@@ -5,10 +5,19 @@ struct PickoMacSidebarView: View {
 
     var body: some View {
         List(selection: $model.sidebarSelection) {
-            Section("Library") {
-                ForEach(PickoMacWorkbenchModel.SidebarSelection.allCases) { item in
-                    Label(item.title, systemImage: item.systemImage)
-                        .tag(item)
+            Section("Tasks") {
+                ForEach(model.sidebarRows) { row in
+                    Label {
+                        VStack(alignment: .leading, spacing: 2) {
+                            Text(row.title)
+                            Text(row.detail)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                        }
+                    } icon: {
+                        Image(systemName: row.systemImage)
+                    }
+                    .tag(row.selection)
                 }
             }
         }

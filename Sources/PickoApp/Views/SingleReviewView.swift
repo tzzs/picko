@@ -10,44 +10,83 @@ public struct SingleReviewView: View {
     }
 
     public var body: some View {
-        VStack(spacing: 20) {
-            if let asset = model.currentAsset {
-                AssetSummaryView(asset: asset, thumbnailProvider: model.thumbnailProvider)
+        Group {
+            if let presentation = PickoSingleReviewPresentation(model: model) {
+                VStack(spacing: 16) {
+                    ZStack(alignment: .topLeading) {
+                        PickoThumbnailView(asset: presentation.asset, thumbnailProvider: model.thumbnailProvider)
+                            .aspectRatio(4 / 3, contentMode: .fit)
+                            .frame(maxWidth: .infinity)
+                            .background(.black.opacity(0.9), in: RoundedRectangle(cornerRadius: 8))
 
-                HStack(spacing: 12) {
-                    Button {
-                        model.keepCurrentAsset()
-                    } label: {
-                        Label("Keep", systemImage: "checkmark.circle")
+                        Text("Suggested keep")
+                            .font(.caption.weight(.semibold))
+                            .padding(.horizontal, 10)
+                            .padding(.vertical, 6)
+                            .background(.green.opacity(0.9), in: Capsule())
+                            .foregroundStyle(.white)
+                            .padding(12)
                     }
-                    .buttonStyle(.borderedProminent)
 
-                    Button {
-                        model.preDeleteCurrentAsset()
-                    } label: {
-                        Label("Review Later", systemImage: "tray.and.arrow.down")
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text(presentation.asset.id)
+                            .font(.title3.bold())
+                            .lineLimit(1)
+                        Text(presentation.metadataSummary)
+                            .font(.subheadline)
+                            .foregroundStyle(.secondary)
+                        Text(presentation.decisionHint)
+                            .font(.footnote)
+                            .foregroundStyle(.secondary)
                     }
-                    .buttonStyle(.bordered)
+                    .frame(maxWidth: .infinity, alignment: .leading)
 
-                    Button {
-                        model.skipCurrentAsset()
-                    } label: {
-                        Label("Skip", systemImage: "forward")
+                    Spacer(minLength: 0)
+
+                    VStack(spacing: 10) {
+                        HStack(spacing: 10) {
+                            Button {
+                                model.keepCurrentAsset()
+                            } label: {
+                                Label(presentation.primaryActions[0].title, systemImage: presentation.primaryActions[0].systemImage)
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.borderedProminent)
+                            .tint(.green)
+
+                            Button {
+                                model.preDeleteCurrentAsset()
+                            } label: {
+                                Label(presentation.primaryActions[1].title, systemImage: presentation.primaryActions[1].systemImage)
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .buttonStyle(.bordered)
+                        }
+
+                        HStack {
+                            Button {
+                                model.undo()
+                            } label: {
+                                Label("Undo", systemImage: "arrow.uturn.backward")
+                            }
+                            .buttonStyle(.borderless)
+
+                            Spacer()
+
+                            Button {
+                                model.skipCurrentAsset()
+                            } label: {
+                                Label(presentation.primaryActions[2].title, systemImage: presentation.primaryActions[2].systemImage)
+                            }
+                            .buttonStyle(.borderless)
+                        }
                     }
-                    .buttonStyle(.bordered)
                 }
+                .padding()
             } else {
                 ContentUnavailableView("No items ready", systemImage: "photo")
             }
-
-            Button {
-                model.undo()
-            } label: {
-                Label("Undo", systemImage: "arrow.uturn.backward")
-            }
-            .buttonStyle(.borderless)
         }
-        .padding()
         .navigationTitle("Review")
     }
 }

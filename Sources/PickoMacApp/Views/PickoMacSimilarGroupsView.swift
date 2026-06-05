@@ -6,21 +6,67 @@ struct PickoMacSimilarGroupsView: View {
     @Bindable var model: PickoMacWorkbenchModel
 
     var body: some View {
-        List(model.groups) { group in
-            HStack(alignment: .top, spacing: 12) {
-                thumbnailStrip(for: group)
-
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(group.id)
-                        .font(.headline)
-                    Text("\(group.assetIds.count) similar items · keep \(group.keepCount)")
-                        .foregroundStyle(.secondary)
-                    Text("Recommended: \(group.recommendedKeepIds.joined(separator: ", "))")
-                        .font(.caption)
+        ScrollView {
+            VStack(alignment: .leading, spacing: 16) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("Similar Groups")
+                        .font(.title2.bold())
+                    Text("Review recommendations, then decide whether to keep one or keep a few before moving the rest to the basket.")
                         .foregroundStyle(.secondary)
                 }
+
+                LazyVStack(spacing: 12) {
+                    ForEach(model.groups) { group in
+                        groupCard(group)
+                    }
+                }
             }
-            .padding(.vertical, 4)
+            .padding()
+        }
+    }
+
+    private func groupCard(_ group: SimilarGroup) -> some View {
+        let presentation = model.similarGroupPresentation(for: group)
+
+        return HStack(alignment: .top, spacing: 14) {
+            thumbnailStrip(for: group)
+
+            VStack(alignment: .leading, spacing: 8) {
+                HStack(alignment: .firstTextBaseline) {
+                    Text(presentation.title)
+                        .font(.headline)
+                    Spacer()
+                    Text(presentation.statusLabel)
+                        .font(.caption.weight(.semibold))
+                        .foregroundStyle(.orange)
+                }
+
+                Text(presentation.summary)
+                    .foregroundStyle(.secondary)
+
+                Label(presentation.recommendation, systemImage: "checkmark.seal.fill")
+                    .font(.callout.weight(.semibold))
+                    .foregroundStyle(.green)
+
+                Text(presentation.context)
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
+
+                HStack(spacing: 8) {
+                    Text("Keep 1")
+                    Text("Keep N")
+                    Text("Manual review")
+                }
+                .font(.caption.weight(.semibold))
+                .foregroundStyle(.secondary)
+                .controlSize(.small)
+            }
+        }
+        .padding(12)
+        .background(.background, in: RoundedRectangle(cornerRadius: 8))
+        .overlay {
+            RoundedRectangle(cornerRadius: 8)
+                .stroke(Color.secondary.opacity(0.16))
         }
     }
 

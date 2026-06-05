@@ -11,43 +11,52 @@ public struct PreDeleteBasketView: View {
     }
 
     public var body: some View {
+        let presentation = PickoBasketPresentation(model: model)
+
         List {
             Section {
-                VStack(alignment: .leading, spacing: 6) {
-                    Text("\(model.deletionQueueCount) items waiting for review")
-                        .font(.headline)
-                    Text(ByteCountFormatter.string(fromByteCount: model.estimatedPreDeleteBytes, countStyle: .file))
+                VStack(alignment: .leading, spacing: 8) {
+                    Text(presentation.summaryTitle)
+                        .font(.title3.bold())
+                    Text(presentation.summarySubtitle)
+                        .foregroundStyle(.secondary)
+                    Text(presentation.secondaryActionTitle)
+                        .font(.footnote)
                         .foregroundStyle(.secondary)
                 }
+                .padding(.vertical, 4)
             }
 
-            Section("Items") {
-                ForEach(model.store.deletionQueue.itemIds, id: \.self) { id in
-                    if let asset = model.store.asset(id: id) {
-                        HStack(spacing: 12) {
-                            PickoThumbnailView(
-                                asset: asset,
-                                thumbnailProvider: model.thumbnailProvider,
-                                targetPixelWidth: 160,
-                                targetPixelHeight: 120
-                            )
-                            .frame(width: 72, height: 54)
-                            .clipShape(RoundedRectangle(cornerRadius: 8))
+            Section("Final review") {
+                ForEach(presentation.items) { item in
+                    HStack(spacing: 12) {
+                        PickoThumbnailView(
+                            asset: item.asset,
+                            thumbnailProvider: model.thumbnailProvider,
+                            targetPixelWidth: 160,
+                            targetPixelHeight: 120
+                        )
+                        .frame(width: 76, height: 58)
+                        .clipShape(RoundedRectangle(cornerRadius: 8))
 
-                            VStack(alignment: .leading) {
-                                Text(asset.id)
-                                Text(ByteCountFormatter.string(fromByteCount: asset.fileSizeBytes, countStyle: .file))
-                                    .font(.caption)
-                                    .foregroundStyle(.secondary)
-                            }
-
-                            Spacer()
-
-                            Button("Restore") {
-                                model.restoreFromBasket(assetId: id)
-                            }
-                            .buttonStyle(.borderless)
+                        VStack(alignment: .leading, spacing: 3) {
+                            Text(item.id)
+                                .font(.headline)
+                                .lineLimit(1)
+                            Text(item.byteText)
+                                .font(.caption)
+                                .foregroundStyle(.secondary)
+                            Text("From review flow")
+                                .font(.caption2)
+                                .foregroundStyle(.secondary)
                         }
+
+                        Spacer()
+
+                        Button("Restore") {
+                            model.restoreFromBasket(assetId: item.id)
+                        }
+                        .buttonStyle(.borderless)
                     }
                 }
             }
@@ -56,7 +65,7 @@ public struct PreDeleteBasketView: View {
                 Button(role: .destructive) {
                     showsDeletionConfirmation = true
                 } label: {
-                    Label("Confirm with Photos", systemImage: "checkmark.shield")
+                    Label(presentation.primaryActionTitle, systemImage: "checkmark.shield")
                 }
                 .disabled(model.deletionQueueCount == 0 || model.photoDeleter == nil || isConfirmingDeletion)
 
@@ -72,6 +81,12 @@ public struct PreDeleteBasketView: View {
                     Text(deletionErrorMessage)
                         .foregroundStyle(.secondary)
                 }
+            }
+
+            Section {
+                Text(presentation.recoveryMessage)
+                    .font(.footnote)
+                    .foregroundStyle(.secondary)
             }
         }
         .navigationTitle("Basket")

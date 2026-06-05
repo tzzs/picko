@@ -29,7 +29,7 @@ final class PickoUITests: XCTestCase {
         app.launch()
 
         XCTAssertTrue(app.navigationBars["Basket"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["1 items waiting for review"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["1 item waiting for final review"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.buttons["Confirm with Photos"].isEnabled)
         XCTAssertTrue(app.buttons["Clear basket"].isEnabled)
     }
@@ -40,14 +40,14 @@ final class PickoUITests: XCTestCase {
         app.launch()
 
         XCTAssertTrue(app.navigationBars["Basket"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["1 items waiting for review"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["1 item waiting for final review"].waitForExistence(timeout: 5))
 
         app.buttons["clear-picko-state-toolbar-button"].tap()
         XCTAssertTrue(app.buttons["Clear Picko state"].waitForExistence(timeout: 5))
         app.buttons["Clear Picko state"].tap()
 
         XCTAssertTrue(
-            app.staticTexts["0 items waiting for review"].waitForExistence(timeout: 5),
+            app.staticTexts["0 items waiting for final review"].waitForExistence(timeout: 5),
             app.debugDescription
         )
         XCTAssertFalse(app.buttons["Confirm with Photos"].isEnabled)

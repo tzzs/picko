@@ -183,6 +183,62 @@ final class PickoAppTests: XCTestCase {
         XCTAssertNotNil(view)
     }
 
+    func testHomePresentationEmphasizesTaskSummaryAndSafeBasket() {
+        let model = PickoAppModel.preview()
+        model.preDeleteCurrentAsset()
+
+        let presentation = PickoHomePresentation(model: model)
+
+        XCTAssertEqual(presentation.heroTitle, "Ready to keep what matters")
+        XCTAssertEqual(presentation.metricRows.map(\.label), ["Library", "Similar groups", "Pre-delete basket"])
+        XCTAssertEqual(presentation.taskRows.map(\.title), [
+            "Review one by one",
+            "Review similar photos",
+            "Review pre-delete basket",
+            "Browse by time and place"
+        ])
+        XCTAssertTrue(presentation.privacyFootnote.contains("Photos are not deleted"))
+    }
+
+    func testSingleReviewPresentationKeepsPrimaryActionsPhotoFirst() throws {
+        let model = PickoAppModel.preview()
+
+        let presentation = try XCTUnwrap(PickoSingleReviewPresentation(model: model))
+
+        XCTAssertEqual(presentation.decisionHint, "Swipe up to keep, down to send to the basket.")
+        XCTAssertEqual(presentation.primaryActions.map(\.title), ["Keep", "Review Later", "Skip"])
+        XCTAssertEqual(presentation.primaryActions.map(\.systemImage), [
+            "checkmark.circle.fill",
+            "tray.and.arrow.down",
+            "forward"
+        ])
+        XCTAssertTrue(presentation.metadataSummary.contains("Similar group"))
+    }
+
+    func testSimilarGroupPresentationExplainsKeepNAndEditableRecommendation() throws {
+        let model = PickoAppModel.preview()
+
+        let presentation = try XCTUnwrap(PickoSimilarGroupPresentation(model: model))
+
+        XCTAssertEqual(presentation.modeTitles, ["Keep 1", "Keep N"])
+        XCTAssertEqual(presentation.recommendationBadge, "Suggested keep")
+        XCTAssertTrue(presentation.footerExplanation.contains("Unselected photos move to the pre-delete basket"))
+        XCTAssertGreaterThanOrEqual(presentation.assetRows.count, 2)
+    }
+
+    func testBasketPresentationReinforcesRecoveryBeforePhotosConfirmation() {
+        let model = PickoAppModel.preview()
+        model.preDeleteCurrentAsset()
+
+        let presentation = PickoBasketPresentation(model: model)
+
+        XCTAssertEqual(presentation.summaryTitle, "1 item waiting for final review")
+        XCTAssertEqual(presentation.primaryActionTitle, "Confirm with Photos")
+        XCTAssertEqual(presentation.secondaryActionTitle, "Restore or clear before confirming")
+        XCTAssertTrue(presentation.recoveryMessage.contains("Recently Deleted"))
+        XCTAssertTrue(presentation.recoveryMessage.contains("recovered"))
+    }
+
     func testModelLoadsAssetsFromPhotoIndexer() async throws {
         let indexer = FakePhotoAssetIndexer(snapshots: [
             PhotoAssetSnapshot(
