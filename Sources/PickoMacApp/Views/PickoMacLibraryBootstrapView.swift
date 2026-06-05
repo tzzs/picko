@@ -54,10 +54,10 @@ public struct PickoMacLibraryBootstrapView: View {
                         systemImage: "photo.on.rectangle.angled"
                     )
 
-                    Button("Review Sample Library") {
+                    PickoMacActionButton(title: "Review Sample Library", systemImage: "photo.stack", style: .primary) {
                         phase = .loaded(.preview())
                     }
-                    .buttonStyle(.borderedProminent)
+                    .frame(width: 240)
                 }
                 .frame(minWidth: 640, minHeight: 420)
                 .background(PickoMacDesign.ColorToken.background)

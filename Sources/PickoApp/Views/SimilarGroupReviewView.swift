@@ -19,11 +19,7 @@ public struct SimilarGroupReviewView: View {
                     VStack(alignment: .leading, spacing: PickoDesign.Spacing.lg) {
                         header(presentation)
 
-                        Picker("Keep mode", selection: $keepsMultiple) {
-                            Text(presentation.modeTitles[0]).tag(false)
-                            Text(presentation.modeTitles[1]).tag(true)
-                        }
-                        .pickerStyle(.segmented)
+                        keepModeControl(presentation.modeTitles)
 
                         if let hero = presentation.assetRows.first {
                             similarHeroCard(hero, badge: presentation.recommendationBadge)
@@ -104,6 +100,42 @@ public struct SimilarGroupReviewView: View {
         } else {
             selectedAssetIds = [id]
         }
+    }
+
+    private func keepModeControl(_ titles: [String]) -> some View {
+        HStack(spacing: 0) {
+            keepModeButton(title: titles[0], isSelected: !keepsMultiple) {
+                keepsMultiple = false
+                if selectedAssetIds.count > 1, let first = selectedAssetIds.first {
+                    selectedAssetIds = [first]
+                }
+            }
+
+            keepModeButton(title: titles[1], isSelected: keepsMultiple) {
+                keepsMultiple = true
+            }
+        }
+        .padding(4)
+        .background(PickoDesign.ColorToken.surfaceContainer, in: Capsule())
+        .overlay {
+            Capsule()
+                .stroke(PickoDesign.ColorToken.outline.opacity(0.45), lineWidth: 1)
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Keep mode")
+    }
+
+    private func keepModeButton(title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            Text(title)
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 8)
+                .background(isSelected ? PickoDesign.ColorToken.surface : Color.clear, in: Capsule())
+                .foregroundStyle(isSelected ? PickoDesign.ColorToken.primary : PickoDesign.ColorToken.secondaryInk)
+        }
+        .buttonStyle(.plain)
+        .accessibilityAddTraits(isSelected ? .isSelected : [])
     }
 
     private func similarHeroCard(_ row: PickoSimilarAssetPresentation, badge: String) -> some View {

@@ -143,3 +143,67 @@ struct PickoMacEmptyStateView: View {
         .background(PickoMacDesign.ColorToken.background)
     }
 }
+
+struct PickoMacActionButton: View {
+    enum Style {
+        case primary
+        case secondary
+        case destructive
+    }
+
+    let title: String
+    let systemImage: String
+    var style: Style = .secondary
+    var action: () -> Void
+
+    var body: some View {
+        Button(action: action) {
+            Label(title, systemImage: systemImage)
+                .font(.system(size: 13, weight: .semibold, design: .rounded))
+                .lineLimit(1)
+                .frame(maxWidth: .infinity)
+                .padding(.vertical, 9)
+                .padding(.horizontal, 12)
+                .background(backgroundColor, in: RoundedRectangle(cornerRadius: PickoMacDesign.Radius.md))
+                .foregroundStyle(foregroundColor)
+                .overlay {
+                    RoundedRectangle(cornerRadius: PickoMacDesign.Radius.md)
+                        .stroke(borderColor, lineWidth: 1)
+                }
+        }
+        .buttonStyle(.plain)
+    }
+
+    private var backgroundColor: Color {
+        switch style {
+        case .primary:
+            return PickoMacDesign.ColorToken.primary
+        case .secondary:
+            return PickoMacDesign.ColorToken.surface
+        case .destructive:
+            return PickoMacDesign.ColorToken.coralDeep
+        }
+    }
+
+    private var foregroundColor: Color {
+        switch style {
+        case .primary:
+            return PickoMacDesign.ColorToken.primarySoft
+        case .secondary:
+            return PickoMacDesign.ColorToken.primary
+        case .destructive:
+            return PickoMacDesign.ColorToken.coral
+        }
+    }
+
+    private var borderColor: Color {
+        switch style {
+        case .primary:
+            return PickoMacDesign.ColorToken.primary.opacity(0)
+        case .secondary:
+            return PickoMacDesign.ColorToken.outline.opacity(0.5)
+        case .destructive:
+            return PickoMacDesign.ColorToken.coral.opacity(0.18)
+        }
+    }
+}

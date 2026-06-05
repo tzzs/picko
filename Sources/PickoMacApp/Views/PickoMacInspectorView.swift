@@ -59,17 +59,15 @@ struct PickoMacInspectorView: View {
                 }
 
                 HStack {
-                    Button("Keep") {
+                    PickoMacActionButton(title: "Keep", systemImage: "checkmark.circle.fill", style: .primary) {
                         model.keepSelectedAsset()
                     }
                     .keyboardShortcut("k", modifiers: [])
-                    .buttonStyle(.borderedProminent)
 
-                    Button("Review Later") {
+                    PickoMacActionButton(title: "Review Later", systemImage: "tray.and.arrow.down", style: .secondary) {
                         model.preDeleteSelectedAsset()
                     }
                     .keyboardShortcut("d", modifiers: [])
-                    .buttonStyle(.bordered)
                 }
             } else {
                 PickoMacEmptyStateView(
