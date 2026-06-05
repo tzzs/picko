@@ -44,12 +44,20 @@ public struct PickoThumbnailView: View {
     }
 
     private var placeholder: some View {
-        RoundedRectangle(cornerRadius: 8)
-            .fill(asset.isScreenshot ? Color.indigo.opacity(0.2) : Color.blue.opacity(0.18))
+        RoundedRectangle(cornerRadius: PickoDesign.Radius.lg)
+            .fill(
+                LinearGradient(
+                    colors: asset.isScreenshot
+                        ? [PickoDesign.ColorToken.primarySoft.opacity(0.72), PickoDesign.ColorToken.surfaceHigh]
+                        : [PickoDesign.ColorToken.surfaceContainer, PickoDesign.ColorToken.primarySoft.opacity(0.62)],
+                    startPoint: .topLeading,
+                    endPoint: .bottomTrailing
+                )
+            )
             .overlay {
                 Image(systemName: iconName)
                     .font(.system(size: 56, weight: .semibold))
-                    .foregroundStyle(.blue)
+                    .foregroundStyle(PickoDesign.ColorToken.primary.opacity(0.58))
             }
     }
 
