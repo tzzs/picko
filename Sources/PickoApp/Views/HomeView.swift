@@ -2,7 +2,6 @@ import SwiftUI
 
 public struct HomeView: View {
     @Bindable private var model: PickoAppModel
-    @State private var isConfirmingClearState = false
 
     public init(model: PickoAppModel) {
         self.model = model
@@ -61,10 +60,37 @@ public struct HomeView: View {
                     .frame(minHeight: 205)
                 }
 
-                LazyVGrid(columns: [GridItem(.adaptive(minimum: 110), spacing: 12)], spacing: 12) {
-                    ForEach(presentation.metricRows, id: \.label) { metric in
-                        PickoMetricCapsule(value: metric.value, label: localizedMetricLabel(metric.label))
+                HStack(spacing: 1) {
+                    ForEach(Array(presentation.metricRows.enumerated()), id: \.element.label) { index, metric in
+                        Button {
+                            openMetric(at: index)
+                        } label: {
+                            VStack(alignment: .leading, spacing: 2) {
+                                Text(metric.value)
+                                    .font(.system(size: 18, weight: .bold, design: .rounded))
+                                    .foregroundStyle(PickoDesign.ColorToken.primary)
+                                Text(metric.label)
+                                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                                    .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+                                    .lineLimit(1)
+                            }
+                            .frame(maxWidth: .infinity, alignment: .leading)
+                            .padding(.vertical, 10)
+                            .padding(.horizontal, 12)
+                        }
+                        .buttonStyle(.plain)
+
+                        if index < presentation.metricRows.count - 1 {
+                            Rectangle()
+                                .fill(PickoDesign.ColorToken.outline.opacity(0.35))
+                                .frame(width: 1, height: 36)
+                        }
                     }
+                }
+                .background(PickoDesign.ColorToken.surface, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
+                .overlay {
+                    RoundedRectangle(cornerRadius: PickoDesign.Radius.lg)
+                        .stroke(PickoDesign.ColorToken.outline.opacity(0.45), lineWidth: 1)
                 }
 
                 VStack(alignment: .leading, spacing: PickoDesign.Spacing.gutter) {
@@ -82,10 +108,10 @@ public struct HomeView: View {
                                     .background(task.stitchBackgroundColor, in: Circle())
 
                                 VStack(alignment: .leading, spacing: 3) {
-                                    Text(localizedTaskTitle(task.title))
+                                    Text(task.title)
                                         .font(.system(size: 18, weight: .semibold, design: .rounded))
                                         .foregroundStyle(task.tintRole == .keep ? .white : PickoDesign.ColorToken.ink)
-                                    Text(localizedTaskSubtitle(task.subtitle))
+                                    Text(task.subtitle)
                                         .font(.system(size: 13, weight: .regular, design: .rounded))
                                         .foregroundStyle(task.tintRole == .keep ? .white.opacity(0.62) : PickoDesign.ColorToken.secondaryInk)
                                 }
@@ -113,8 +139,19 @@ public struct HomeView: View {
 
                 VStack(alignment: .leading, spacing: PickoDesign.Spacing.gutter) {
                     PickoSectionLabel(title: "探索合集")
-                    collectionRow(title: "时间", subtitle: "2014 - 2024", systemImage: "clock")
-                    collectionRow(title: "地点", subtitle: "12 个国家 / 地区", systemImage: "location")
+                    NavigationLink {
+                        CollectionReviewView(mode: .time)
+                    } label: {
+                        collectionRow(title: "时间", subtitle: "2014 - 2024", systemImage: "clock")
+                    }
+                    .buttonStyle(.plain)
+
+                    NavigationLink {
+                        CollectionReviewView(mode: .place)
+                    } label: {
+                        collectionRow(title: "地点", subtitle: "12 个国家 / 地区", systemImage: "location")
+                    }
+                    .buttonStyle(.plain)
                 }
 
                 PickoFloatingBasketButton(count: model.deletionQueueCount) {
@@ -125,20 +162,19 @@ public struct HomeView: View {
             .padding(PickoDesign.Spacing.page)
             .padding(.bottom, 96)
         }
-        .navigationTitle("Picko")
+        .navigationTitle(PickoCopy.Tabs.home)
         .pickoInlineNavigationTitle()
         .pickoScreenBackground()
-        .confirmationDialog(
-            "Clear Picko review state?",
-            isPresented: $isConfirmingClearState,
-            titleVisibility: .visible
-        ) {
-            Button("Clear Picko state", role: .destructive) {
-                model.clearLocalReviewState()
-            }
-            Button("Cancel", role: .cancel) {}
-        } message: {
-            Text("This only resets local Picko review progress. It does not delete or modify photos.")
+    }
+
+    private func openMetric(at index: Int) {
+        switch index {
+        case 1:
+            model.selectedTab = .similar
+        case 2:
+            model.selectedTab = .basket
+        default:
+            model.selectedTab = .review
         }
     }
 
@@ -179,49 +215,6 @@ public struct HomeView: View {
         }
     }
 
-    private func localizedMetricLabel(_ label: String) -> String {
-        switch label {
-        case "Library":
-            return "图库"
-        case "Similar groups":
-            return "相似组"
-        case "Pre-delete basket":
-            return "预删除篮"
-        default:
-            return label
-        }
-    }
-
-    private func localizedTaskTitle(_ title: String) -> String {
-        switch title {
-        case "Review one by one":
-            return "单张整理"
-        case "Review similar photos":
-            return "智能整理"
-        case "Review pre-delete basket":
-            return "预删除篮复核"
-        case "Browse by time and place":
-            return "按时间地点浏览"
-        default:
-            return title
-        }
-    }
-
-    private func localizedTaskSubtitle(_ subtitle: String) -> String {
-        if subtitle.contains("Quick keep") {
-            return "逐一筛选珍贵回忆"
-        }
-        if subtitle.contains("suggestions") {
-            return "每组保留 1 张或多张"
-        }
-        if subtitle.contains("Restore") {
-            return "最终确认前可随时恢复"
-        }
-        if subtitle.contains("event-based") {
-            return "从日期和地点继续整理"
-        }
-        return subtitle
-    }
 }
 
 private extension PickoTaskPresentation {

@@ -5,6 +5,7 @@ public struct PreDeleteBasketView: View {
     @State private var showsDeletionConfirmation = false
     @State private var isConfirmingDeletion = false
     @State private var deletionErrorMessage: String?
+    @State private var previewAsset: PickoBasketItemPresentation?
 
     public init(model: PickoAppModel) {
         self.model = model
@@ -15,28 +16,22 @@ public struct PreDeleteBasketView: View {
 
         ScrollView {
             VStack(alignment: .leading, spacing: PickoDesign.Spacing.lg) {
-                PickoBrandHeader(title: "拾影", trailingSystemImage: "gearshape") {}
+                PickoBrandHeader(title: "拾影")
 
                 VStack(alignment: .leading, spacing: PickoDesign.Spacing.md) {
-                    PickoSectionLabel(title: "Savings Overview")
+                    PickoSectionLabel(title: PickoCopy.Basket.savingsOverview)
 
                     VStack(alignment: .leading, spacing: PickoDesign.Spacing.md) {
                         HStack(alignment: .bottom) {
                             VStack(alignment: .leading, spacing: 3) {
-                                Text("总计节省")
+                                Text(PickoCopy.Basket.totalSavings)
                                     .font(.system(size: 16, weight: .regular, design: .rounded))
                                     .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
-                                Text(presentation.summarySubtitle.replacingOccurrences(of: "Estimated space: ", with: ""))
+                                Text(presentation.summarySubtitle.replacingOccurrences(of: "预计可节省：", with: ""))
                                     .font(.system(size: 34, weight: .bold, design: .rounded))
                                     .foregroundStyle(PickoDesign.ColorToken.primary)
                             }
                             Spacer()
-                            Button("复核") {}
-                                .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                .padding(.horizontal, 18)
-                                .padding(.vertical, 10)
-                                .background(PickoDesign.ColorToken.goldSoft, in: Capsule())
-                                .foregroundStyle(PickoDesign.ColorToken.primaryDeep)
                         }
 
                         Text(presentation.summaryTitle)
@@ -69,18 +64,18 @@ public struct PreDeleteBasketView: View {
 
                 VStack(alignment: .leading, spacing: PickoDesign.Spacing.md) {
                     HStack {
-                        Text("相似组")
+                        Text(PickoCopy.Basket.similarGroup)
                             .font(.system(size: 18, weight: .semibold, design: .rounded))
                         Spacer()
-                        Text("\(presentation.items.count) ITEMS")
+                        Text("\(presentation.items.count) 项")
                             .font(.system(size: 12, weight: .medium, design: .monospaced))
                             .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
                     }
 
                     if presentation.items.isEmpty {
                         PickoEmptyStateView(
-                            title: "预删除篮为空",
-                            message: "复核时放入预删除篮的照片会先在这里等待最终确认。",
+                            title: PickoCopy.Basket.emptyTitle,
+                            message: PickoCopy.Basket.emptyMessage,
                             systemImage: "basket"
                         )
                         .padding(0)
@@ -98,10 +93,10 @@ public struct PreDeleteBasketView: View {
 
                 VStack(alignment: .leading, spacing: PickoDesign.Spacing.md) {
                     HStack {
-                        Text("单张复核")
+                        Text(PickoCopy.Basket.singleReview)
                             .font(.system(size: 18, weight: .semibold, design: .rounded))
                         Spacer()
-                        Text("\(presentation.items.count) PHOTOS")
+                        Text("\(presentation.items.count) 张")
                             .font(.system(size: 12, weight: .medium, design: .monospaced))
                             .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
                     }
@@ -109,16 +104,21 @@ public struct PreDeleteBasketView: View {
                     LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: PickoDesign.Spacing.gutter) {
                         ForEach(presentation.items) { item in
                             ZStack(alignment: .topTrailing) {
-                                PickoThumbnailView(
-                                    asset: item.asset,
-                                    thumbnailProvider: model.thumbnailProvider,
-                                    targetPixelWidth: 220,
-                                    targetPixelHeight: 220
-                                )
-                                .aspectRatio(1, contentMode: .fill)
-                                .clipShape(RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
+                                Button {
+                                    previewAsset = item
+                                } label: {
+                                    PickoThumbnailView(
+                                        asset: item.asset,
+                                        thumbnailProvider: model.thumbnailProvider,
+                                        targetPixelWidth: 220,
+                                        targetPixelHeight: 220
+                                    )
+                                    .aspectRatio(1, contentMode: .fill)
+                                    .clipShape(RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
+                                }
+                                .buttonStyle(.plain)
 
-                                Button("Restore") {
+                                Button(PickoCopy.Basket.restore) {
                                     model.restoreFromBasket(assetId: item.id)
                                 }
                                 .font(.system(size: 11, weight: .semibold, design: .rounded))
@@ -156,17 +156,24 @@ public struct PreDeleteBasketView: View {
                         .font(.system(size: 16, weight: .semibold, design: .rounded))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 16)
-                        .background(PickoDesign.ColorToken.primary, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
-                        .foregroundStyle(PickoDesign.ColorToken.primarySoft)
+                        .background(primaryActionBackground, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
+                        .foregroundStyle(primaryActionForeground)
                 }
                 .buttonStyle(.plain)
-                .disabled(model.deletionQueueCount == 0 || model.photoDeleter == nil || isConfirmingDeletion)
-                .opacity(model.deletionQueueCount == 0 || model.photoDeleter == nil || isConfirmingDeletion ? 0.45 : 1)
+                .disabled(isPrimaryActionDisabled)
+
+                if let disabledReason = isConfirmingDeletion ? PickoCopy.Basket.confirmingDisabledReason : presentation.disabledReason {
+                    Text(disabledReason)
+                        .font(.system(size: 12, weight: .medium, design: .rounded))
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+                        .frame(maxWidth: .infinity)
+                }
 
                 Button(role: .destructive) {
                     model.clearBasket()
                 } label: {
-                    Label("Clear basket", systemImage: "arrow.uturn.backward")
+                    Label(PickoCopy.Basket.clear, systemImage: "arrow.uturn.backward")
                         .font(.system(size: 14, weight: .semibold, design: .rounded))
                         .frame(maxWidth: .infinity)
                         .padding(.vertical, 12)
@@ -178,49 +185,69 @@ public struct PreDeleteBasketView: View {
             .padding(PickoDesign.Spacing.page)
             .background(.ultraThinMaterial)
         }
-        .navigationTitle("Basket")
+        .navigationTitle(PickoCopy.Tabs.basket)
         .pickoScreenBackground()
+        .sheet(item: $previewAsset) { item in
+            PhotoPreviewView(asset: item.asset, model: model)
+        }
         .confirmationDialog(
-            "Confirm reviewed items with Photos",
+            PickoCopy.Basket.confirmationTitle,
             isPresented: $showsDeletionConfirmation,
             titleVisibility: .visible
         ) {
-            Button("Continue", role: .destructive) {
+            Button(PickoCopy.Basket.continueAction, role: .destructive) {
                 Task {
                     await confirmDeletion()
                 }
             }
 
-            Button("Cancel", role: .cancel) {}
+            Button(PickoCopy.Basket.cancelAction, role: .cancel) {}
         } message: {
             Text(ReviewCopy.photosConfirmationMessage)
         }
     }
 
+    private var isPrimaryActionDisabled: Bool {
+        model.deletionQueueCount == 0 || model.photoDeleter == nil || isConfirmingDeletion
+    }
+
+    private var primaryActionBackground: Color {
+        isPrimaryActionDisabled ? PickoDesign.ColorToken.surfaceHigh : PickoDesign.ColorToken.primary
+    }
+
+    private var primaryActionForeground: Color {
+        isPrimaryActionDisabled ? PickoDesign.ColorToken.secondaryInk : PickoDesign.ColorToken.primarySoft
+    }
+
     private func basketCard(_ item: PickoBasketItemPresentation) -> some View {
         VStack(alignment: .leading, spacing: 8) {
-            PickoThumbnailView(
-                asset: item.asset,
-                thumbnailProvider: model.thumbnailProvider,
-                targetPixelWidth: 320,
-                targetPixelHeight: 320
-            )
-            .frame(width: 220, height: 220)
-            .clipShape(RoundedRectangle(cornerRadius: PickoDesign.Radius.xl))
-            .overlay(alignment: .topTrailing) {
-                Text(item.byteText)
-                    .font(.system(size: 10, weight: .medium, design: .monospaced))
-                    .padding(.horizontal, 8)
-                    .padding(.vertical, 5)
-                    .background(PickoDesign.ColorToken.primary.opacity(0.82), in: RoundedRectangle(cornerRadius: PickoDesign.Radius.sm))
-                    .foregroundStyle(.white)
-                    .padding(10)
+            Button {
+                previewAsset = item
+            } label: {
+                PickoThumbnailView(
+                    asset: item.asset,
+                    thumbnailProvider: model.thumbnailProvider,
+                    targetPixelWidth: 320,
+                    targetPixelHeight: 320
+                )
+                .frame(width: 220, height: 220)
+                .clipShape(RoundedRectangle(cornerRadius: PickoDesign.Radius.xl))
+                .overlay(alignment: .topTrailing) {
+                    Text(item.byteText)
+                        .font(.system(size: 10, weight: .medium, design: .monospaced))
+                        .padding(.horizontal, 8)
+                        .padding(.vertical, 5)
+                        .background(PickoDesign.ColorToken.primary.opacity(0.82), in: RoundedRectangle(cornerRadius: PickoDesign.Radius.sm))
+                        .foregroundStyle(.white)
+                        .padding(10)
+                }
             }
+            .buttonStyle(.plain)
 
             Text(item.id)
                 .font(.system(size: 16, weight: .regular, design: .rounded))
                 .lineLimit(1)
-            Text("From review flow")
+            Text(PickoCopy.Basket.fromReviewFlow)
                 .font(.system(size: 12, weight: .medium, design: .monospaced))
                 .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
         }
@@ -235,7 +262,7 @@ public struct PreDeleteBasketView: View {
         do {
             _ = try await model.confirmPreDeleteBasket()
         } catch {
-            deletionErrorMessage = "Photos confirmation could not be completed."
+            deletionErrorMessage = "系统照片确认未完成，请稍后重试。"
         }
 
         isConfirmingDeletion = false

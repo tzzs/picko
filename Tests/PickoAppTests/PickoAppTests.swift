@@ -154,8 +154,8 @@ final class PickoAppTests: XCTestCase {
     }
 
     func testPhotosConfirmationCopyMentionsRecentlyDeletedRecovery() {
-        XCTAssertTrue(ReviewCopy.photosConfirmationMessage.contains("Recently Deleted"))
-        XCTAssertTrue(ReviewCopy.photosConfirmationMessage.contains("recovered"))
+        XCTAssertTrue(ReviewCopy.photosConfirmationMessage.contains("最近删除"))
+        XCTAssertTrue(ReviewCopy.photosConfirmationMessage.contains("恢复"))
     }
 
     func testThumbnailViewCanBeConstructedWithoutProvider() {
@@ -189,15 +189,15 @@ final class PickoAppTests: XCTestCase {
 
         let presentation = PickoHomePresentation(model: model)
 
-        XCTAssertEqual(presentation.heroTitle, "Ready to keep what matters")
-        XCTAssertEqual(presentation.metricRows.map(\.label), ["Library", "Similar groups", "Pre-delete basket"])
+        XCTAssertEqual(presentation.heroTitle, "继续整理珍贵回忆")
+        XCTAssertEqual(presentation.metricRows.map(\.label), ["图库", "相似组", "预删除篮"])
         XCTAssertEqual(presentation.taskRows.map(\.title), [
-            "Review one by one",
-            "Review similar photos",
-            "Review pre-delete basket",
-            "Browse by time and place"
+            "单张整理",
+            "相似照片",
+            "预删除篮复核",
+            "时间与地点"
         ])
-        XCTAssertTrue(presentation.privacyFootnote.contains("Photos are not deleted"))
+        XCTAssertTrue(presentation.privacyFootnote.contains("不会删除照片"))
     }
 
     func testSingleReviewPresentationKeepsPrimaryActionsPhotoFirst() throws {
@@ -205,14 +205,14 @@ final class PickoAppTests: XCTestCase {
 
         let presentation = try XCTUnwrap(PickoSingleReviewPresentation(model: model))
 
-        XCTAssertEqual(presentation.decisionHint, "Swipe up to keep, down to send to the basket.")
-        XCTAssertEqual(presentation.primaryActions.map(\.title), ["Keep", "Review Later", "Skip"])
+        XCTAssertEqual(presentation.decisionHint, "向上保留，向下放入预删除篮。")
+        XCTAssertEqual(presentation.primaryActions.map(\.title), ["保留", "放入预删除篮", "跳过"])
         XCTAssertEqual(presentation.primaryActions.map(\.systemImage), [
             "checkmark.circle.fill",
             "tray.and.arrow.down",
             "forward"
         ])
-        XCTAssertTrue(presentation.metadataSummary.contains("Similar group"))
+        XCTAssertTrue(presentation.metadataSummary.contains("相似组"))
     }
 
     func testSimilarGroupPresentationExplainsKeepNAndEditableRecommendation() throws {
@@ -220,9 +220,9 @@ final class PickoAppTests: XCTestCase {
 
         let presentation = try XCTUnwrap(PickoSimilarGroupPresentation(model: model))
 
-        XCTAssertEqual(presentation.modeTitles, ["Keep 1", "Keep N"])
-        XCTAssertEqual(presentation.recommendationBadge, "Suggested keep")
-        XCTAssertTrue(presentation.footerExplanation.contains("Unselected photos move to the pre-delete basket"))
+        XCTAssertEqual(presentation.modeTitles, ["保留 1 张", "保留多张"])
+        XCTAssertEqual(presentation.recommendationBadge, "推荐保留")
+        XCTAssertTrue(presentation.footerExplanation.contains("未选照片会进入预删除篮"))
         XCTAssertGreaterThanOrEqual(presentation.assetRows.count, 2)
     }
 
@@ -232,11 +232,27 @@ final class PickoAppTests: XCTestCase {
 
         let presentation = PickoBasketPresentation(model: model)
 
-        XCTAssertEqual(presentation.summaryTitle, "1 item waiting for final review")
-        XCTAssertEqual(presentation.primaryActionTitle, "Confirm with Photos")
-        XCTAssertEqual(presentation.secondaryActionTitle, "Restore or clear before confirming")
-        XCTAssertTrue(presentation.recoveryMessage.contains("Recently Deleted"))
-        XCTAssertTrue(presentation.recoveryMessage.contains("recovered"))
+        XCTAssertEqual(presentation.summaryTitle, "1 项等待最终复核")
+        XCTAssertEqual(presentation.summarySubtitle, "预计可节省：3.7 MB")
+        XCTAssertEqual(presentation.primaryActionTitle, "交由系统照片确认")
+        XCTAssertEqual(presentation.secondaryActionTitle, "确认前可恢复或清空")
+        XCTAssertEqual(presentation.disabledReason, "当前为样例图库，无法调用系统照片确认。")
+        XCTAssertTrue(presentation.recoveryMessage.contains("最近删除"))
+        XCTAssertTrue(presentation.recoveryMessage.contains("恢复"))
+    }
+
+    func testBasketPresentationFormatsZeroBytesInChinese() {
+        let presentation = PickoBasketPresentation(model: .preview())
+
+        XCTAssertEqual(presentation.summarySubtitle, "预计可节省：0 字节")
+        XCTAssertEqual(presentation.disabledReason, "预删除篮为空，暂无需要确认的项目。")
+    }
+
+    func testPhotoPreviewViewCanBeConstructedForReviewActions() {
+        let model = PickoAppModel.preview()
+        let view = PhotoPreviewView(asset: model.assets[0], model: model)
+
+        XCTAssertNotNil(view)
     }
 
     func testModelLoadsAssetsFromPhotoIndexer() async throws {

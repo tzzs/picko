@@ -207,3 +207,49 @@ struct PickoEmptyStateView: View {
         .padding(PickoDesign.Spacing.page)
     }
 }
+
+struct PickoPageEmptyStateView<Actions: View>: View {
+    let title: String
+    let message: String
+    let systemImage: String
+    @ViewBuilder let actions: () -> Actions
+
+    var body: some View {
+        VStack(spacing: PickoDesign.Spacing.md) {
+            Spacer(minLength: PickoDesign.Spacing.lg)
+
+            Image(systemName: systemImage)
+                .font(.system(size: 36, weight: .semibold))
+                .frame(width: 76, height: 76)
+                .background(PickoDesign.ColorToken.primarySoft.opacity(0.7), in: Circle())
+                .foregroundStyle(PickoDesign.ColorToken.primary)
+
+            VStack(spacing: 8) {
+                Text(title)
+                    .font(.system(size: 22, weight: .semibold, design: .rounded))
+                    .foregroundStyle(PickoDesign.ColorToken.primary)
+                Text(message)
+                    .font(.system(size: 15, weight: .regular, design: .rounded))
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+            }
+
+            actions()
+                .padding(.top, PickoDesign.Spacing.sm)
+
+            Spacer(minLength: PickoDesign.Spacing.lg)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
+        .padding(PickoDesign.Spacing.page)
+        .background(PickoDesign.ColorToken.background.ignoresSafeArea())
+    }
+}
+
+extension PickoPageEmptyStateView where Actions == EmptyView {
+    init(title: String, message: String, systemImage: String) {
+        self.title = title
+        self.message = message
+        self.systemImage = systemImage
+        self.actions = { EmptyView() }
+    }
+}

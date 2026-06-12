@@ -5,6 +5,7 @@ public struct SimilarGroupReviewView: View {
     @Bindable private var model: PickoAppModel
     @State private var selectedAssetIds: Set<PhotoAsset.ID>
     @State private var keepsMultiple = false
+    @State private var previewAsset: PhotoAsset?
 
     public init(model: PickoAppModel) {
         self.model = model
@@ -44,12 +45,20 @@ public struct SimilarGroupReviewView: View {
                                 spacing: PickoDesign.Spacing.gutter
                             ) {
                                 ForEach(presentation.assetRows) { row in
-                                    Button {
-                                        toggle(row.id)
-                                    } label: {
-                                        similarAssetCard(row)
+                                    VStack(spacing: 8) {
+                                        Button {
+                                            toggle(row.id)
+                                        } label: {
+                                            similarAssetCard(row)
+                                        }
+                                        .buttonStyle(.plain)
+
+                                        Button("预览") {
+                                            previewAsset = row.asset
+                                        }
+                                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                        .foregroundStyle(PickoDesign.ColorToken.primary)
                                     }
-                                    .buttonStyle(.plain)
                                 }
                             }
                         }
@@ -61,15 +70,30 @@ public struct SimilarGroupReviewView: View {
                     stickyActionBar(presentation)
                 }
             } else {
-                PickoEmptyStateView(
-                    title: "暂无相似照片组",
-                    message: "Picko 还没有发现需要成组复核的相似照片。继续单张整理或等待新的图库索引。",
+                PickoPageEmptyStateView(
+                    title: PickoCopy.Similar.emptyTitle,
+                    message: PickoCopy.Similar.emptyMessage,
                     systemImage: "square.grid.2x2"
-                )
+                ) {
+                    Button {
+                        model.selectedTab = .review
+                    } label: {
+                        Label(PickoCopy.Similar.goReview, systemImage: "rectangle.stack")
+                            .frame(maxWidth: .infinity)
+                    }
+                    .buttonStyle(.plain)
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .padding(.vertical, 14)
+                    .background(PickoDesign.ColorToken.primary, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
+                    .foregroundStyle(PickoDesign.ColorToken.primarySoft)
+                }
             }
         }
-        .navigationTitle("Similar")
+        .navigationTitle(PickoCopy.Tabs.similar)
         .pickoScreenBackground()
+        .sheet(item: $previewAsset) { asset in
+            PhotoPreviewView(asset: asset, model: model)
+        }
     }
 
     private func header(_ presentation: PickoSimilarGroupPresentation) -> some View {
@@ -85,10 +109,6 @@ public struct SimilarGroupReviewView: View {
             }
 
             Spacer()
-
-            Button("跳过此组") {}
-                .font(.system(size: 12, weight: .medium, design: .monospaced))
-                .foregroundStyle(PickoDesign.ColorToken.gold)
         }
     }
 
@@ -122,7 +142,7 @@ public struct SimilarGroupReviewView: View {
                 .stroke(PickoDesign.ColorToken.outline.opacity(0.45), lineWidth: 1)
         }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("Keep mode")
+        .accessibilityLabel("保留模式")
     }
 
     private func keepModeButton(title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
@@ -163,7 +183,7 @@ public struct SimilarGroupReviewView: View {
             }
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("BEST QUALITY")
+                Text("推荐")
                     .font(.system(size: 10, weight: .medium, design: .monospaced))
                     .tracking(0.6)
                     .foregroundStyle(.white.opacity(0.76))
@@ -253,7 +273,7 @@ public struct SimilarGroupReviewView: View {
                 Button {
                     model.keep(assetIds: Array(selectedAssetIds), in: presentation.group)
                 } label: {
-                    Label("Keep selected", systemImage: "arrow.right")
+                    Label("保留所选", systemImage: "arrow.right")
                         .frame(maxWidth: .infinity)
                 }
                 .buttonStyle(.plain)

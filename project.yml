@@ -29,8 +29,8 @@ targets:
       path: Apps/Picko/iOS/Info.plist
       properties:
         CFBundleDisplayName: Picko
-        NSPhotoLibraryUsageDescription: Picko needs photo library access to help you review and keep photos locally.
-        NSPhotoLibraryAddUsageDescription: Picko uses Photos system confirmation before changing your library.
+        NSPhotoLibraryUsageDescription: Picko 需要访问照片图库，才能在本机帮你整理和复核照片。
+        NSPhotoLibraryAddUsageDescription: Picko 会在修改图库前交由系统“照片”再次确认。
         UILaunchScreen: {}
         UIApplicationSceneManifest:
           UIApplicationSupportsMultipleScenes: false

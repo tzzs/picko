@@ -1,3 +1,3 @@
 public enum ReviewCopy {
-    public static let photosConfirmationMessage = "Photos will show the system confirmation before changing your library. Confirmed items move to Recently Deleted, where they can still be recovered in Photos."
+    public static let photosConfirmationMessage = "确认后，系统“照片”会再次弹出确认。项目会移至“最近删除”，仍可在“照片”中恢复。"
 }

@@ -4,6 +4,7 @@ import SwiftUI
 
 public struct SingleReviewView: View {
     @Bindable private var model: PickoAppModel
+    @State private var previewAsset: PhotoAsset?
 
     public init(model: PickoAppModel) {
         self.model = model
@@ -22,62 +23,67 @@ public struct SingleReviewView: View {
                             .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
                     }
 
-                    ZStack(alignment: .bottomLeading) {
-                        PickoThumbnailView(asset: presentation.asset, thumbnailProvider: model.thumbnailProvider)
-                            .aspectRatio(3 / 4, contentMode: .fill)
-                            .frame(maxWidth: .infinity)
-                            .clipShape(RoundedRectangle(cornerRadius: PickoDesign.Radius.xl))
-                            .background(PickoDesign.ColorToken.surfaceLow, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.xl))
-                            .overlay(alignment: .top) {
-                                VStack(spacing: 2) {
-                                    Image(systemName: "chevron.compact.up")
-                                        .font(.system(size: 30, weight: .semibold))
-                                    Text("向上保留")
-                                        .font(.system(size: 11, weight: .medium, design: .monospaced))
-                                }
-                                .foregroundStyle(PickoDesign.ColorToken.primary.opacity(0.45))
-                                .padding(.top, 12)
-                            }
-                            .overlay(alignment: .bottom) {
-                                LinearGradient(
-                                    colors: [.clear, .black.opacity(0.62)],
-                                    startPoint: .top,
-                                    endPoint: .bottom
-                                )
-                                .frame(height: 150)
+                    Button {
+                        previewAsset = presentation.asset
+                    } label: {
+                        ZStack(alignment: .bottomLeading) {
+                            PickoThumbnailView(asset: presentation.asset, thumbnailProvider: model.thumbnailProvider)
+                                .aspectRatio(3 / 4, contentMode: .fill)
+                                .frame(maxWidth: .infinity)
                                 .clipShape(RoundedRectangle(cornerRadius: PickoDesign.Radius.xl))
-                            }
-                            .overlay {
-                                RoundedRectangle(cornerRadius: PickoDesign.Radius.xl)
-                                    .stroke(PickoDesign.ColorToken.outline.opacity(0.7), lineWidth: 1)
-                            }
-
-                        VStack(alignment: .leading, spacing: 6) {
-                            HStack {
-                                VStack(alignment: .leading, spacing: 2) {
-                                    Text("2026年5月30日 · 上海")
-                                        .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                        .foregroundStyle(.white)
-                                    Text(presentation.metadataSummary)
-                                        .font(.system(size: 12, weight: .medium, design: .monospaced))
-                                        .foregroundStyle(.white.opacity(0.72))
-                                        .lineLimit(1)
+                                .background(PickoDesign.ColorToken.surfaceLow, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.xl))
+                                .overlay(alignment: .top) {
+                                    VStack(spacing: 2) {
+                                        Image(systemName: "chevron.compact.up")
+                                            .font(.system(size: 30, weight: .semibold))
+                                        Text("向上保留")
+                                            .font(.system(size: 11, weight: .medium, design: .monospaced))
+                                    }
+                                    .foregroundStyle(PickoDesign.ColorToken.primary.opacity(0.45))
+                                    .padding(.top, 12)
                                 }
-                                Spacer()
-                                Image(systemName: "sparkles")
-                                    .font(.system(size: 15, weight: .bold))
-                                    .frame(width: 34, height: 34)
-                                    .background(PickoDesign.ColorToken.goldSoft, in: Circle())
-                                    .foregroundStyle(PickoDesign.ColorToken.primaryDeep)
+                                .overlay(alignment: .bottom) {
+                                    LinearGradient(
+                                        colors: [.clear, .black.opacity(0.62)],
+                                        startPoint: .top,
+                                        endPoint: .bottom
+                                    )
+                                    .frame(height: 150)
+                                    .clipShape(RoundedRectangle(cornerRadius: PickoDesign.Radius.xl))
+                                }
+                                .overlay {
+                                    RoundedRectangle(cornerRadius: PickoDesign.Radius.xl)
+                                        .stroke(PickoDesign.ColorToken.outline.opacity(0.7), lineWidth: 1)
+                                }
+
+                            VStack(alignment: .leading, spacing: 6) {
+                                HStack {
+                                    VStack(alignment: .leading, spacing: 2) {
+                                        Text("2026年5月30日 · 上海")
+                                            .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                            .foregroundStyle(.white)
+                                        Text(presentation.metadataSummary)
+                                            .font(.system(size: 12, weight: .medium, design: .monospaced))
+                                            .foregroundStyle(.white.opacity(0.72))
+                                            .lineLimit(1)
+                                    }
+                                    Spacer()
+                                    Image(systemName: "sparkles")
+                                        .font(.system(size: 15, weight: .bold))
+                                        .frame(width: 34, height: 34)
+                                        .background(PickoDesign.ColorToken.goldSoft, in: Circle())
+                                        .foregroundStyle(PickoDesign.ColorToken.primaryDeep)
+                                }
                             }
+                            .padding(PickoDesign.Spacing.md)
                         }
-                        .padding(PickoDesign.Spacing.md)
                     }
+                    .buttonStyle(.plain)
 
                     Spacer(minLength: 0)
 
                     HStack(alignment: .top, spacing: PickoDesign.Spacing.md) {
-                        reviewCircleButton(title: "Undo", displayTitle: "撤销", systemImage: "arrow.uturn.backward") {
+                        reviewCircleButton(title: "撤销", displayTitle: "撤销", systemImage: "arrow.uturn.backward") {
                             model.undo()
                         }
 
@@ -126,8 +132,11 @@ public struct SingleReviewView: View {
                 )
             }
         }
-        .navigationTitle("Review")
+        .navigationTitle(PickoCopy.Tabs.review)
         .pickoScreenBackground()
+        .sheet(item: $previewAsset) { asset in
+            PhotoPreviewView(asset: asset, model: model)
+        }
     }
 
     private func reviewCircleButton(

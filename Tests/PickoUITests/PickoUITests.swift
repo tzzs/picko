@@ -28,29 +28,20 @@ final class PickoUITests: XCTestCase {
         app.launchArguments = ["--picko-use-sample-basket"]
         app.launch()
 
-        XCTAssertTrue(app.navigationBars["Basket"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["1 item waiting for final review"].waitForExistence(timeout: 5))
-        XCTAssertFalse(app.buttons["Confirm with Photos"].isEnabled)
-        XCTAssertTrue(app.buttons["Clear basket"].isEnabled)
+        XCTAssertTrue(app.navigationBars["预删除篮"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["1 项等待最终复核"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["交由系统照片确认"].isEnabled)
+        XCTAssertTrue(app.staticTexts["当前为样例图库，无法调用系统照片确认。"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["清空预删除篮"].isEnabled)
     }
 
-    func testSampleBasketCanClearPickoReviewStateWithoutPhotosConfirmation() {
+    func testSampleBasketDoesNotExposeGlobalClearStateAction() {
         let app = XCUIApplication()
         app.launchArguments = ["--picko-use-sample-basket"]
         app.launch()
 
-        XCTAssertTrue(app.navigationBars["Basket"].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.staticTexts["1 item waiting for final review"].waitForExistence(timeout: 5))
-
-        app.buttons["clear-picko-state-toolbar-button"].tap()
-        XCTAssertTrue(app.buttons["Clear Picko state"].waitForExistence(timeout: 5))
-        app.buttons["Clear Picko state"].tap()
-
-        XCTAssertTrue(
-            app.staticTexts["0 items waiting for final review"].waitForExistence(timeout: 5),
-            app.debugDescription
-        )
-        XCTAssertFalse(app.buttons["Confirm with Photos"].isEnabled)
+        XCTAssertTrue(app.navigationBars["预删除篮"].waitForExistence(timeout: 5))
+        XCTAssertFalse(app.buttons["clear-picko-state-toolbar-button"].exists)
     }
 
     func testDeniedLibraryShowsFallbackAction() {
@@ -58,7 +49,7 @@ final class PickoUITests: XCTestCase {
         app.launchArguments = ["--picko-use-denied-library"]
         app.launch()
 
-        XCTAssertTrue(app.staticTexts["Photo library access is needed to review your library."].waitForExistence(timeout: 5))
-        XCTAssertTrue(app.buttons["Review Sample Library"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["需要照片图库权限才能开始整理。"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["先查看样例图库"].waitForExistence(timeout: 5))
     }
 }

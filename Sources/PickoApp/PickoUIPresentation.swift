@@ -52,44 +52,44 @@ public struct PickoHomePresentation: Equatable {
     public let privacyFootnote: String
 
     public init(model: PickoAppModel) {
-        heroTitle = "Ready to keep what matters"
-        heroSubtitle = "\(model.assets.count) items prepared. Picko keeps review decisions local until you confirm them."
+        heroTitle = PickoCopy.Home.heroTitle
+        heroSubtitle = "已准备 \(model.assets.count) 张照片。整理决定会先保存在本机，确认前不会修改系统照片。"
         metricRows = [
-            PickoMetricPresentation(label: "Library", value: "\(model.assets.count)", detail: "items ready"),
-            PickoMetricPresentation(label: "Similar groups", value: "\(model.groups.count)", detail: "review candidates"),
+            PickoMetricPresentation(label: PickoCopy.Home.libraryMetric, value: "\(model.assets.count)", detail: "待整理"),
+            PickoMetricPresentation(label: PickoCopy.Home.similarMetric, value: "\(model.groups.count)", detail: "待复核"),
             PickoMetricPresentation(
-                label: "Pre-delete basket",
+                label: PickoCopy.Home.basketMetric,
                 value: "\(model.deletionQueueCount)",
-                detail: ByteCountFormatter.string(fromByteCount: model.estimatedPreDeleteBytes, countStyle: .file)
+                detail: PickoCopy.byteText(model.estimatedPreDeleteBytes)
             )
         ]
         taskRows = [
             PickoTaskPresentation(
-                title: "Review one by one",
-                subtitle: "Quick keep, review later, skip, and undo.",
+                title: PickoCopy.Home.reviewOneByOne,
+                subtitle: PickoCopy.Home.reviewOneByOneSubtitle,
                 systemImage: "rectangle.stack",
                 tintRole: .review
             ),
             PickoTaskPresentation(
-                title: "Review similar photos",
-                subtitle: "Use suggestions, then choose Keep 1 or Keep N.",
+                title: PickoCopy.Home.reviewSimilar,
+                subtitle: PickoCopy.Home.reviewSimilarSubtitle,
                 systemImage: "square.grid.2x2",
                 tintRole: .keep
             ),
             PickoTaskPresentation(
-                title: "Review pre-delete basket",
-                subtitle: "Restore items before Photos confirmation.",
+                title: PickoCopy.Home.reviewBasket,
+                subtitle: PickoCopy.Home.reviewBasketSubtitle,
                 systemImage: "tray.full",
                 tintRole: .basket
             ),
             PickoTaskPresentation(
-                title: "Browse by time and place",
-                subtitle: "Plan the next event-based review.",
+                title: PickoCopy.Home.timeAndPlace,
+                subtitle: PickoCopy.Home.timeAndPlaceSubtitle,
                 systemImage: "calendar.badge.clock",
                 tintRole: .time
             )
         ]
-        privacyFootnote = "Photos are not deleted when you review. Picko only asks Photos after the basket confirmation."
+        privacyFootnote = PickoCopy.Home.privacyFootnote
     }
 }
 
@@ -105,25 +105,25 @@ public struct PickoSingleReviewPresentation: Equatable {
         }
 
         self.asset = asset
-        decisionHint = "Swipe up to keep, down to send to the basket."
-        metadataSummary = "\(asset.pixelWidth)x\(asset.pixelHeight) · \(Self.byteText(asset.fileSizeBytes)) · Similar group \(Self.groupPosition(for: asset.id, in: model))"
+        decisionHint = PickoCopy.Review.decisionHint
+        metadataSummary = "\(asset.pixelWidth)x\(asset.pixelHeight) · \(Self.byteText(asset.fileSizeBytes)) · \(PickoCopy.Review.similarGroupPosition(Self.groupPosition(for: asset.id, in: model)))"
         primaryActions = [
-            PickoActionPresentation(title: "Keep", systemImage: "checkmark.circle.fill"),
-            PickoActionPresentation(title: "Review Later", systemImage: "tray.and.arrow.down"),
-            PickoActionPresentation(title: "Skip", systemImage: "forward")
+            PickoActionPresentation(title: PickoCopy.Review.keep, systemImage: "checkmark.circle.fill"),
+            PickoActionPresentation(title: PickoCopy.Review.preDelete, systemImage: "tray.and.arrow.down"),
+            PickoActionPresentation(title: PickoCopy.Review.skip, systemImage: "forward")
         ]
     }
 
     private static func groupPosition(for assetId: PhotoAsset.ID, in model: PickoAppModel) -> String {
         guard let groupIndex = model.groups.firstIndex(where: { $0.assetIds.contains(assetId) }) else {
-            return "none"
+            return PickoCopy.Review.metadataNoGroup
         }
 
         return "\(groupIndex + 1)/\(model.groups.count)"
     }
 
     private static func byteText(_ bytes: Int64) -> String {
-        ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file)
+        PickoCopy.byteText(bytes)
     }
 }
 
@@ -137,7 +137,7 @@ public struct PickoSimilarAssetPresentation: Equatable, Identifiable {
         id = asset.id
         self.asset = asset
         self.isSuggested = isSuggested
-        byteText = ByteCountFormatter.string(fromByteCount: asset.fileSizeBytes, countStyle: .file)
+        byteText = PickoCopy.byteText(asset.fileSizeBytes)
     }
 }
 
@@ -154,9 +154,9 @@ public struct PickoSimilarGroupPresentation: Equatable {
         }
 
         self.group = group
-        modeTitles = ["Keep 1", "Keep N"]
-        recommendationBadge = "Suggested keep"
-        footerExplanation = "Unselected photos move to the pre-delete basket for final review."
+        modeTitles = [PickoCopy.Similar.keepOne, PickoCopy.Similar.keepMany]
+        recommendationBadge = PickoCopy.Similar.suggestedKeep
+        footerExplanation = PickoCopy.Similar.footerExplanation
         let suggestedIds = Set(group.recommendedKeepIds)
         assetRows = model.assets
             .filter { group.assetIds.contains($0.id) }
@@ -172,7 +172,7 @@ public struct PickoBasketItemPresentation: Equatable, Identifiable {
     public init(asset: PhotoAsset) {
         id = asset.id
         self.asset = asset
-        byteText = ByteCountFormatter.string(fromByteCount: asset.fileSizeBytes, countStyle: .file)
+        byteText = PickoCopy.byteText(asset.fileSizeBytes)
     }
 }
 
@@ -181,15 +181,23 @@ public struct PickoBasketPresentation: Equatable {
     public let summarySubtitle: String
     public let primaryActionTitle: String
     public let secondaryActionTitle: String
+    public let disabledReason: String?
     public let recoveryMessage: String
     public let items: [PickoBasketItemPresentation]
 
     public init(model: PickoAppModel) {
         let count = model.deletionQueueCount
-        summaryTitle = "\(count) \(count == 1 ? "item" : "items") waiting for final review"
-        summarySubtitle = "Estimated space: \(ByteCountFormatter.string(fromByteCount: model.estimatedPreDeleteBytes, countStyle: .file))"
-        primaryActionTitle = "Confirm with Photos"
-        secondaryActionTitle = "Restore or clear before confirming"
+        summaryTitle = PickoCopy.Basket.summaryTitle(count: count)
+        summarySubtitle = PickoCopy.Basket.summarySubtitle(bytes: model.estimatedPreDeleteBytes)
+        primaryActionTitle = PickoCopy.Basket.primaryAction
+        secondaryActionTitle = PickoCopy.Basket.secondaryAction
+        if count == 0 {
+            disabledReason = PickoCopy.Basket.emptyDisabledReason
+        } else if model.photoDeleter == nil {
+            disabledReason = PickoCopy.Basket.sampleLibraryDisabledReason
+        } else {
+            disabledReason = nil
+        }
         recoveryMessage = ReviewCopy.photosConfirmationMessage
         items = model.store.deletionQueue.itemIds.compactMap { id in
             model.store.asset(id: id).map(PickoBasketItemPresentation.init(asset:))

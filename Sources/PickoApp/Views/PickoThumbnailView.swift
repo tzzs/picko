@@ -40,7 +40,7 @@ public struct PickoThumbnailView: View {
         .task(id: asset.id) {
             await loadThumbnail()
         }
-        .accessibilityLabel("Photo preview")
+        .accessibilityLabel("照片预览")
     }
 
     private var placeholder: some View {

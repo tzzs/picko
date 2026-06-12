@@ -21,9 +21,9 @@
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>NSPhotoLibraryAddUsageDescription</key>
-	<string>Picko uses Photos system confirmation before changing your library.</string>
+	<string>Picko 会在修改图库前交由系统“照片”再次确认。</string>
 	<key>NSPhotoLibraryUsageDescription</key>
-	<string>Picko needs photo library access to help you review and keep photos locally.</string>
+	<string>Picko 需要访问照片图库，才能在本机帮你整理和复核照片。</string>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>
