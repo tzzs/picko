@@ -122,6 +122,14 @@ manual_dir = sys.argv[2]
 capture_date = sys.argv[3]
 host_capture_timestamp = sys.argv[4]
 text = evidence_path.read_text()
+host_section_headers = {
+    "## Host Photos-Backed Metadata Baseline",
+    "## Host Photos 支撑的元数据基线",
+    "## 主机 Photos 支撑的元数据基线",
+}
+
+if not any(header in text for header in host_section_headers):
+    raise SystemExit("evidence document is missing a host Photos-backed metadata baseline section.")
 
 host_capture_pattern = re.compile(
     r'scripts/capture-metadata-baseline\.sh --photos --confirm-non-production-photos --photos-library-label "Non-production Mac Photos test library" --timestamp [A-Za-z0-9._-]+ 1000 10000 50000'

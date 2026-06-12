@@ -160,6 +160,10 @@ required_rows = {
     ("First Photos authorization", "macOS"),
     ("Pre-delete basket triggers Photos confirmation", "macOS"),
 }
+row_aliases = {
+    ("首次 Photos 授权", "macOS"): ("First Photos authorization", "macOS"),
+    ("预删除篮触发 Photos 确认", "macOS"): ("Pre-delete basket triggers Photos confirmation", "macOS"),
+}
 found_rows = set()
 
 for line in evidence_path.read_text().splitlines():
@@ -169,7 +173,7 @@ for line in evidence_path.read_text().splitlines():
     parts = [part.strip() for part in stripped.strip("|").split("|")]
     if len(parts) != 5:
         continue
-    scenario, platform = parts[0], parts[1]
+    scenario, platform = row_aliases.get((parts[0], parts[1]), (parts[0], parts[1]))
     if (scenario, platform) in required_rows:
         found_rows.add((scenario, platform))
 

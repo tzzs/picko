@@ -747,7 +747,7 @@ fi
 runtime_privacy_line=""
 runtime_privacy_artifact=""
 if [[ -n "$evidence_path" && -f "$evidence_path" ]]; then
-  runtime_privacy_line="$(rg 'Runtime logs checked for photo contents or sensitive metadata|Runtime 日志已检查照片内容或敏感元数据' "$evidence_path" || true)"
+  runtime_privacy_line="$(rg 'Runtime logs checked for photo contents or sensitive metadata|Runtime 日志已检查照片内容或敏感元数据|运行时日志已检查照片内容或敏感元数据' "$evidence_path" || true)"
   runtime_privacy_artifact="$(runtime_privacy_artifact_path "$evidence_path")"
 fi
 
