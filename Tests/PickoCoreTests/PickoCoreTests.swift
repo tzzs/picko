@@ -176,6 +176,35 @@ final class PickoCoreTests: XCTestCase {
         XCTAssertTrue(groups.isEmpty)
     }
 
+    func testRealLibraryAssetsWithoutHashesCanBeGroupedByConservativeMetadataFallback() {
+        let base = Date(timeIntervalSince1970: 1_000)
+        let assets = [
+            makeAsset(id: "a1", creationDate: base, pixelWidth: 3024, pixelHeight: 4032, fileSizeBytes: 2_100_000, thumbnailHash: nil, perceptualHash: nil),
+            makeAsset(id: "a2", creationDate: base.addingTimeInterval(24), pixelWidth: 3024, pixelHeight: 4032, fileSizeBytes: 2_250_000, thumbnailHash: nil, perceptualHash: nil),
+            makeAsset(id: "a3", creationDate: base.addingTimeInterval(48), pixelWidth: 3000, pixelHeight: 4000, fileSizeBytes: 2_050_000, thumbnailHash: nil, perceptualHash: nil),
+            makeAsset(id: "a4", creationDate: base.addingTimeInterval(72), pixelWidth: 3024, pixelHeight: 4032, fileSizeBytes: 2_300_000, thumbnailHash: nil, perceptualHash: nil),
+            makeAsset(id: "a5", creationDate: base.addingTimeInterval(96), pixelWidth: 3024, pixelHeight: 4032, fileSizeBytes: 2_200_000, thumbnailHash: nil, perceptualHash: nil),
+            makeAsset(id: "a6", creationDate: base.addingTimeInterval(120), pixelWidth: 3000, pixelHeight: 4000, fileSizeBytes: 2_150_000, thumbnailHash: nil, perceptualHash: nil)
+        ]
+
+        let groups = SimilarityEngine(configuration: .realLibraryDefault).groups(from: assets)
+
+        XCTAssertEqual(groups.count, 1)
+        XCTAssertEqual(groups[0].assetIds, ["a1", "a2", "a3", "a4", "a5", "a6"])
+    }
+
+    func testMetadataFallbackDoesNotGroupVeryDifferentAssetsWithoutHashes() {
+        let base = Date(timeIntervalSince1970: 1_000)
+        let assets = [
+            makeAsset(id: "a1", creationDate: base, pixelWidth: 3024, pixelHeight: 4032, fileSizeBytes: 2_100_000, thumbnailHash: nil, perceptualHash: nil),
+            makeAsset(id: "a2", creationDate: base.addingTimeInterval(24), pixelWidth: 1200, pixelHeight: 800, fileSizeBytes: 280_000, thumbnailHash: nil, perceptualHash: nil)
+        ]
+
+        let groups = SimilarityEngine(configuration: .realLibraryDefault).groups(from: assets)
+
+        XCTAssertTrue(groups.isEmpty)
+    }
+
     func testRecommendationPrefersEditedAssetOverLargerUneditedAsset() {
         let base = Date(timeIntervalSince1970: 1_000)
         let assets = [

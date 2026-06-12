@@ -70,7 +70,7 @@ public final class PickoAppModel {
     public static func loadingFromPhotoLibrary(
         indexer: PhotoAssetIndexing,
         mapper: PhotoAssetMapper = PhotoAssetMapper(),
-        similarityEngine: SimilarityEngine = SimilarityEngine(),
+        similarityEngine: SimilarityEngine = SimilarityEngine(configuration: .realLibraryDefault),
         decisionStore: ReviewDecisionStore? = nil,
         photoDeleter: (any PhotoDeleting)? = nil,
         thumbnailProvider: (any PhotoThumbnailProviding)? = nil
