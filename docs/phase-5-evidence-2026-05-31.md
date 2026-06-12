@@ -1,31 +1,33 @@
-# Picko Phase 5 Evidence
+# Picko Phase 5 证据
 
 日期：2026-05-31
 工作目录：`/Users/tanzz/workspaces/picko/.worktrees/mvp-core`
 
-## Environment
+## 环境
 
-| Field | Value |
+| 字段 | 值 |
 | --- | --- |
 | macOS | 26.4, build 25E246 |
 | Xcode | Xcode 26.5 Build version 17F42 |
-| Architecture | arm64 |
-| iOS Simulator | iPhone 17 Pro, iOS 26.5 Simulator, id 0CF79391-989B-47A5-B853-1422340684F8; platform/UI smoke verified; Photos-backed 1k/10k/50k benchmark evidence captured |
-| Test Photos Library | Non-production iOS Simulator generated fixture on iPhone 17 Pro simulator; host Mac Photos baseline still requires a separate non-production Mac Photos library |
+| 架构 | arm64 |
+| iOS 模拟器 | iPhone 17 Pro，iOS 26.5 模拟器，id 0CF79391-989B-47A5-B853-1422340684F8；已完成平台与 UI 冒烟验证；已采集 Photos-backed 1k/10k/50k 基准测试证据 |
+| 测试照片图库 | 非生产 iOS 模拟器生成 fixture，运行于 iPhone 17 Pro 模拟器；主机 Mac Photos 基线仍需要单独准备非生产 Mac Photos 图库 |
 
-## Automated Gates
+## 自动化门禁
 
-| Gate | Command | Result | Evidence |
+自动化门禁记录。
+
+| 门禁 | 命令 | 结果 | 证据 |
 | --- | --- | --- | --- |
-| Local Phase 5 | `scripts/verify-phase-5-local.sh` | Passed | Terminal run 2026-05-31 20:03 CST: scripts/verify-phase-5-local.sh |
-| Platform Phase 5 | `scripts/verify-phase-5-platform.sh` | Passed | Terminal run 2026-05-31 21:46 CST: scripts/verify-phase-5-platform.sh; PickoUITests 5 passed including Clear Picko State sample basket flow |
-| Privacy logging | `scripts/audit-privacy-logging.sh` | Passed | Terminal run 2026-05-31 20:03 CST: scripts/audit-privacy-logging.sh via scripts/verify-phase-5-local.sh |
-| Evidence completeness | `scripts/check-phase-5-evidence.sh docs/phase-5-evidence-YYYY-MM-DD.md` | TBD | TBD |
-| Manual evidence completeness | `scripts/check-phase-5-manual-evidence.sh docs/phase-5-evidence/manual-2026-05-31` | TBD | `docs/phase-5-evidence/manual-2026-05-31/README.md` |
+| 本地 Phase 5 | `scripts/verify-phase-5-local.sh` | 通过 | 2026-05-31 20:03 CST 终端运行：scripts/verify-phase-5-local.sh |
+| 平台 Phase 5 | `scripts/verify-phase-5-platform.sh` | 通过 | 2026-05-31 21:46 CST 终端运行：scripts/verify-phase-5-platform.sh；PickoUITests 5 个用例通过，包括 Clear Picko State sample basket flow |
+| 隐私日志 | `scripts/audit-privacy-logging.sh` | 通过 | 2026-05-31 20:03 CST 终端运行：scripts/verify-phase-5-local.sh 内部调用 scripts/audit-privacy-logging.sh |
+| 证据完整性 | `scripts/check-phase-5-evidence.sh docs/phase-5-evidence-YYYY-MM-DD.md` | 待补充 | 待补充 |
+| 手工证据完整性 | `scripts/check-phase-5-manual-evidence.sh docs/phase-5-evidence/manual-2026-05-31` | 待补充 | `docs/phase-5-evidence/manual-2026-05-31/README.md` |
 
-## Host Photos-Backed Metadata Baseline
+## 主机 Photos 支撑的元数据基线
 
-Command:
+命令：
 
 ```sh
 scripts/prepare-phase-5-host-baseline-capture.sh
@@ -34,19 +36,21 @@ scripts/capture-metadata-baseline.sh --photos --confirm-non-production-photos --
 scripts/capture-metadata-baseline.sh --photos --confirm-non-production-photos --photos-library-label "Non-production Mac Photos test library" --timestamp 20260603-photos-baseline 1000 10000 50000
 ```
 
-Preflight status: Passed locally on 2026-06-03 with `--validate-only`; this checked the non-production label, formal 1k/10k/50k counts, and project evidence output directory without building or reading the current Mac Photos library.
+预检状态：通过。2026-06-03 已在本地使用 `--validate-only`
+完成预检；该预检确认了 non-production label、正式 1k/10k/50k counts
+以及项目 evidence 输出目录，不会构建项目，也不会读取当前 Mac Photos library。
 
-| Asset count | Elapsed seconds | Assets / second | Notes |
+| 资产数量 | 耗时秒数 | 每秒资产数 | 备注 |
 | ---: | ---: | ---: | --- |
-| 1,000 | TBD | TBD | TBD |
-| 10,000 | TBD | TBD | TBD |
-| 50,000 | TBD | TBD | TBD |
+| 1,000 | 待补充 | 待补充 | 待补充 |
+| 10,000 | 待补充 | 待补充 | 待补充 |
+| 50,000 | 待补充 | 待补充 | 待补充 |
 
-Raw JSON evidence path: `TBD`
+原始 JSON 证据路径：`待补充`
 
-## iOS Simulator Photos-Backed Benchmark
+## iOS 模拟器 Photos 支撑的基准测试
 
-Fixture setup:
+Fixture 准备：
 
 ```sh
 scripts/seed-simulator-photos-fixture.sh --count 1000 --simulator booted
@@ -54,23 +58,23 @@ scripts/seed-simulator-photos-fixture.sh --count 10000 --simulator booted
 scripts/seed-simulator-photos-fixture.sh --count 50000 --simulator booted
 ```
 
-App launch arguments:
+App 启动参数：
 
 ```text
 --picko-run-metadata-benchmark --picko-benchmark-counts=1000,10000,50000
 ```
 
-| Asset count | Elapsed seconds | Assets / second | Evidence |
+| 资产数量 | 耗时秒数 | 每秒资产数 | 证据 |
 | ---: | ---: | ---: | --- |
 | 1,000 | 58.9891 | 16.9523 | `docs/phase-5-evidence/ios-metadata-benchmark/photos-1000-2026-05-31.jpg` |
 | 10,000 | 26.3797 | 379.0787 | `docs/phase-5-evidence/ios-metadata-benchmark/photos-10000-2026-05-31.jpg` |
 | 50,000 | 331.2685 | 150.9350 | `docs/phase-5-evidence/ios-metadata-benchmark/photos-50000-2026-05-31.jpg` |
 
-Screenshot or recording paths: see the 1,000 / 10,000 / 50,000 evidence rows above.
+截图或录屏路径：见上方 1,000 / 10,000 / 50,000 三行证据。
 
-## Manual Photos Verification
+## 手工 Photos 验证
 
-Prepare evidence folders:
+准备 evidence 文件夹：
 
 ```sh
 scripts/prepare-phase-5-manual-evidence.sh
@@ -81,19 +85,19 @@ screencapture -i docs/phase-5-evidence/manual-2026-05-31/macos/delete-confirmati
 scripts/check-phase-5-manual-evidence.sh docs/phase-5-evidence/manual-2026-05-31
 ```
 
-| Scenario | Platform | Result | Evidence path | Notes |
+| 场景 | 平台 | 结果 | 证据路径 | 备注 |
 | --- | --- | --- | --- | --- |
-| First Photos authorization | iOS | Passed | `docs/phase-5-evidence/manual-2026-05-31/ios/authorization/ios-first-photos-authorization-2026-05-31.jpg` | Non-production iOS Simulator Photos fixture; system first authorization dialog captured before granting limited access |
-| Limited library state | iOS | Passed | `docs/phase-5-evidence/manual-2026-05-31/ios/limited-library/ios-limited-library-picker-2026-05-31.jpg` | Non-production iOS Simulator generated fixture; limited-library picker captured with one selected generated asset |
-| Pre-delete basket triggers Photos confirmation | iOS | Passed | `docs/phase-5-evidence/manual-2026-05-31/ios/delete-confirmation/ios-system-photos-delete-confirmation-2026-05-31.jpg` | Non-production iOS Simulator generated fixture; Picko basket confirmation continued to system Photos delete confirmation without tapping Delete |
-| First Photos authorization | macOS | TBD | TBD | TBD |
-| Pre-delete basket triggers Photos confirmation | macOS | TBD | TBD | TBD |
-| Recently Deleted recovery explanation | iOS/macOS | Passed | `docs/phase-5-evidence/manual-2026-05-31/ios/delete-confirmation/ios-picko-confirmation-recently-deleted-2026-05-31.jpg` | Shared Picko confirmation copy explains Photos Recently Deleted recovery before system confirmation |
+| 首次 Photos 授权 | iOS | 通过 | `docs/phase-5-evidence/manual-2026-05-31/ios/authorization/ios-first-photos-authorization-2026-05-31.jpg` | 非生产 iOS Simulator Photos fixture；在授予 limited access 之前已捕获系统首次授权弹窗 |
+| 受限图库状态 | iOS | 通过 | `docs/phase-5-evidence/manual-2026-05-31/ios/limited-library/ios-limited-library-picker-2026-05-31.jpg` | 非生产 iOS 模拟器生成 fixture；已捕获受限图库 picker，其中选择了一个生成资产 |
+| 预删除篮触发 Photos 确认 | iOS | 通过 | `docs/phase-5-evidence/manual-2026-05-31/ios/delete-confirmation/ios-system-photos-delete-confirmation-2026-05-31.jpg` | 非生产 iOS 模拟器生成 fixture；Picko 预删除篮确认继续进入系统 Photos 删除确认，但未点击 Delete |
+| 首次 Photos 授权 | macOS | 待补充 | 待补充 | 待补充 |
+| 预删除篮触发 Photos 确认 | macOS | 待补充 | 待补充 | 待补充 |
+| “最近删除”恢复说明 | iOS/macOS | 通过 | `docs/phase-5-evidence/manual-2026-05-31/ios/delete-confirmation/ios-picko-confirmation-recently-deleted-2026-05-31.jpg` | 共享 Picko 确认文案会在系统确认前说明 Photos“最近删除”可恢复 |
 
-## Privacy Review
+## 隐私审查
 
-| Check | Result | Evidence |
+| 检查项 | 结果 | 证据 |
 | --- | --- | --- |
-| Product code has no broad logging calls | Passed | Terminal run 2026-05-31 20:03 CST: scripts/audit-privacy-logging.sh via scripts/verify-phase-5-local.sh |
-| Runtime logs checked for photo contents or sensitive metadata | Passed | scripts/audit-runtime-privacy-logs.sh docs/phase-5-evidence/privacy/ios-runtime-2026-05-31.log |
-| Thumbnail cache remains in process memory only | Passed | Code review: Sources/PickoPhotos/PhotoThumbnailProvider.swift, Sources/PickoApp/Views/PickoThumbnailView.swift, Tests/PickoPhotosTests/PickoPhotosTests.swift |
+| 产品代码没有宽泛日志调用 | 通过 | 2026-05-31 20:03 CST 终端运行：scripts/verify-phase-5-local.sh 内部调用 scripts/audit-privacy-logging.sh |
+| 运行时日志已检查照片内容或敏感元数据 | 通过 | scripts/audit-runtime-privacy-logs.sh docs/phase-5-evidence/privacy/ios-runtime-2026-05-31.log |
+| 缩略图缓存仅保留在进程内存中 | 通过 | 代码审查：Sources/PickoPhotos/PhotoThumbnailProvider.swift、Sources/PickoApp/Views/PickoThumbnailView.swift、Tests/PickoPhotosTests/PickoPhotosTests.swift |

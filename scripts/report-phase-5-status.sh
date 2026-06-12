@@ -198,9 +198,14 @@ count_label = sys.argv[1]
 source_path = Path(sys.argv[2])
 
 in_ios_section = False
+ios_section_headers = {
+    "## iOS Simulator Photos-Backed Benchmark",
+    "## iOS Simulator Photos 支撑的 Benchmark",
+    "## iOS 模拟器 Photos 支撑的基准测试",
+}
 for line in source_path.read_text().splitlines():
     if line.startswith("## "):
-        in_ios_section = line.strip() == "## iOS Simulator Photos-Backed Benchmark"
+        in_ios_section = line.strip() in ios_section_headers
         continue
 
     if not in_ios_section:
@@ -238,9 +243,14 @@ count_label = sys.argv[1]
 source_path = Path(sys.argv[2])
 
 in_ios_section = False
+ios_section_headers = {
+    "## iOS Simulator Photos-Backed Benchmark",
+    "## iOS Simulator Photos 支撑的 Benchmark",
+    "## iOS 模拟器 Photos 支撑的基准测试",
+}
 for line in source_path.read_text().splitlines():
     if line.startswith("## "):
-        in_ios_section = line.strip() == "## iOS Simulator Photos-Backed Benchmark"
+        in_ios_section = line.strip() in ios_section_headers
         continue
 
     if not in_ios_section:
@@ -297,7 +307,21 @@ ios_benchmark_artifact_status() {
 has_passed_table_row() {
   local row_label="$1"
   local source_path="$2"
-  rg --quiet "\\|[[:space:]]*$row_label[[:space:]]*\\|([^|]*\\|)?[[:space:]]*Passed[[:space:]]*\\|[[:space:]]*[^|]*[^[:space:]|][[:space:]]*\\|" "$source_path"
+  rg --quiet "\\|[[:space:]]*$row_label[[:space:]]*\\|([^|]*\\|)?[[:space:]]*(Passed|通过)[[:space:]]*\\|[[:space:]]*[^|]*[^[:space:]|][[:space:]]*\\|" "$source_path"
+}
+
+has_any_passed_table_row() {
+  local source_path="$1"
+  shift
+
+  local row_label
+  for row_label in "$@"; do
+    if has_passed_table_row "$row_label" "$source_path"; then
+      return 0
+    fi
+  done
+
+  return 1
 }
 
 has_manual_verification_row() {
@@ -312,6 +336,16 @@ from pathlib import Path
 scenario = sys.argv[1]
 platform = sys.argv[2]
 source_path = Path(sys.argv[3])
+row_aliases = {
+    ("首次 Photos 授权", "iOS"): ("First Photos authorization", "iOS"),
+    ("Limited library 状态", "iOS"): ("Limited library state", "iOS"),
+    ("受限图库状态", "iOS"): ("Limited library state", "iOS"),
+    ("预删除篮触发 Photos 确认", "iOS"): ("Pre-delete basket triggers Photos confirmation", "iOS"),
+    ("首次 Photos 授权", "macOS"): ("First Photos authorization", "macOS"),
+    ("预删除篮触发 Photos 确认", "macOS"): ("Pre-delete basket triggers Photos confirmation", "macOS"),
+    ("“最近删除”恢复说明", "iOS/macOS"): ("Recently Deleted recovery explanation", "iOS/macOS"),
+    ("\"最近删除\"恢复说明", "iOS/macOS"): ("Recently Deleted recovery explanation", "iOS/macOS"),
+}
 expected_fragments = {
     ("First Photos authorization", "iOS"): ["/ios/authorization/"],
     ("Limited library state", "iOS"): ["/ios/limited-library/"],
@@ -374,12 +408,13 @@ for line in source_path.read_text().splitlines():
         continue
 
     row_scenario, row_platform, result, artifact_path, notes = parts
+    row_scenario, row_platform = row_aliases.get((row_scenario, row_platform), (row_scenario, row_platform))
     if row_scenario != scenario or row_platform != platform:
         continue
 
     artifact_path = artifact_path.strip("`").strip()
     if (
-        result == "Passed"
+        result in {"Passed", "通过"}
         and artifact_path.startswith("docs/phase-5-evidence/manual-")
         and any(fragment in f"{artifact_path}/" for fragment in expected_fragments[(scenario, platform)])
         and Path(artifact_path).is_file()
@@ -388,6 +423,7 @@ for line in source_path.read_text().splitlines():
         and not text_artifact_contains_sensitive_metadata(Path(artifact_path))
         and notes
         and "TBD" not in notes
+        and "待补充" not in notes
         and not notes_reference_personal_or_production_library(notes)
     ):
         raise SystemExit(0)
@@ -407,13 +443,18 @@ import sys
 from pathlib import Path
 
 text = Path(sys.argv[1]).read_text()
+host_section_headers = {
+    "## Host Photos-Backed Metadata Baseline",
+    "## Host Photos 支撑的元数据基线",
+    "## 主机 Photos 支撑的元数据基线",
+}
 host_section_lines = []
 in_host_section = False
 for raw_line in text.splitlines():
     if raw_line.startswith("## "):
         if in_host_section:
             break
-        in_host_section = raw_line.strip() == "## Host Photos-Backed Metadata Baseline"
+        in_host_section = raw_line.strip() in host_section_headers
         continue
     if in_host_section:
         host_section_lines.append(raw_line)
@@ -422,7 +463,11 @@ if not host_section_lines:
     raise SystemExit(1)
 
 section = "\n".join(host_section_lines)
-if "Preflight status:" not in section or "Passed" not in section:
+has_passed_preflight = (
+    ("Preflight status:" in section and "Passed" in section)
+    or ("预检状态：" in section and "通过" in section)
+)
+if not has_passed_preflight:
     raise SystemExit(1)
 
 sensitive_library_phrases = (
@@ -475,10 +520,15 @@ from pathlib import Path
 
 field_name = sys.argv[1]
 source_path = Path(sys.argv[2])
+field_aliases = {
+    "iOS Simulator": {"iOS Simulator", "iOS 模拟器"},
+    "Test Photos Library": {"Test Photos Library", "测试照片图库"},
+}
+accepted_fields = field_aliases.get(field_name, {field_name})
 
 for line in source_path.read_text().splitlines():
     parts = [part.strip() for part in line.strip().strip("|").split("|")]
-    if len(parts) == 2 and parts[0] == field_name:
+    if len(parts) == 2 and parts[0] in accepted_fields:
         print(parts[1])
         break
 PY
@@ -493,20 +543,26 @@ from pathlib import Path
 
 source_path = Path(sys.argv[1])
 in_privacy_section = False
+privacy_section_headers = {"## Privacy Review", "## 隐私审查"}
+runtime_privacy_checks = {
+    "Runtime logs checked for photo contents or sensitive metadata",
+    "Runtime 日志已检查照片内容或敏感元数据",
+    "运行时日志已检查照片内容或敏感元数据",
+}
 
 for line in source_path.read_text().splitlines():
     if line.startswith("## "):
         if in_privacy_section:
             break
-        in_privacy_section = line.strip() == "## Privacy Review"
+        in_privacy_section = line.strip() in privacy_section_headers
         continue
     if not in_privacy_section:
         continue
-    if "Runtime logs checked for photo contents or sensitive metadata" not in line:
+    if not any(check in line for check in runtime_privacy_checks):
         continue
     if "audit-runtime-privacy-logs.sh" not in line:
         continue
-    if "TBD" in line or "LOG_PATH" in line:
+    if "TBD" in line or "待补充" in line or "LOG_PATH" in line:
         continue
 
     match = re.search(r"docs/phase-5-evidence/privacy/[^ `|)]+", line)
@@ -533,7 +589,7 @@ fi
 
 if [[ -n "$evidence_path" && -f "$evidence_path" ]]; then
   ios_simulator_value="$(environment_value "iOS Simulator" "$evidence_path")"
-  if [[ -n "$ios_simulator_value" && "$ios_simulator_value" != *"TBD"* ]]; then
+  if [[ -n "$ios_simulator_value" && "$ios_simulator_value" != *"TBD"* && "$ios_simulator_value" != *"待补充"* ]]; then
     ios_environment_ready=1
     pass "Environment row has concrete value: iOS Simulator."
   else
@@ -545,7 +601,8 @@ if [[ -n "$evidence_path" && -f "$evidence_path" ]]; then
   test_library_lower="$(printf '%s' "$test_library_value" | tr '[:upper:]' '[:lower:]')"
   if [[ -n "$test_library_value" \
     && "$test_library_value" != *"TBD"* \
-    && "$test_library_lower" == *"non-production"* \
+    && "$test_library_value" != *"待补充"* \
+    && ( "$test_library_lower" == *"non-production"* || "$test_library_value" == *"非生产"* ) \
     && "$test_library_lower" != *"production personal"* \
     && "$test_library_lower" != *"personal photos"* \
     && "$test_library_lower" != *"personal library"* \
@@ -558,21 +615,28 @@ if [[ -n "$evidence_path" && -f "$evidence_path" ]]; then
     warn "Environment row is missing concrete non-production value: Test Photos Library."
   fi
 
-  for gate_name in "Local Phase 5" "Platform Phase 5" "Privacy logging"; do
-    if has_passed_table_row "$gate_name" "$evidence_path"; then
+  while IFS='|' read -r gate_name gate_alias; do
+    if has_any_passed_table_row "$evidence_path" "$gate_name" "$gate_alias"; then
       pass "Automated gate is recorded as Passed: $gate_name."
     else
       warn "Automated gate is not recorded as Passed: $gate_name."
     fi
-  done
+  done <<'GATE_ROWS'
+Local Phase 5|本地 Phase 5
+Platform Phase 5|平台 Phase 5
+Privacy logging|隐私日志
+GATE_ROWS
 
-  for privacy_check in "Product code has no broad logging calls" "Thumbnail cache remains in process memory only"; do
-    if has_passed_table_row "$privacy_check" "$evidence_path"; then
+  while IFS='|' read -r privacy_check privacy_alias; do
+    if has_any_passed_table_row "$evidence_path" "$privacy_check" "$privacy_alias"; then
       pass "Privacy review is recorded as Passed: $privacy_check."
     else
       warn "Privacy review is not recorded as Passed: $privacy_check."
     fi
-  done
+  done <<'PRIVACY_ROWS'
+Product code has no broad logging calls|产品代码没有宽泛日志调用
+Thumbnail cache remains in process memory only|缩略图缓存仅保留在进程内存中
+PRIVACY_ROWS
 
   while IFS='|' read -r scenario platform; do
     [[ -z "$scenario" || -z "$platform" ]] && continue
@@ -683,13 +747,14 @@ fi
 runtime_privacy_line=""
 runtime_privacy_artifact=""
 if [[ -n "$evidence_path" && -f "$evidence_path" ]]; then
-  runtime_privacy_line="$(rg 'Runtime logs checked for photo contents or sensitive metadata' "$evidence_path" || true)"
+  runtime_privacy_line="$(rg 'Runtime logs checked for photo contents or sensitive metadata|Runtime 日志已检查照片内容或敏感元数据' "$evidence_path" || true)"
   runtime_privacy_artifact="$(runtime_privacy_artifact_path "$evidence_path")"
 fi
 
 if [[ "$runtime_privacy_line" == *"audit-runtime-privacy-logs.sh"* \
   && "$runtime_privacy_line" == *"docs/phase-5-evidence/"* \
   && "$runtime_privacy_line" != *"TBD"* \
+  && "$runtime_privacy_line" != *"待补充"* \
   && "$runtime_privacy_line" != *"LOG_PATH"* \
   && -n "$runtime_privacy_artifact" \
   && -f "$runtime_privacy_artifact" \

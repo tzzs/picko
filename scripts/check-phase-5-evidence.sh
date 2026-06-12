@@ -40,7 +40,7 @@ status=0
 baseline_json_count=0
 manual_evidence_count=0
 
-if rg --line-number --color never '(^|[^A-Za-z])TBD([^A-Za-z]|$)|__[A-Z0-9_]+__' "$evidence_path"; then
+if rg --line-number --color never '(^|[^A-Za-z])TBD([^A-Za-z]|$)|待补充|__[A-Z0-9_]+__' "$evidence_path"; then
   cat >&2 <<'MESSAGE'
 
 Phase 5 evidence is incomplete.
@@ -58,21 +58,27 @@ import sys
 from pathlib import Path
 
 evidence_path = Path(sys.argv[1])
+field_aliases = {
+    "iOS Simulator": "iOS Simulator",
+    "iOS 模拟器": "iOS Simulator",
+    "Test Photos Library": "Test Photos Library",
+    "测试照片图库": "Test Photos Library",
+}
 values = {}
 for line in evidence_path.read_text().splitlines():
     parts = [part.strip() for part in line.strip().strip("|").split("|")]
-    if len(parts) == 2 and parts[0] in {"iOS Simulator", "Test Photos Library"}:
-        values[parts[0]] = parts[1]
+    if len(parts) == 2 and parts[0] in field_aliases:
+        values[field_aliases[parts[0]]] = parts[1]
 
 ios = values.get("iOS Simulator", "")
-if not ios or "TBD" in ios:
+if not ios or "TBD" in ios or "待补充" in ios:
     raise SystemExit("missing concrete iOS Simulator environment row")
 
 library = values.get("Test Photos Library", "")
 library_lower = library.lower()
-if not library or "TBD" in library:
+if not library or "TBD" in library or "待补充" in library:
     raise SystemExit("missing concrete Test Photos Library environment row")
-if "non-production" not in library_lower:
+if "non-production" not in library_lower and "非生产" not in library:
     raise SystemExit("Test Photos Library must explicitly say Non-production")
 sensitive_library_phrases = (
     "production personal",
@@ -172,13 +178,18 @@ import sys
 from pathlib import Path
 
 text = Path(sys.argv[1]).read_text()
+host_section_headers = {
+    "## Host Photos-Backed Metadata Baseline",
+    "## Host Photos 支撑的元数据基线",
+    "## 主机 Photos 支撑的元数据基线",
+}
 host_section_lines = []
 in_host_section = False
 for raw_line in text.splitlines():
     if raw_line.startswith("## "):
         if in_host_section:
             break
-        in_host_section = raw_line.strip() == "## Host Photos-Backed Metadata Baseline"
+        in_host_section = raw_line.strip() in host_section_headers
         continue
     if in_host_section:
         host_section_lines.append(raw_line)
@@ -187,7 +198,11 @@ if not host_section_lines:
     raise SystemExit("missing complete host Photos baseline preflight command")
 
 host_section = "\n".join(host_section_lines)
-if "Preflight status:" not in host_section or "Passed" not in host_section:
+has_passed_preflight = (
+    ("Preflight status:" in host_section and "Passed" in host_section)
+    or ("预检状态：" in host_section and "通过" in host_section)
+)
+if not has_passed_preflight:
     raise SystemExit("missing passed host Photos baseline preflight status")
 
 sensitive_library_phrases = (
@@ -244,10 +259,15 @@ required = ["1,000", "10,000", "50,000"]
 supported_extensions = {".png", ".jpg", ".jpeg", ".heic", ".mov", ".mp4"}
 found = set()
 in_ios_section = False
+ios_section_headers = {
+    "## iOS Simulator Photos-Backed Benchmark",
+    "## iOS Simulator Photos 支撑的 Benchmark",
+    "## iOS 模拟器 Photos 支撑的基准测试",
+}
 
 for line in evidence_path.read_text().splitlines():
     if line.startswith("## "):
-        in_ios_section = line.strip() == "## iOS Simulator Photos-Backed Benchmark"
+        in_ios_section = line.strip() in ios_section_headers
         continue
 
     if not in_ios_section:
@@ -302,12 +322,18 @@ from pathlib import Path
 evidence_path = Path(sys.argv[1])
 allow_temp = sys.argv[2] == "1"
 in_privacy_section = False
+privacy_section_headers = {"## Privacy Review", "## 隐私审查"}
+runtime_privacy_checks = {
+    "Runtime logs checked for photo contents or sensitive metadata",
+    "Runtime 日志已检查照片内容或敏感元数据",
+    "运行时日志已检查照片内容或敏感元数据",
+}
 
 for line in evidence_path.read_text().splitlines():
     if line.startswith("## "):
         if in_privacy_section:
             break
-        in_privacy_section = line.strip() == "## Privacy Review"
+        in_privacy_section = line.strip() in privacy_section_headers
         continue
     if not in_privacy_section:
         continue
@@ -321,9 +347,9 @@ for line in evidence_path.read_text().splitlines():
         continue
 
     check, result, evidence = parts
-    if check != "Runtime logs checked for photo contents or sensitive metadata":
+    if check not in runtime_privacy_checks:
         continue
-    if result != "Passed" or "TBD" in evidence:
+    if result not in {"Passed", "通过"} or "TBD" in evidence or "待补充" in evidence:
         continue
     if "scripts/audit-runtime-privacy-logs.sh" not in evidence:
         continue
@@ -368,6 +394,16 @@ required_rows = [
     ("Pre-delete basket triggers Photos confirmation", "macOS"),
     ("Recently Deleted recovery explanation", "iOS/macOS"),
 ]
+row_aliases = {
+    ("首次 Photos 授权", "iOS"): ("First Photos authorization", "iOS"),
+    ("Limited library 状态", "iOS"): ("Limited library state", "iOS"),
+    ("受限图库状态", "iOS"): ("Limited library state", "iOS"),
+    ("预删除篮触发 Photos 确认", "iOS"): ("Pre-delete basket triggers Photos confirmation", "iOS"),
+    ("首次 Photos 授权", "macOS"): ("First Photos authorization", "macOS"),
+    ("预删除篮触发 Photos 确认", "macOS"): ("Pre-delete basket triggers Photos confirmation", "macOS"),
+    ("“最近删除”恢复说明", "iOS/macOS"): ("Recently Deleted recovery explanation", "iOS/macOS"),
+    ("\"最近删除\"恢复说明", "iOS/macOS"): ("Recently Deleted recovery explanation", "iOS/macOS"),
+}
 expected_fragments = {
     ("First Photos authorization", "iOS"): ["/ios/authorization/"],
     ("Limited library state", "iOS"): ["/ios/limited-library/"],
@@ -433,13 +469,13 @@ for line in evidence_path.read_text().splitlines():
     if len(parts) != 5:
         scenario = parts[0] if len(parts) > 0 else ""
         platform = parts[1] if len(parts) > 1 else ""
-        key = (scenario, platform)
+        key = row_aliases.get((scenario, platform), (scenario, platform))
         if key in required_rows:
             rows[key] = ("__INVALID_COLUMN_COUNT__", "", "")
         continue
 
     scenario, platform, result, artifact_path, notes = parts[:5]
-    key = (scenario, platform)
+    key = row_aliases.get((scenario, platform), (scenario, platform))
     if key not in required_rows:
         continue
 
@@ -459,8 +495,8 @@ for key in required_rows:
     if result == "__INVALID_COLUMN_COUNT__":
         invalid.append(f"{label}: row must contain exactly five columns")
         continue
-    if result != "Passed":
-        invalid.append(f"{label}: result must be Passed")
+    if result not in {"Passed", "通过"}:
+        invalid.append(f"{label}: result must be Passed or 通过")
     if allow_temp:
         if not (artifact_path.startswith("docs/phase-5-evidence/manual-") or artifact_path.startswith("/tmp/")):
             invalid.append(f"{label}: evidence path must be under docs/phase-5-evidence/manual-* or /tmp")
@@ -477,7 +513,7 @@ for key in required_rows:
         invalid.append(f"{label}: evidence artifact file type is not supported")
     elif text_artifact_contains_sensitive_metadata(Path(artifact_path)):
         invalid.append(f"{label}: text evidence artifact contains sensitive photo metadata")
-    if not notes or "TBD" in notes or "|" in notes:
+    if not notes or "TBD" in notes or "待补充" in notes or "|" in notes:
         invalid.append(f"{label}: notes must be concrete")
     elif notes_reference_personal_or_production_library(notes):
         invalid.append(f"{label}: notes must not reference personal or production Photos libraries")
