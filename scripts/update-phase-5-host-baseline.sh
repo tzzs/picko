@@ -89,6 +89,11 @@ evidence_path = Path(sys.argv[1])
 baseline_path = Path(sys.argv[2])
 document = evidence_path.read_text()
 report = json.loads(baseline_path.read_text())
+host_section_headers = {
+    "## Host Photos-Backed Metadata Baseline",
+    "## Host Photos 支撑的元数据基线",
+    "## 主机 Photos 支撑的元数据基线",
+}
 sensitive_library_phrases = (
     "production personal",
     "personal photos",
@@ -103,7 +108,7 @@ for raw_line in document.splitlines():
     if raw_line.startswith("## "):
         if in_host_section:
             break
-        in_host_section = raw_line.strip() == "## Host Photos-Backed Metadata Baseline"
+        in_host_section = raw_line.strip() in host_section_headers
         continue
     if in_host_section:
         host_section_lines.append(raw_line)
@@ -112,7 +117,11 @@ if not host_section_lines:
     raise SystemExit("evidence document must record the complete host Photos --validate-only preflight command")
 
 host_section = "\n".join(host_section_lines)
-if "Preflight status:" not in host_section or "Passed" not in host_section:
+has_passed_preflight = (
+    ("Preflight status:" in host_section and "Passed" in host_section)
+    or ("预检状态：" in host_section and "通过" in host_section)
+)
+if not has_passed_preflight:
     raise SystemExit("evidence document must record a Passed host Photos --validate-only preflight status")
 
 for line in host_section_lines:
@@ -187,11 +196,12 @@ for count in (1000, 10000, 50000):
     else:
         raise SystemExit(f"could not find host baseline row for {count_label}")
 
-raw_pattern = re.compile(r"^Raw JSON evidence path: `.*`$")
-raw_replacement = f"Raw JSON evidence path: `{baseline_path}`"
 for index, line in enumerate(lines):
-    if raw_pattern.match(line):
-        lines[index] = raw_replacement
+    if line.startswith("Raw JSON evidence path:") or line.startswith("原始 JSON 证据路径："):
+        if line.startswith("原始 JSON 证据路径"):
+            lines[index] = f"原始 JSON 证据路径：`{baseline_path}`"
+        else:
+            lines[index] = f"Raw JSON evidence path: `{baseline_path}`"
         break
 else:
     raise SystemExit("could not find raw JSON evidence path row")

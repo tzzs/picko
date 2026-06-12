@@ -5,10 +5,10 @@ struct PickoMacTimeLocationView: View {
     let systemImage: String
 
     var body: some View {
-        ContentUnavailableView(
-            title,
-            systemImage: systemImage,
-            description: Text("This view will use the same review state after real photo indexing is connected.")
+        PickoMacEmptyStateView(
+            title: title,
+            message: "This view will use the same review state after real photo indexing is connected.",
+            systemImage: systemImage
         )
     }
 }

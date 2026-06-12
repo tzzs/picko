@@ -145,6 +145,11 @@ from pathlib import Path
 evidence_path = Path(sys.argv[1])
 expected_label = sys.argv[2]
 document = evidence_path.read_text()
+host_section_headers = {
+    "## Host Photos-Backed Metadata Baseline",
+    "## Host Photos 支撑的元数据基线",
+    "## 主机 Photos 支撑的元数据基线",
+}
 
 host_section_lines = []
 in_host_section = False
@@ -152,16 +157,20 @@ for raw_line in document.splitlines():
     if raw_line.startswith("## "):
         if in_host_section:
             break
-        in_host_section = raw_line.strip() == "## Host Photos-Backed Metadata Baseline"
+        in_host_section = raw_line.strip() in host_section_headers
         continue
     if in_host_section:
         host_section_lines.append(raw_line)
 
 if not host_section_lines:
-    raise SystemExit("evidence document is missing ## Host Photos-Backed Metadata Baseline")
+    raise SystemExit("evidence document is missing a host Photos-backed metadata baseline section")
 
 host_section = "\n".join(host_section_lines)
-if "Preflight status:" not in host_section or "Passed" not in host_section:
+has_passed_preflight = (
+    ("Preflight status:" in host_section and "Passed" in host_section)
+    or ("预检状态：" in host_section and "通过" in host_section)
+)
+if not has_passed_preflight:
     raise SystemExit("host Photos baseline preflight is not recorded as Passed")
 
 expected_counts = {"1000", "10000", "50000"}

@@ -232,12 +232,33 @@ artifact_path = sys.argv[5]
 notes = sys.argv[6]
 
 lines = evidence_path.read_text().splitlines()
-row_pattern = re.compile(rf"^\|\s*{re.escape(scenario)}\s*\|\s*{re.escape(platform)}\s*\|")
-replacement = f"| {scenario} | {platform} | {result} | `{artifact_path}` | {notes} |"
+row_aliases = {
+    ("首次 Photos 授权", "iOS"): ("First Photos authorization", "iOS"),
+    ("受限图库状态", "iOS"): ("Limited library state", "iOS"),
+    ("Limited library 状态", "iOS"): ("Limited library state", "iOS"),
+    ("预删除篮触发 Photos 确认", "iOS"): ("Pre-delete basket triggers Photos confirmation", "iOS"),
+    ("首次 Photos 授权", "macOS"): ("First Photos authorization", "macOS"),
+    ("预删除篮触发 Photos 确认", "macOS"): ("Pre-delete basket triggers Photos confirmation", "macOS"),
+    ("“最近删除”恢复说明", "iOS/macOS"): ("Recently Deleted recovery explanation", "iOS/macOS"),
+    ("\"最近删除\"恢复说明", "iOS/macOS"): ("Recently Deleted recovery explanation", "iOS/macOS"),
+}
+result_aliases = {
+    "Passed": "通过",
+    "Failed": "失败",
+    "Blocked": "受阻",
+}
 
 for index, line in enumerate(lines):
-    if row_pattern.match(line):
-        lines[index] = replacement
+    stripped = line.strip()
+    if not stripped.startswith("|") or not stripped.endswith("|"):
+        continue
+    parts = [part.strip() for part in stripped.strip("|").split("|")]
+    if len(parts) != 5:
+        continue
+    row_scenario, row_platform = row_aliases.get((parts[0], parts[1]), (parts[0], parts[1]))
+    if row_scenario == scenario and row_platform == platform:
+        display_result = result_aliases.get(result, result) if (parts[0], parts[1]) in row_aliases else result
+        lines[index] = f"| {parts[0]} | {parts[1]} | {display_result} | `{artifact_path}` | {notes} |"
         evidence_path.write_text("\n".join(lines) + "\n")
         break
 else:

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@100..900&amp;family=Manrope:wght@100..900&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                "on-error": "#ffffff",
+                "secondary-container": "#fddd7c",
+                "inverse-primary": "#accbe0",
+                "on-tertiary-fixed": "#370e00",
+                "on-surface-variant": "#42474b",
+                "outline-variant": "#c2c7cc",
+                "on-error-container": "#93000a",
+                "on-secondary-fixed": "#231b00",
+                "on-tertiary": "#ffffff",
+                "error-container": "#ffdad6",
+                "error": "#ba1a1a",
+                "surface-container-high": "#e8e8e6",
+                "on-primary": "#ffffff",
+                "tertiary-fixed": "#ffdbce",
+                "secondary-fixed": "#ffe085",
+                "on-background": "#1a1c1b",
+                "tertiary-container": "#3f1200",
+                "on-tertiary-container": "#be7658",
+                "surface-container-low": "#f4f4f2",
+                "surface-container": "#eeeeec",
+                "surface-container-lowest": "#ffffff",
+                "on-secondary": "#ffffff",
+                "background": "#f9f9f7",
+                "tertiary-fixed-dim": "#ffb598",
+                "on-primary-fixed": "#001e2c",
+                "surface": "#f9f9f7",
+                "outline": "#72787c",
+                "on-surface": "#1a1c1b",
+                "primary-fixed": "#c7e7fc",
+                "surface-dim": "#dadad8",
+                "on-primary-fixed-variant": "#2c4a5c",
+                "on-tertiary-fixed-variant": "#70371e",
+                "secondary-fixed-dim": "#e3c466",
+                "primary-fixed-dim": "#accbe0",
+                "inverse-on-surface": "#f1f1ef",
+                "inverse-surface": "#2f3130",
+                "tertiary": "#180400",
+                "surface-container-highest": "#e2e3e1",
+                "surface-bright": "#f9f9f7",
+                "surface-variant": "#e2e3e1",
+                "primary-container": "#002434",
+                "on-secondary-container": "#776005",
+                "secondary": "#735c00",
+                "primary": "#000b13",
+                "surface-tint": "#446274",
+                "on-secondary-fixed-variant": "#574500",
+                "on-primary-container": "#6e8ca0"
+            },
+            "borderRadius": {
+                "DEFAULT": "0.25rem",
+                "lg": "0.5rem",
+                "xl": "0.75rem",
+                "full": "9999px"
+            },
+            "spacing": {
+                "stack-md": "16px",
+                "gutter": "12px",
+                "stack-lg": "32px",
+                "stack-sm": "8px",
+                "container-margin": "20px",
+                "safe-area-bottom": "34px"
+            },
+            "fontFamily": {
+                "title-sm": ["Manrope"],
+                "headline-md": ["Manrope"],
+                "display-lg": ["Manrope"],
+                "body-sm": ["Manrope"],
+                "metadata": ["Manrope"],
+                "body-md": ["Manrope"],
+                "label-caps": ["JetBrains Mono"],
+                "headline-md-mobile": ["Manrope"]
+            },
+            "fontSize": {
+                "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                "display-lg": ["34px", {"lineHeight": "41px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                "metadata": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                "headline-md-mobile": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+            }
+          }
+        }
+      }
+    </script>
+<style>
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .hide-scrollbar::-webkit-scrollbar { display: none; }
+        .hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface text-on-surface font-body-md min-h-screen pb-40">
+<!-- Top Navigation Bar -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-md flex justify-between items-center px-container-margin h-16 w-full">
+<div class="flex items-center gap-3">
+<div class="w-8 h-8 rounded-full overflow-hidden bg-primary-fixed flex items-center justify-center">
+<img alt="User" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDaCm-fmyo3g3cPygpLSK04HiA7K1KvedzSuDMjdQbbIE9ZSbYTkf-COebVO_nhs7kva5k5SR2i61f0u5Lw1_WL0q9-m2puY7AEibk4GBDqx-PGYfxO6AGB_gD4X1ugI1kL59qPOPhSdQmAcRVRm-atZ1kjMdywuJDfI3og01WLJL-nfYIBYfZlIovsxNGV87FzF6br1_dortruLaFjMni9camT5aWDuL6itHKU_6oeTXmslJO-WT9Rnp3z70OOcnGQoI4i3qAlrifl"/>
+</div>
+<span class="font-headline-md text-headline-md text-primary dark:text-primary-fixed tracking-tight">拾影</span>
+</div>
+<button class="material-symbols-outlined text-primary dark:text-primary-fixed hover:opacity-80 transition-opacity active:scale-95 transition-transform" data-icon="settings">
+            settings
+        </button>
+</header>
+<main class="pt-20 px-container-margin">
+<!-- Summary Card (Glassmorphism Heritage style) -->
+<section class="mb-stack-lg animate-in fade-in slide-in-from-bottom-4 duration-700">
+<div class="bg-surface-container-lowest border border-outline-variant p-6 rounded-[24px] shadow-sm relative overflow-hidden">
+<div class="relative z-10">
+<p class="font-label-caps text-label-caps text-on-surface-variant mb-1 uppercase tracking-widest">Savings Overview</p>
+<div class="flex justify-between items-end">
+<div>
+<h2 class="font-body-md text-body-md text-on-surface-variant">总计节省</h2>
+<p class="font-display-lg text-display-lg text-primary mt-1">1.2 GB</p>
+</div>
+<button class="bg-secondary-container text-on-secondary-container px-4 py-2 rounded-full font-title-sm text-title-sm active:scale-95 transition-transform">
+                            全部恢复
+                        </button>
+</div>
+</div>
+<!-- Background decoration -->
+<div class="absolute -right-4 -bottom-4 opacity-5 pointer-events-none">
+<span class="material-symbols-outlined text-[120px]" data-icon="auto_delete" style="font-variation-settings: 'FILL' 1;">auto_delete</span>
+</div>
+</div>
+</section>
+<!-- Information Box -->
+<div class="flex items-start gap-3 p-4 bg-surface-container rounded-xl mb-stack-lg border-l-4 border-secondary">
+<span class="material-symbols-outlined text-secondary" data-icon="info">info</span>
+<p class="font-body-sm text-body-sm text-on-surface-variant">照片将移至系统“最近删除”相册，可在该处恢复。</p>
+</div>
+<!-- Similar Groups Section -->
+<section class="mb-stack-lg">
+<div class="flex justify-between items-center mb-stack-md">
+<h3 class="font-title-sm text-title-sm">相似组</h3>
+<span class="font-label-caps text-label-caps text-on-surface-variant">3 GROUPS</span>
+</div>
+<div class="flex gap-4 overflow-x-auto hide-scrollbar -mx-container-margin px-container-margin">
+<!-- Group Card 1 -->
+<div class="flex-none w-64 group active:scale-95 transition-transform duration-200">
+<div class="relative h-64 rounded-[24px] overflow-hidden border border-outline-variant shadow-sm mb-2">
+<img class="w-full h-full object-cover" data-alt="A cinematic close-up of a golden retriever puppy looking into the distance with warm sunset lighting. The image captures fine fur detail and soulful eyes, evoking a nostalgic and warm mood. Soft bokeh background enhances the high-end digital photography aesthetic, aligning with a premium curated gallery app." src="https://lh3.googleusercontent.com/aida-public/AB6AXuAoraDZ8Db0g6HNmkEGp5DLqAzEqIyZfz2jehoo-oAjSPD6upVoJjhFIDnr0HvGUsP-rotR2hba71Jw87KmTR20SPO7hvJBilVbiABZW9boZaNoAkwFsJ_bT7MX4PwRG9J_GIjOvStyDk905YO11k2QqNe6QRPPJvCxCGbA659qLSwEgQ7Sq5ptG9LOQpS5rKTqMCtRHv7FHZrAWklPHK9BhToRRE-YLUShaibkz2Fc3OjEFImIPcHqURC3PkzrwwEL6nfTD_nUx-5Q"/>
+<div class="absolute top-3 right-3 bg-primary/80 backdrop-blur-sm text-white px-2 py-1 rounded-lg font-label-caps text-[10px]">
+                            12 DUPLICATES
+                        </div>
+</div>
+<div class="flex justify-between items-center">
+<p class="font-body-md text-body-md truncate">周末郊游</p>
+<span class="font-metadata text-metadata text-on-surface-variant">420 MB</span>
+</div>
+</div>
+<!-- Group Card 2 -->
+<div class="flex-none w-64 group active:scale-95 transition-transform duration-200">
+<div class="relative h-64 rounded-[24px] overflow-hidden border border-outline-variant shadow-sm mb-2">
+<img class="w-full h-full object-cover" data-alt="A minimalist architectural shot of the Eiffel Tower framed by classical Parisian buildings under a soft, overcast sky. The color palette is muted and sophisticated, focusing on architectural textures and heritage vibes. The lighting is diffused and even, creating a calm, archival feel suitable for a high-end curation tool." src="https://lh3.googleusercontent.com/aida-public/AB6AXuDcXaIMwOH86sEDdFtkMAIlQDH_p_5VF9LeSOe8bmkDYWRRP7J3AvH8IdGKHkGLz8XRbDdom_0JA61ns8GVJE9HzKjI_xx53fvLtKLIpWMRh2dY_gyvAChVVZzVCREjICWrmiifYuzMUrEKf41mk0pp4VgV65Y4q5o3uu-fPg8yZ7QA_VaEOEyb7cuUg3ZGA9ihNNmk_CBJTF5z6jGsdu-9zzldKlfbVNy5NkWkLPPj_PESEYcR2QRIqlZwy7DzW8py7pdtYWask_yK"/>
+<div class="absolute top-3 right-3 bg-primary/80 backdrop-blur-sm text-white px-2 py-1 rounded-lg font-label-caps text-[10px]">
+                            5 DUPLICATES
+                        </div>
+</div>
+<div class="flex justify-between items-center">
+<p class="font-body-md text-body-md truncate">巴黎之行</p>
+<span class="font-metadata text-metadata text-on-surface-variant">150 MB</span>
+</div>
+</div>
+</div>
+</section>
+<!-- Single Review Section (Bento-style Grid) -->
+<section class="mb-stack-lg">
+<div class="flex justify-between items-center mb-stack-md">
+<h3 class="font-title-sm text-title-sm">单张复核</h3>
+<span class="font-label-caps text-label-caps text-on-surface-variant">24 PHOTOS</span>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div class="relative aspect-square rounded-xl overflow-hidden border border-outline-variant group cursor-pointer">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="An expansive landscape photograph showing majestic mountain peaks reflected in a crystal clear alpine lake. The lighting is early morning blue-hour, creating a serene and vast atmosphere. The composition is clean and focused, reflecting a curated editorial style for a professional media management interface." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCkeRIQ_mO3nq1gSOmS07CsmcI8tRjWXHV7q_49nGThhb6sPUmS4JXRC0sosR01aq11SDqGmj29m46swgX0DRkXEM54iAmOTD-3uorEUt5BL5a6nJrnMMx3pYqyWfqmWSBDrzyJkD_APcQhUAX13K4UWoGAKfNt7JtE-Htj_COpgBg83oXAhDPuL9oEEEd51hK9FDphqU9JZLnTD-l9lrYofW4fWJFBHvux5kfu0ycF6GoTVOtG76lyhtkH7UBEWHrHlamXqryTy_Kt"/>
+<div class="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors"></div>
+<button class="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm" data-icon="close">close</span>
+</button>
+</div>
+<div class="relative aspect-square rounded-xl overflow-hidden border border-outline-variant group cursor-pointer">
+<img class="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110" data-alt="A moody, high-contrast forest scene with sunlight filtering through tall redwood trees, creating dramatic light rays. The greens are deep and rich, contributing to a sense of digital heritage and preservation. The image captures textures of bark and needles in sharp detail, fitting for a curated archive aesthetic." src="https://lh3.googleusercontent.com/aida-public/AB6AXuCVWqtlJrrS64aU75JO60KQcgXJ_1vr1hLNqAWkB6uL7aaCEAjNmX8D5kFv_OEF27fx62MRpAX2flVRltAEIIQNbs-3YajEms20ZKJNYzGHQtG2ET10gO9C8bUQFiyi2uSLHe0kIsU_zX2jE8FRGlqbBzZZZZT2e0gkYGZy8lffVDNBv5jNWK55jIZ-3kC5O3tMMzlpe48AUZHyWhtxj7qaMGSaL8g93iCe8TB3K1f0-YnQ-s7vaoMZe9ugnbP1NTrOLGCeQj4mSy6B"/>
+<div class="absolute inset-0 bg-black/20 group-hover:bg-black/0 transition-colors"></div>
+<button class="absolute top-2 right-2 w-8 h-8 rounded-full bg-white/20 backdrop-blur-md border border-white/40 flex items-center justify-center">
+<span class="material-symbols-outlined text-white text-sm" data-icon="close">close</span>
+</button>
+</div>
+</div>
+</section>
+</main>
+<!-- Floating Basket Action Container -->
+<div class="fixed bottom-24 left-1/2 -translate-x-1/2 w-[calc(100%-40px)] max-w-md z-40">
+<div class="bg-tertiary-container shadow-lg rounded-3xl p-4 flex items-center justify-between group cursor-pointer active:scale-95 transition-transform duration-200">
+<div class="flex items-center gap-4">
+<div class="w-12 h-12 rounded-2xl bg-on-tertiary-container/10 flex items-center justify-center relative overflow-hidden">
+<span class="material-symbols-outlined text-on-tertiary-container text-2xl relative z-10" data-icon="shopping_basket" style="font-variation-settings: 'FILL' 1;">shopping_basket</span>
+<div class="absolute inset-0 opacity-10 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-on-tertiary-container to-transparent scale-150"></div>
+</div>
+<div>
+<p class="font-body-md text-on-tertiary-container font-semibold">清空篮子</p>
+<p class="font-metadata text-[10px] text-on-tertiary-container/60 uppercase tracking-widest">Permanently delete 128 items</p>
+</div>
+</div>
+<div class="w-10 h-10 rounded-full bg-on-tertiary-container flex items-center justify-center group-hover:translate-x-1 transition-transform">
+<span class="material-symbols-outlined text-tertiary-container" data-icon="arrow_forward">arrow_forward</span>
+</div>
+</div>
+</div>
+<!-- Bottom Navigation Bar -->
+<nav class="fixed bottom-0 w-full z-50 pb-safe-area-bottom bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-md flex justify-around items-center w-full h-20 px-gutter">
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="home">home</span>
+<span class="font-label-caps text-label-caps mt-1">首页</span>
+</a>
+<a class="flex flex-col items-center justify-center text-on-surface-variant dark:text-on-surface-variant hover:text-secondary dark:hover:text-secondary-fixed transition-colors active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="task_alt">task_alt</span>
+<span class="font-label-caps text-label-caps mt-1">任务</span>
+</a>
+<a class="flex flex-col items-center justify-center text-secondary dark:text-secondary-fixed-dim active:scale-90 transition-transform duration-200" href="#">
+<span class="material-symbols-outlined" data-icon="shopping_basket" style="font-variation-settings: 'FILL' 1;">shopping_basket</span>
+<span class="font-label-caps text-label-caps mt-1">篮子</span>
+</a>
+</nav>
+<script>
+        // Micro-interaction for feedback
+        document.querySelectorAll('button, .group').forEach(el => {
+            el.addEventListener('click', () => {
+                // Potential haptic feedback trigger or sound effect
+                console.log('Interaction detected');
+            });
+        });
+
+        // Simple parallax on scroll for header summary
+        window.addEventListener('scroll', () => {
+            const summary = document.querySelector('.bg-surface-container-lowest');
+            const scrolled = window.pageYOffset;
+            if (summary) {
+                summary.style.transform = `translateY(${scrolled * 0.05}px)`;
+            }
+        });
+    </script>
+</body></html>

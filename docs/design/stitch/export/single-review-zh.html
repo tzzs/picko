@@ -1,0 +1,256 @@
+<!DOCTYPE html>
+
+<html lang="zh-CN"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700&amp;family=JetBrains+Mono:wght@500&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            "colors": {
+                    "on-error": "#ffffff",
+                    "secondary-container": "#fddd7c",
+                    "inverse-primary": "#accbe0",
+                    "on-tertiary-fixed": "#370e00",
+                    "on-surface-variant": "#42474b",
+                    "outline-variant": "#c2c7cc",
+                    "on-error-container": "#93000a",
+                    "on-secondary-fixed": "#231b00",
+                    "on-tertiary": "#ffffff",
+                    "error-container": "#ffdad6",
+                    "error": "#ba1a1a",
+                    "surface-container-high": "#e8e8e6",
+                    "on-primary": "#ffffff",
+                    "tertiary-fixed": "#ffdbce",
+                    "secondary-fixed": "#ffe085",
+                    "on-background": "#1a1c1b",
+                    "tertiary-container": "#3f1200",
+                    "on-tertiary-container": "#be7658",
+                    "surface-container-low": "#f4f4f2",
+                    "surface-container": "#eeeeec",
+                    "surface-container-lowest": "#ffffff",
+                    "on-secondary": "#ffffff",
+                    "background": "#f9f9f7",
+                    "tertiary-fixed-dim": "#ffb598",
+                    "on-primary-fixed": "#001e2c",
+                    "surface": "#f9f9f7",
+                    "outline": "#72787c",
+                    "on-surface": "#1a1c1b",
+                    "primary-fixed": "#c7e7fc",
+                    "surface-dim": "#dadad8",
+                    "on-primary-fixed-variant": "#2c4a5c",
+                    "on-tertiary-fixed-variant": "#70371e",
+                    "secondary-fixed-dim": "#e3c466",
+                    "primary-fixed-dim": "#accbe0",
+                    "inverse-on-surface": "#f1f1ef",
+                    "inverse-surface": "#2f3130",
+                    "tertiary": "#180400",
+                    "surface-container-highest": "#e2e3e1",
+                    "surface-bright": "#f9f9f7",
+                    "surface-variant": "#e2e3e1",
+                    "primary-container": "#002434",
+                    "on-secondary-container": "#776005",
+                    "secondary": "#735c00",
+                    "primary": "#000b13",
+                    "surface-tint": "#446274",
+                    "on-secondary-fixed-variant": "#574500",
+                    "on-primary-container": "#6e8ca0"
+            },
+            "borderRadius": {
+                    "DEFAULT": "0.25rem",
+                    "lg": "0.5rem",
+                    "xl": "0.75rem",
+                    "full": "9999px"
+            },
+            "spacing": {
+                    "stack-md": "16px",
+                    "gutter": "12px",
+                    "stack-lg": "32px",
+                    "stack-sm": "8px",
+                    "container-margin": "20px",
+                    "safe-area-bottom": "34px"
+            },
+            "fontFamily": {
+                    "title-sm": ["Manrope"],
+                    "headline-md": ["Manrope"],
+                    "display-lg": ["Manrope"],
+                    "body-sm": ["Manrope"],
+                    "metadata": ["Manrope"],
+                    "body-md": ["Manrope"],
+                    "label-caps": ["JetBrains Mono"],
+                    "headline-md-mobile": ["Manrope"]
+            },
+            "fontSize": {
+                    "title-sm": ["18px", {"lineHeight": "24px", "fontWeight": "600"}],
+                    "headline-md": ["24px", {"lineHeight": "32px", "letterSpacing": "-0.01em", "fontWeight": "600"}],
+                    "display-lg": ["34px", {"lineHeight": "41px", "letterSpacing": "-0.02em", "fontWeight": "700"}],
+                    "body-sm": ["14px", {"lineHeight": "20px", "fontWeight": "400"}],
+                    "metadata": ["12px", {"lineHeight": "16px", "fontWeight": "500"}],
+                    "body-md": ["16px", {"lineHeight": "24px", "fontWeight": "400"}],
+                    "label-caps": ["12px", {"lineHeight": "16px", "letterSpacing": "0.05em", "fontWeight": "500"}],
+                    "headline-md-mobile": ["20px", {"lineHeight": "28px", "fontWeight": "600"}]
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        .glass-panel {
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+        }
+        .swipe-hint-anim {
+            animation: bounce-vertical 2s infinite ease-in-out;
+        }
+        @keyframes bounce-vertical {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .swipe-hint-anim-down {
+            animation: bounce-vertical-down 2s infinite ease-in-out;
+        }
+        @keyframes bounce-vertical-down {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(10px); }
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-surface font-body-md text-on-surface overflow-hidden">
+<!-- Top Navigation Bar (Shared Component Strategy) -->
+<header class="fixed top-0 w-full z-50 bg-surface/80 dark:bg-surface-dim/80 backdrop-blur-md flex justify-between items-center px-container-margin h-16 w-full">
+<div class="flex items-center gap-stack-sm active:scale-95 transition-transform">
+<span class="material-symbols-outlined text-primary" data-icon="arrow_back">arrow_back</span>
+</div>
+<div class="flex flex-col items-center">
+<h1 class="font-headline-md-mobile text-headline-md-mobile text-primary tracking-tight">复核</h1>
+<span class="font-label-caps text-[10px] tracking-widest text-on-surface-variant">128 / 450</span>
+</div>
+<div class="flex items-center gap-stack-md">
+<button class="active:scale-95 transition-transform hover:opacity-80">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="settings">settings</span>
+</button>
+</div>
+</header>
+<!-- Main Content Canvas -->
+<main class="relative h-screen w-full flex flex-col items-center justify-center p-container-margin pt-20 pb-safe-area-bottom">
+<!-- Swipe Visual Cues -->
+<div class="absolute top-20 flex flex-col items-center z-10 opacity-40 swipe-hint-anim">
+<span class="material-symbols-outlined text-primary text-4xl" data-icon="keyboard_double_arrow_up">keyboard_double_arrow_up</span>
+<span class="font-label-caps text-label-caps mt-1">向上保留</span>
+</div>
+<div class="absolute bottom-32 flex flex-col items-center z-10 opacity-40 swipe-hint-anim-down">
+<span class="font-label-caps text-label-caps mb-1">向下预删除</span>
+<span class="material-symbols-outlined text-error text-4xl" data-icon="keyboard_double_arrow_down">keyboard_double_arrow_down</span>
+</div>
+<!-- Image Container (Curation Card Style) -->
+<div class="relative w-full aspect-[3/4] max-h-[574px] rounded-[24px] overflow-hidden shadow-lg border border-outline-variant bg-surface-container-low transition-all duration-300 ease-out cursor-grab active:cursor-grabbing" id="photo-card">
+<img alt="Shanghai Cityscape" class="w-full h-full object-cover" data-alt="A high-end professional photograph of the Shanghai Lujiazui skyline during the blue hour. The image features the iconic Oriental Pearl Tower and surrounding skyscrapers illuminated against a deep indigo twilight sky. The lighting is soft yet crisp, with reflections shimmering on the Huangpu River. The overall aesthetic is clean, archival, and sophisticated, matching a modern digital curation platform." src="https://lh3.googleusercontent.com/aida-public/AB6AXuC55HAllwyYXQfcXRWSYa2mCts1nqX_lEzLngd2T-Q2TdECOiL4w4r0BNNM0jqqsuO4W185bl-bHTv9mwaUm0wxAI2lbpxmVvMtGLmGIB8_2Ds1fdtgkfs9S4f3PUNy1MpldgU7tlpJJrIQfUOPjz6mI0xSgFfQGi0RG4DXSuochFZLT7U9EvB4h1o2BMT2Dtd4DEtVQa56EYfl1lJLo5F5auSPg3kWc9xv5xW68KFN23-n3eIRAHEgw9V1DYi4oi2jxh_RqF2AOrCi"/>
+<!-- Metadata Overlay (Glassmorphism) -->
+<div class="absolute bottom-0 left-0 right-0 p-stack-md glass-panel bg-primary-container/40 text-on-primary-fixed border-t border-white/10">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<span class="font-title-sm text-title-sm text-white">2026年5月30日 · 上海</span>
+<span class="font-metadata text-metadata text-white/70">4.2 MB · 4032 × 3024 · RAW</span>
+</div>
+<div class="h-8 w-8 rounded-full bg-secondary-container flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-on-secondary-container text-sm" data-icon="auto_awesome" data-weight="fill" style="font-variation-settings: 'FILL' 1;">auto_awesome</span>
+</div>
+</div>
+</div>
+</div>
+<!-- Action Control Bar -->
+<div class="mt-stack-lg w-full flex items-center justify-between max-w-sm px-stack-md">
+<!-- Undo -->
+<button class="flex flex-col items-center gap-1 active:scale-90 transition-transform">
+<div class="h-14 w-14 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-on-surface-variant" data-icon="undo">undo</span>
+</div>
+<span class="font-label-caps text-[10px]">撤销</span>
+</button>
+<!-- Skip -->
+<button class="flex flex-col items-center gap-1 active:scale-90 transition-transform">
+<div class="px-8 h-14 rounded-full bg-surface-container-high flex items-center justify-center hover:opacity-80">
+<span class="font-title-sm text-title-sm text-primary">跳过</span>
+</div>
+<span class="font-label-caps text-[10px]">下一张</span>
+</button>
+<!-- Star -->
+<button class="flex flex-col items-center gap-1 active:scale-90 transition-transform">
+<div class="h-14 w-14 rounded-full border border-outline-variant flex items-center justify-center hover:bg-surface-container-high">
+<span class="material-symbols-outlined text-secondary" data-icon="star" data-weight="fill" style="font-variation-settings: 'FILL' 1;">star</span>
+</div>
+<span class="font-label-caps text-[10px]">收藏</span>
+</button>
+</div>
+</main>
+<!-- Floating Basket Summary (High Contrast Element) -->
+<div class="fixed bottom-10 right-container-margin z-50 flex items-center gap-stack-sm bg-tertiary-container px-stack-md py-stack-sm rounded-full shadow-lg border border-outline-variant active:scale-95 transition-transform">
+<div class="relative">
+<span class="material-symbols-outlined text-on-tertiary-container" data-icon="shopping_basket">shopping_basket</span>
+<span class="absolute -top-1 -right-1 bg-secondary-container text-on-secondary-container text-[8px] font-bold h-4 w-4 rounded-full flex items-center justify-center">12</span>
+</div>
+<span class="font-label-caps text-label-caps text-on-tertiary-container">待处理</span>
+<button class="h-8 w-8 rounded-full bg-secondary-container flex items-center justify-center ml-2">
+<span class="material-symbols-outlined text-on-secondary-container text-sm" data-icon="arrow_forward">arrow_forward</span>
+</button>
+</div>
+<script>
+        const card = document.getElementById('photo-card');
+        let startY = 0;
+        let currentY = 0;
+
+        card.addEventListener('touchstart', (e) => {
+            startY = e.touches[0].clientY;
+            card.style.transition = 'none';
+        });
+
+        card.addEventListener('touchmove', (e) => {
+            currentY = e.touches[0].clientY - startY;
+            // Dampen movement
+            const transformY = currentY * 0.5;
+            card.style.transform = `translateY(${transformY}px) rotate(${transformY * 0.05}deg)`;
+            
+            // Visual feedback for keep/delete
+            if (transformY < -50) {
+                card.style.boxShadow = '0 0 40px rgba(0, 36, 52, 0.2)';
+            } else if (transformY > 50) {
+                card.style.boxShadow = '0 0 40px rgba(186, 26, 26, 0.2)';
+            } else {
+                card.style.boxShadow = '';
+            }
+        });
+
+        card.addEventListener('touchend', () => {
+            card.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+            card.style.transform = 'translateY(0) rotate(0deg)';
+            card.style.boxShadow = '';
+        });
+
+        // Simple desktop click simulation
+        card.addEventListener('mousedown', (e) => {
+            startY = e.clientY;
+            const onMouseMove = (e) => {
+                currentY = e.clientY - startY;
+                card.style.transform = `translateY(${currentY * 0.3}px) rotate(${currentY * 0.02}deg)`;
+            };
+            const onMouseUp = () => {
+                card.style.transition = 'all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                card.style.transform = 'translateY(0) rotate(0deg)';
+                window.removeEventListener('mousemove', onMouseMove);
+                window.removeEventListener('mouseup', onMouseUp);
+            };
+            window.addEventListener('mousemove', onMouseMove);
+            window.addEventListener('mouseup', onMouseUp);
+        });
+    </script>
+</body></html>
