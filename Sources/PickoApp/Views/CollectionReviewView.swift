@@ -3,6 +3,12 @@ import PickoCore
 import PickoPhotos
 import SwiftUI
 
+enum CollectionPreviewStripLayout {
+    static let height: CGFloat = 112
+    static let targetPixelSize = 360
+    static let targetPixelHeight = targetPixelSize
+}
+
 public struct CollectionReviewView: View {
     public enum Mode: String, Identifiable {
         case time
@@ -233,18 +239,18 @@ public struct CollectionReviewView: View {
                     PickoThumbnailView(
                         asset: asset,
                         thumbnailProvider: model.thumbnailProvider,
-                        targetPixelWidth: 220,
-                        targetPixelHeight: 220,
+                        targetPixelWidth: CollectionPreviewStripLayout.targetPixelSize,
+                        targetPixelHeight: CollectionPreviewStripLayout.targetPixelHeight,
                         contentMode: .fill
                     )
-                    .frame(height: 74)
+                    .frame(height: CollectionPreviewStripLayout.height)
                     .frame(maxWidth: .infinity)
                     .clipShape(RoundedRectangle(cornerRadius: PickoDesign.Radius.sm))
                     .background(PickoDesign.ColorToken.surfaceLow, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.sm))
                 }
             }
         }
-        .frame(minHeight: 74)
+        .frame(minHeight: CollectionPreviewStripLayout.height)
     }
 
     private func placeMapPanel(groups: [PhotoCollectionGroup]) -> some View {

@@ -307,6 +307,11 @@ final class PickoAppTests: XCTestCase {
         XCTAssertNotNil(placeView)
     }
 
+    func testCollectionPreviewStripUsesReadablePhotoHeight() {
+        XCTAssertGreaterThanOrEqual(CollectionPreviewStripLayout.height, 108)
+        XCTAssertGreaterThanOrEqual(CollectionPreviewStripLayout.targetPixelHeight, 320)
+    }
+
     func testPlaceMapPresentationUsesRealGroupCoordinates() {
         let groups = [
             makePlaceGroup(
