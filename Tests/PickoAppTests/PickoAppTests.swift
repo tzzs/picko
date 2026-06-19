@@ -1,4 +1,5 @@
 import XCTest
+import MapKit
 import PickoCore
 import PickoPhotos
 @testable import PickoApp
@@ -301,6 +302,36 @@ final class PickoAppTests: XCTestCase {
 
         XCTAssertNotNil(timeView)
         XCTAssertNotNil(placeView)
+    }
+
+    func testPlaceMapPresentationUsesRealGroupCoordinates() {
+        let groups = [
+            makePlaceGroup(
+                id: "shanghai",
+                title: "上海 · 武康路",
+                latitude: 31.2304,
+                longitude: 121.4737,
+                assetIds: ["a1", "a2"]
+            ),
+            makePlaceGroup(
+                id: "hangzhou",
+                title: "杭州 · 西湖",
+                latitude: 30.2741,
+                longitude: 120.1551,
+                assetIds: ["a3"]
+            )
+        ]
+
+        let presentation = PlaceMapPresentation(groups: groups)
+
+        XCTAssertEqual(presentation.annotations.map(\.id), ["shanghai", "hangzhou"])
+        XCTAssertEqual(presentation.annotations.map(\.count), [2, 1])
+        XCTAssertEqual(presentation.annotations.first?.latitude ?? 0, 31.2304, accuracy: 0.0001)
+        XCTAssertEqual(presentation.annotations.first?.longitude ?? 0, 121.4737, accuracy: 0.0001)
+        XCTAssertEqual(presentation.region.center.latitude, 30.75225, accuracy: 0.01)
+        XCTAssertEqual(presentation.region.center.longitude, 120.8144, accuracy: 0.01)
+        XCTAssertGreaterThan(presentation.region.span.latitudeDelta, 0.9)
+        XCTAssertGreaterThan(presentation.region.span.longitudeDelta, 1.3)
     }
 
     func testStartingReviewScopeLimitsCurrentAssetToSelectedUnreviewedAssets() {
@@ -872,6 +903,26 @@ final class PickoAppTests: XCTestCase {
             duration: nil,
             thumbnailHash: nil,
             perceptualHash: nil
+        )
+    }
+
+    private func makePlaceGroup(
+        id: String,
+        title: String,
+        latitude: Double,
+        longitude: Double,
+        assetIds: [PhotoAsset.ID]
+    ) -> PhotoCollectionGroup {
+        PhotoCollectionGroup(
+            id: id,
+            kind: .place,
+            title: title,
+            subtitle: "\(assetIds.count) 张 · 0 组相似",
+            assetIds: assetIds,
+            previewAssetIds: assetIds,
+            similarGroupCount: 0,
+            sortDate: Date(timeIntervalSince1970: 0),
+            representativeLocation: .init(latitude: latitude, longitude: longitude)
         )
     }
 

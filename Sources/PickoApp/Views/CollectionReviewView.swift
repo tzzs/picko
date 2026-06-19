@@ -1,3 +1,4 @@
+import MapKit
 import PickoCore
 import PickoPhotos
 import SwiftUI
@@ -243,7 +244,9 @@ public struct CollectionReviewView: View {
     }
 
     private func placeMapPanel(groups: [PhotoCollectionGroup]) -> some View {
-        VStack(alignment: .leading, spacing: PickoDesign.Spacing.gutter) {
+        let mapPresentation = PlaceMapPresentation(groups: groups)
+
+        return VStack(alignment: .leading, spacing: PickoDesign.Spacing.gutter) {
             HStack {
                 Label("地图聚合", systemImage: "map")
                     .font(.system(size: 13, weight: .semibold, design: .rounded))
@@ -254,27 +257,19 @@ public struct CollectionReviewView: View {
                     .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
             }
 
-            GeometryReader { proxy in
-                ZStack {
-                    RoundedRectangle(cornerRadius: PickoDesign.Radius.lg)
-                        .fill(PickoDesign.ColorToken.primarySoft.opacity(0.45))
-
-                    ForEach(0..<4, id: \.self) { index in
-                        Path { path in
-                            let y = proxy.size.height * CGFloat(index + 1) / 5
-                            path.move(to: CGPoint(x: 12, y: y))
-                            path.addLine(to: CGPoint(x: proxy.size.width - 12, y: y))
-                        }
-                        .stroke(PickoDesign.ColorToken.primary.opacity(0.12), lineWidth: 1)
-                    }
-
-                    ForEach(Array(groups.prefix(6).enumerated()), id: \.element.id) { index, group in
-                        placePin(group: group)
-                            .position(pinPosition(index: index, in: proxy.size))
+            Map(position: .constant(.region(mapPresentation.region)), interactionModes: []) {
+                ForEach(mapPresentation.annotations) { annotation in
+                    Annotation(annotation.title, coordinate: annotation.coordinate) {
+                        placePin(count: annotation.count)
                     }
                 }
             }
             .frame(height: 160)
+            .clipShape(RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
+            .overlay {
+                RoundedRectangle(cornerRadius: PickoDesign.Radius.lg)
+                    .stroke(PickoDesign.ColorToken.outline.opacity(0.35), lineWidth: 1)
+            }
         }
         .padding(PickoDesign.Spacing.md)
         .background(PickoDesign.ColorToken.surface, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
@@ -284,30 +279,17 @@ public struct CollectionReviewView: View {
         }
     }
 
-    private func placePin(group: PhotoCollectionGroup) -> some View {
+    private func placePin(count: Int) -> some View {
         HStack(spacing: 4) {
             Image(systemName: "mappin.circle.fill")
                 .font(.system(size: 16, weight: .semibold))
-            Text("\(group.assetIds.count)")
+            Text("\(count)")
                 .font(.system(size: 11, weight: .bold, design: .monospaced))
         }
         .padding(.horizontal, 8)
         .padding(.vertical, 5)
         .background(PickoDesign.ColorToken.primary, in: Capsule())
         .foregroundStyle(.white)
-    }
-
-    private func pinPosition(index: Int, in size: CGSize) -> CGPoint {
-        let positions: [CGPoint] = [
-            CGPoint(x: 0.22, y: 0.36),
-            CGPoint(x: 0.68, y: 0.42),
-            CGPoint(x: 0.45, y: 0.68),
-            CGPoint(x: 0.78, y: 0.72),
-            CGPoint(x: 0.32, y: 0.58),
-            CGPoint(x: 0.58, y: 0.28)
-        ]
-        let normalized = positions[index % positions.count]
-        return CGPoint(x: normalized.x * size.width, y: normalized.y * size.height)
     }
 
     private func emptyState(title: String, message: String, systemImage: String) -> some View {
