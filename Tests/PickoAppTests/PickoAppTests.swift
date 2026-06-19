@@ -369,6 +369,21 @@ final class PickoAppTests: XCTestCase {
         XCTAssertEqual(thumbnailRegion.center.longitude, 121.5, accuracy: 0.0001)
     }
 
+    func testPlaceMapPresentationKeepsDetailPinsAwayFromEdges() {
+        let groups = [
+            makePlaceGroup(id: "northwest", title: "西北", latitude: 32.0, longitude: 121.0, assetIds: ["a1"]),
+            makePlaceGroup(id: "southeast", title: "东南", latitude: 31.0, longitude: 122.0, assetIds: ["a2"])
+        ]
+
+        let presentation = PlaceMapPresentation(groups: groups)
+        let detailRegion = presentation.detailRegion(forAspectRatio: 0.46)
+
+        XCTAssertGreaterThanOrEqual(detailRegion.span.latitudeDelta, detailRegion.span.longitudeDelta / 0.46)
+        XCTAssertGreaterThanOrEqual(detailRegion.span.longitudeDelta, 2.4)
+        XCTAssertEqual(detailRegion.center.latitude, 31.5, accuracy: 0.0001)
+        XCTAssertEqual(detailRegion.center.longitude, 121.5, accuracy: 0.0001)
+    }
+
     func testPlaceMapPresentationPrefersMapTapToExpand() {
         let presentation = PlaceMapPresentation(groups: [
             makePlaceGroup(id: "shanghai", title: "上海", latitude: 31.2304, longitude: 121.4737, assetIds: ["a1"])

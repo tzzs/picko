@@ -401,7 +401,7 @@ private struct PlaceMapDetailView: View {
 
     init(presentation: PlaceMapPresentation) {
         self.presentation = presentation
-        _mapPosition = State(initialValue: .region(presentation.fittingRegion(forAspectRatio: 0.46)))
+        _mapPosition = State(initialValue: .region(presentation.detailRegion(forAspectRatio: 0.46)))
     }
 
     var body: some View {
@@ -432,7 +432,7 @@ private struct PlaceMapDetailView: View {
     }
 
     private func resetMapPosition(for size: CGSize) {
-        mapPosition = .region(presentation.fittingRegion(forAspectRatio: aspectRatio(for: size)))
+        mapPosition = .region(presentation.detailRegion(forAspectRatio: aspectRatio(for: size)))
     }
 
     private func aspectRatio(for size: CGSize) -> Double {

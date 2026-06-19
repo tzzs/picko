@@ -55,6 +55,10 @@ struct PlaceMapPresentation: Identifiable {
         Self.region(for: annotations, aspectRatio: aspectRatio, paddingMultiplier: 2.4)
     }
 
+    func detailRegion(forAspectRatio aspectRatio: Double) -> MKCoordinateRegion {
+        Self.region(for: annotations, aspectRatio: aspectRatio, paddingMultiplier: 2.4)
+    }
+
     private static func region(
         for annotations: [Annotation],
         aspectRatio: Double = 1.0,
