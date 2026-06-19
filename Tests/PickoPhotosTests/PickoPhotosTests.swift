@@ -98,6 +98,30 @@ final class PickoPhotosTests: XCTestCase {
         XCTAssertEqual(source.requestCount, 1)
     }
 
+    func testMemoryThumbnailProviderCoalescesConcurrentRequests() async throws {
+        let source = CountingThumbnailProvider(data: Data([4, 5, 6]), delayNanoseconds: 20_000_000)
+        let cache = MemoryCachingPhotoThumbnailProvider(source: source)
+        let request = PhotoThumbnailRequest(assetId: "a1", targetPixelWidth: 120, targetPixelHeight: 90)
+
+        let values = try await withThrowingTaskGroup(of: Data?.self) { group in
+            for _ in 0..<40 {
+                group.addTask {
+                    try await cache.thumbnailData(for: request)
+                }
+            }
+
+            var values: [Data?] = []
+            for try await value in group {
+                values.append(value)
+            }
+            return values
+        }
+
+        XCTAssertEqual(values.count, 40)
+        XCTAssertTrue(values.allSatisfy { $0 == Data([4, 5, 6]) })
+        XCTAssertEqual(source.requestCount, 1)
+    }
+
     func testIndexingBenchmarkReportsFetchedSnapshotCount() async throws {
         let benchmark = AssetIndexingBenchmark(indexer: SyntheticPhotoAssetIndexer(assetCount: 1_000))
 
@@ -146,14 +170,32 @@ final class PickoPhotosTests: XCTestCase {
 
 private final class CountingThumbnailProvider: PhotoThumbnailProviding {
     private let data: Data?
-    private(set) var requestCount = 0
+    private let delayNanoseconds: UInt64
+    private let lock = NSLock()
+    private var lockedRequestCount = 0
 
-    init(data: Data?) {
+    var requestCount: Int {
+        lock.lock()
+        defer { lock.unlock() }
+        return lockedRequestCount
+    }
+
+    init(data: Data?, delayNanoseconds: UInt64 = 0) {
         self.data = data
+        self.delayNanoseconds = delayNanoseconds
     }
 
     func thumbnailData(for request: PhotoThumbnailRequest) async throws -> Data? {
-        requestCount += 1
+        incrementRequestCount()
+        if delayNanoseconds > 0 {
+            try await Task.sleep(nanoseconds: delayNanoseconds)
+        }
         return data
+    }
+
+    private func incrementRequestCount() {
+        lock.lock()
+        defer { lock.unlock() }
+        lockedRequestCount += 1
     }
 }
