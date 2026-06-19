@@ -2,7 +2,7 @@
 
 日期：2026-06-13
 来源：用户在真机 `TZZ's iPhone 6s` 上运行 Picko 后的口述反馈
-状态：待评审；本文只整理优化方案，不直接修改代码
+状态：已实现并完成本地/模拟器验证；等待 `TZZ's iPhone 6s` 真机复验
 
 ## 1. 目标
 
@@ -13,6 +13,39 @@
 3. 统一中文界面、本地化、空状态和按钮可读性。
 4. 修复照片预览页无法交互的严重可用性问题。
 5. 让首页、Similar、Basket 三个核心入口的视觉关系更自然。
+
+## 1.1 当前进度
+
+更新日期：2026-06-20
+
+整体结论：上述 10 个反馈项均已在 `codex/iphone-real-device-ux-fixes` 分支实现，对应 PR 为 `#5 fix(ios): polish iPhone real-device UX`。代码侧已通过自动测试、隐私日志审计、Phase 5 本地验证、iOS 模拟器 UI 测试和平台验证；由于 Codex 无法直接读取用户真机屏幕，最后一步仍需要在 `TZZ's iPhone 6s` 上按本文真机验收清单复验。
+
+| 问题 | 进度 | 实现摘要 |
+| --- | --- | --- |
+| 2.1 预览页不可用 | 已修复 | 新增 `PhotoPreviewView`，接入单张整理、相似组和预删除篮，支持完整显示、缩放、拖动、关闭和复核动作。 |
+| 2.2 相似照片未检出 | 已修复 | `SimilarityEngine` 新增真实图库默认配置，在 hash 缺失时使用时间、尺寸、文件大小和地点的保守 metadata fallback 分组。 |
+| 2.3 首页清除状态入口 | 已修复 | 移除 tab toolbar 中的全局清除状态按钮，避免普通用户误触调试入口。 |
+| 2.4 首页三项指标突兀 | 已修复 | 将“图库 / 相似组 / 预删除篮”改为更轻量的紧凑状态区，并保留跳转语义。 |
+| 2.5 Basket 禁用态不可读 | 已修复 | 禁用按钮改为可读样式，并补充“空篮 / 样例图库”的中文禁用原因。 |
+| 2.6 Basket 英文与 Zero KB | 已修复 | 新增 `PickoCopy` 和中文空间格式化，替换 `Savings Overview`、`Confirm with Photos`、`Clear Basket`、`Zero KB` 等文案。 |
+| 2.7 Basket 空设置图标 | 已修复 | 移除右上角无响应设置图标，不保留空 action 控件。 |
+| 2.8 Similar 空态背景不一致 | 已修复 | 新增页面级空状态样式，背景与 app 页面背景一致，并提供下一步动作。 |
+| 2.9 首页时间/地点无法点击 | 已修复 | 时间和地点入口改为 `NavigationLink`，进入可用的合集占位页面。 |
+| 2.10 Tab 和主流程英文 | 已修复 | Tab 和首页、复核、相似、预删除篮、授权失败等主流程文案已中文化。 |
+
+已完成验证：
+
+1. `swift test`
+2. `scripts/audit-privacy-logging.sh`
+3. `scripts/verify-phase-5-local.sh`
+4. XcodeBuildMCP `test_sim` on `Picko` / `iPhone 17 Pro`：6 passed, 0 failed
+5. XcodeBuildMCP `build_run_sim` + 截图烟测
+6. `scripts/verify-phase-5-platform.sh` 使用新的临时 DerivedData 路径通过
+
+待复验：
+
+1. 在 `TZZ's iPhone 6s` 上安装最新 PR 构建。
+2. 按本文“真机验收”清单确认真实 Photos 授权、6 张相似照片检出、预览缩放/退出、Basket 禁用态和系统 Photos 确认前取消。
 
 ## 2. 问题清单与优先级
 
