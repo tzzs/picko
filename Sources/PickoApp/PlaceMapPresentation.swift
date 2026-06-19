@@ -21,6 +21,9 @@ struct PlaceMapPresentation: Identifiable {
     var interactionModes: MapInteractionModes {
         [.pan, .zoom]
     }
+    var prefersMapTapToExpand: Bool {
+        true
+    }
 
     var id: String {
         annotations.map(\.id).joined(separator: "|")
@@ -44,7 +47,11 @@ struct PlaceMapPresentation: Identifiable {
         region = Self.region(for: annotations)
     }
 
-    private static func region(for annotations: [Annotation]) -> MKCoordinateRegion {
+    func fittingRegion(forAspectRatio aspectRatio: Double) -> MKCoordinateRegion {
+        Self.region(for: annotations, aspectRatio: aspectRatio)
+    }
+
+    private static func region(for annotations: [Annotation], aspectRatio: Double = 1.0) -> MKCoordinateRegion {
         guard !annotations.isEmpty else {
             return MKCoordinateRegion(
                 center: CLLocationCoordinate2D(latitude: 0, longitude: 0),
@@ -63,9 +70,20 @@ struct PlaceMapPresentation: Identifiable {
             latitude: (minLatitude + maxLatitude) / 2,
             longitude: (minLongitude + maxLongitude) / 2
         )
+
+        let normalizedAspectRatio = max(aspectRatio, 0.1)
+        var latitudeDelta = max((maxLatitude - minLatitude) * 1.6, 0.08)
+        var longitudeDelta = max((maxLongitude - minLongitude) * 1.6, 0.08)
+
+        if longitudeDelta < latitudeDelta * normalizedAspectRatio {
+            longitudeDelta = latitudeDelta * normalizedAspectRatio
+        } else if latitudeDelta < longitudeDelta / normalizedAspectRatio {
+            latitudeDelta = longitudeDelta / normalizedAspectRatio
+        }
+
         let span = MKCoordinateSpan(
-            latitudeDelta: max((maxLatitude - minLatitude) * 1.6, 0.08),
-            longitudeDelta: max((maxLongitude - minLongitude) * 1.6, 0.08)
+            latitudeDelta: min(latitudeDelta, 180),
+            longitudeDelta: min(longitudeDelta, 360)
         )
 
         return MKCoordinateRegion(center: center, span: span)

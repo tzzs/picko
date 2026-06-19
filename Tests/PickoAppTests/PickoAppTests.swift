@@ -337,6 +337,31 @@ final class PickoAppTests: XCTestCase {
         XCTAssertGreaterThan(presentation.region.span.longitudeDelta, 1.3)
     }
 
+    func testPlaceMapPresentationFitsAllLocationsForThumbnailAndDetailAspects() {
+        let groups = [
+            makePlaceGroup(id: "west", title: "西侧", latitude: 31.2304, longitude: 121.4737, assetIds: ["a1"]),
+            makePlaceGroup(id: "east", title: "东侧", latitude: 31.2304, longitude: 122.4737, assetIds: ["a2"])
+        ]
+
+        let presentation = PlaceMapPresentation(groups: groups)
+        let thumbnailRegion = presentation.fittingRegion(forAspectRatio: 2.0)
+        let detailRegion = presentation.fittingRegion(forAspectRatio: 0.46)
+
+        XCTAssertEqual(thumbnailRegion.center.latitude, 31.2304, accuracy: 0.0001)
+        XCTAssertEqual(thumbnailRegion.center.longitude, 121.9737, accuracy: 0.0001)
+        XCTAssertGreaterThanOrEqual(thumbnailRegion.span.longitudeDelta, thumbnailRegion.span.latitudeDelta * 2.0)
+        XCTAssertGreaterThanOrEqual(detailRegion.span.latitudeDelta, detailRegion.span.longitudeDelta / 0.46)
+        XCTAssertGreaterThanOrEqual(detailRegion.span.longitudeDelta, 1.6)
+    }
+
+    func testPlaceMapPresentationPrefersMapTapToExpand() {
+        let presentation = PlaceMapPresentation(groups: [
+            makePlaceGroup(id: "shanghai", title: "上海", latitude: 31.2304, longitude: 121.4737, assetIds: ["a1"])
+        ])
+
+        XCTAssertTrue(presentation.prefersMapTapToExpand)
+    }
+
     func testPlaceMapPresentationAllowsPanAndZoom() {
         let presentation = PlaceMapPresentation(groups: [
             makePlaceGroup(id: "shanghai", title: "上海", latitude: 31.2304, longitude: 121.4737, assetIds: ["a1"])

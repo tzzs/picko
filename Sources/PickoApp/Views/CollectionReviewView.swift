@@ -301,7 +301,7 @@ private struct PlaceMapPanel: View {
     init(presentation: PlaceMapPresentation, onExpand: @escaping () -> Void) {
         self.presentation = presentation
         self.onExpand = onExpand
-        _mapPosition = State(initialValue: .region(presentation.region))
+        _mapPosition = State(initialValue: .region(presentation.fittingRegion(forAspectRatio: 2.0)))
     }
 
     var body: some View {
@@ -316,7 +316,7 @@ private struct PlaceMapPanel: View {
                     .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
             }
 
-            map
+            fittedMap
                 .frame(height: 180)
                 .clipShape(RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
                 .overlay(alignment: .topTrailing) {
@@ -336,6 +336,18 @@ private struct PlaceMapPanel: View {
         }
     }
 
+    private var fittedMap: some View {
+        GeometryReader { proxy in
+            map
+                .onAppear {
+                    resetMapPosition(for: proxy.size)
+                }
+                .onChange(of: presentation.id) {
+                    resetMapPosition(for: proxy.size)
+                }
+        }
+    }
+
     private var map: some View {
         Map(position: $mapPosition, interactionModes: presentation.interactionModes) {
             ForEach(presentation.annotations) { annotation in
@@ -346,6 +358,26 @@ private struct PlaceMapPanel: View {
         }
         .accessibilityLabel("地点聚合地图")
         .accessibilityHint("可拖动、缩放，或打开大地图查看")
+        .contentShape(Rectangle())
+        .simultaneousGesture(
+            TapGesture().onEnded {
+                guard presentation.prefersMapTapToExpand else {
+                    return
+                }
+                onExpand()
+            }
+        )
+    }
+
+    private func resetMapPosition(for size: CGSize) {
+        mapPosition = .region(presentation.fittingRegion(forAspectRatio: aspectRatio(for: size)))
+    }
+
+    private func aspectRatio(for size: CGSize) -> Double {
+        guard size.height > 0 else {
+            return 1
+        }
+        return max(Double(size.width / size.height), 0.1)
     }
 
     private var expandButton: some View {
@@ -369,16 +401,21 @@ private struct PlaceMapDetailView: View {
 
     init(presentation: PlaceMapPresentation) {
         self.presentation = presentation
-        _mapPosition = State(initialValue: .region(presentation.region))
+        _mapPosition = State(initialValue: .region(presentation.fittingRegion(forAspectRatio: 0.46)))
     }
 
     var body: some View {
         NavigationStack {
-            Map(position: $mapPosition, interactionModes: presentation.interactionModes) {
-                ForEach(presentation.annotations) { annotation in
-                    Annotation(annotation.title, coordinate: annotation.coordinate) {
-                        PlaceMapPin(count: annotation.count)
+            GeometryReader { proxy in
+                Map(position: $mapPosition, interactionModes: presentation.interactionModes) {
+                    ForEach(presentation.annotations) { annotation in
+                        Annotation(annotation.title, coordinate: annotation.coordinate) {
+                            PlaceMapPin(count: annotation.count)
+                        }
                     }
+                }
+                .onAppear {
+                    resetMapPosition(for: proxy.size)
                 }
             }
             .ignoresSafeArea(edges: .bottom)
@@ -392,6 +429,17 @@ private struct PlaceMapDetailView: View {
             }
             .accessibilityLabel("地点聚合大地图")
         }
+    }
+
+    private func resetMapPosition(for size: CGSize) {
+        mapPosition = .region(presentation.fittingRegion(forAspectRatio: aspectRatio(for: size)))
+    }
+
+    private func aspectRatio(for size: CGSize) -> Double {
+        guard size.height > 0 else {
+            return 1
+        }
+        return max(Double(size.width / size.height), 0.1)
     }
 }
 
