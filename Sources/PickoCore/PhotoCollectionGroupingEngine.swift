@@ -156,7 +156,39 @@ public struct PhotoCollectionGroupingEngine: Sendable {
     }
 
     private func fallbackPlaceTitle(for location: PhotoAsset.Location) -> String {
-        String(format: "附近 · %.2f, %.2f", location.latitude, location.longitude)
+        if let region = localRegionTitle(for: location) {
+            return region
+        }
+
+        return String(format: "附近 · %.2f, %.2f", location.latitude, location.longitude)
+    }
+
+    private func localRegionTitle(for location: PhotoAsset.Location) -> String? {
+        let latitude = location.latitude
+        let longitude = location.longitude
+
+        guard (63.0...67.0).contains(latitude),
+              (-25.0 ... -13.0).contains(longitude) else {
+            return nil
+        }
+
+        if latitude < 64.35 {
+            return "冰岛南部"
+        }
+
+        if longitude > -16.7 {
+            return "冰岛东部"
+        }
+
+        if latitude > 65.2 {
+            return "冰岛北部"
+        }
+
+        if longitude < -21.0 {
+            return "冰岛西部"
+        }
+
+        return "冰岛"
     }
 
     private func timeBucket(for date: Date, now: Date, calendar: Calendar) -> TimeBucket {

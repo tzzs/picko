@@ -29,23 +29,75 @@ public actor SystemPlaceLabelResolver: PlaceLabelResolving {
     }
 
     private static func label(from placemark: CLPlacemark) -> String? {
-        let city = firstNonEmpty([
-            placemark.locality,
-            placemark.subAdministrativeArea,
-            placemark.administrativeArea
-        ])
-        let place = firstNonEmpty([
-            placemark.name,
-            placemark.subLocality,
-            placemark.thoroughfare,
-            placemark.areasOfInterest?.first
-        ])
+        PhotoPlaceLabelFormatter.label(
+            city: firstNonEmpty([
+                placemark.locality,
+                placemark.subAdministrativeArea,
+                placemark.administrativeArea
+            ]),
+            region: firstNonEmpty([
+                placemark.administrativeArea,
+                placemark.subAdministrativeArea
+            ]),
+            country: placemark.country,
+            place: firstNonEmpty([
+                placemark.name,
+                placemark.subLocality,
+                placemark.thoroughfare
+            ]),
+            areaOfInterest: placemark.areasOfInterest?.first,
+            naturalFeature: firstNonEmpty([
+                placemark.inlandWater,
+                placemark.ocean
+            ])
+        )
+    }
 
-        if let city, let place, !place.localizedCaseInsensitiveContains(city) {
-            return "\(city) · \(place)"
+    private static func firstNonEmpty(_ values: [String?]) -> String? {
+        values
+            .compactMap { value in
+                value?.trimmingCharacters(in: .whitespacesAndNewlines)
+            }
+            .first { !$0.isEmpty }
+    }
+}
+
+enum PhotoPlaceLabelFormatter {
+    static func label(
+        city: String?,
+        region: String?,
+        country: String?,
+        place: String?,
+        areaOfInterest: String?,
+        naturalFeature: String?
+    ) -> String? {
+        let city = firstNonEmpty([city])
+        let detail = firstNonEmpty([areaOfInterest, place, naturalFeature])
+
+        if let city {
+            return combinedLabel(context: city, detail: detail)
         }
 
-        return city
+        let widerContext = firstNonEmpty([country, region])
+        if let widerContext {
+            return combinedLabel(context: widerContext, detail: detail)
+        }
+
+        return detail
+    }
+
+    private static func combinedLabel(context: String, detail: String?) -> String {
+        guard let detail, !isDuplicate(context: context, detail: detail) else {
+            return context
+        }
+
+        return "\(context) · \(detail)"
+    }
+
+    private static func isDuplicate(context: String, detail: String) -> Bool {
+        let foldedContext = context.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+        let foldedDetail = detail.folding(options: [.caseInsensitive, .diacriticInsensitive], locale: .current)
+        return foldedContext == foldedDetail || foldedDetail.contains(foldedContext)
     }
 
     private static func firstNonEmpty(_ values: [String?]) -> String? {

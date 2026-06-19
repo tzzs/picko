@@ -223,6 +223,32 @@ final class PickoAppTests: XCTestCase {
         XCTAssertEqual(SingleReviewLayout.mainImageHeight(availableHeight: 900), 390, accuracy: 0.01)
     }
 
+    func testPlaceLabelFormatterUsesCountryAndNaturalFeatureWhenCityIsMissing() {
+        let label = PhotoPlaceLabelFormatter.label(
+            city: nil,
+            region: nil,
+            country: "冰岛",
+            place: nil,
+            areaOfInterest: "Skogafoss",
+            naturalFeature: nil
+        )
+
+        XCTAssertEqual(label, "冰岛 · Skogafoss")
+    }
+
+    func testPlaceLabelFormatterUsesNaturalFeatureBeforeCoordinateFallback() {
+        let label = PhotoPlaceLabelFormatter.label(
+            city: nil,
+            region: "南部区",
+            country: nil,
+            place: nil,
+            areaOfInterest: nil,
+            naturalFeature: "大西洋"
+        )
+
+        XCTAssertEqual(label, "南部区 · 大西洋")
+    }
+
     func testSimilarGroupPresentationExplainsKeepNAndEditableRecommendation() throws {
         let model = PickoAppModel.preview()
 

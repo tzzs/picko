@@ -330,6 +330,19 @@ final class PickoCoreTests: XCTestCase {
         XCTAssertEqual(groups.first?.representativeLocation?.latitude ?? 0, 31.2304, accuracy: 0.001)
     }
 
+    func testPlaceCollectionGroupsUseLocalRegionFallbackBeforeCoordinates() async {
+        let assets = [
+            makeAsset(id: "iceland", location: .init(latitude: 63.53, longitude: -19.51))
+        ]
+
+        let groups = await PhotoCollectionGroupingEngine().placeGroups(
+            from: assets,
+            resolver: FakePlaceLabelResolver(labels: [:])
+        )
+
+        XCTAssertEqual(groups.first?.title, "冰岛南部")
+    }
+
 }
 
 private extension PickoCoreTests {
