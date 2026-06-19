@@ -41,6 +41,7 @@ public struct CollectionReviewView: View {
     @Bindable private var model: PickoAppModel
     @State private var placeGroups: [PhotoCollectionGroup] = []
     @State private var isLoadingPlaceGroups = false
+    @State private var expandedPlaceMap: PlaceMapPresentation?
 
     private let mode: Mode
     private let groupingEngine: PhotoCollectionGroupingEngine
@@ -77,6 +78,9 @@ public struct CollectionReviewView: View {
         .navigationTitle(mode.title)
         .pickoInlineNavigationTitle()
         .pickoScreenBackground()
+        .sheet(item: $expandedPlaceMap) { presentation in
+            PlaceMapDetailView(presentation: presentation)
+        }
         .task(id: placeTaskKey) {
             guard mode == .place else {
                 return
@@ -246,50 +250,9 @@ public struct CollectionReviewView: View {
     private func placeMapPanel(groups: [PhotoCollectionGroup]) -> some View {
         let mapPresentation = PlaceMapPresentation(groups: groups)
 
-        return VStack(alignment: .leading, spacing: PickoDesign.Spacing.gutter) {
-            HStack {
-                Label("地图聚合", systemImage: "map")
-                    .font(.system(size: 13, weight: .semibold, design: .rounded))
-                    .foregroundStyle(PickoDesign.ColorToken.primary)
-                Spacer()
-                Text("\(groups.count) 个地点")
-                    .font(.system(size: 11, weight: .medium, design: .monospaced))
-                    .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
-            }
-
-            Map(position: .constant(.region(mapPresentation.region)), interactionModes: []) {
-                ForEach(mapPresentation.annotations) { annotation in
-                    Annotation(annotation.title, coordinate: annotation.coordinate) {
-                        placePin(count: annotation.count)
-                    }
-                }
-            }
-            .frame(height: 160)
-            .clipShape(RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
-            .overlay {
-                RoundedRectangle(cornerRadius: PickoDesign.Radius.lg)
-                    .stroke(PickoDesign.ColorToken.outline.opacity(0.35), lineWidth: 1)
-            }
+        return PlaceMapPanel(presentation: mapPresentation) {
+            expandedPlaceMap = mapPresentation
         }
-        .padding(PickoDesign.Spacing.md)
-        .background(PickoDesign.ColorToken.surface, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
-        .overlay {
-            RoundedRectangle(cornerRadius: PickoDesign.Radius.lg)
-                .stroke(PickoDesign.ColorToken.outline.opacity(0.45), lineWidth: 1)
-        }
-    }
-
-    private func placePin(count: Int) -> some View {
-        HStack(spacing: 4) {
-            Image(systemName: "mappin.circle.fill")
-                .font(.system(size: 16, weight: .semibold))
-            Text("\(count)")
-                .font(.system(size: 11, weight: .bold, design: .monospaced))
-        }
-        .padding(.horizontal, 8)
-        .padding(.vertical, 5)
-        .background(PickoDesign.ColorToken.primary, in: Capsule())
-        .foregroundStyle(.white)
     }
 
     private func emptyState(title: String, message: String, systemImage: String) -> some View {
@@ -326,6 +289,126 @@ public struct CollectionReviewView: View {
         return model.assets
             .map { "\($0.id):\($0.status)" }
             .joined(separator: "|")
+    }
+}
+
+private struct PlaceMapPanel: View {
+    let presentation: PlaceMapPresentation
+    var onExpand: () -> Void
+
+    @State private var mapPosition: MapCameraPosition
+
+    init(presentation: PlaceMapPresentation, onExpand: @escaping () -> Void) {
+        self.presentation = presentation
+        self.onExpand = onExpand
+        _mapPosition = State(initialValue: .region(presentation.region))
+    }
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: PickoDesign.Spacing.gutter) {
+            HStack {
+                Label("地图聚合", systemImage: "map")
+                    .font(.system(size: 13, weight: .semibold, design: .rounded))
+                    .foregroundStyle(PickoDesign.ColorToken.primary)
+                Spacer()
+                Text("\(presentation.annotations.count) 个地点")
+                    .font(.system(size: 11, weight: .medium, design: .monospaced))
+                    .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+            }
+
+            map
+                .frame(height: 180)
+                .clipShape(RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
+                .overlay(alignment: .topTrailing) {
+                    expandButton
+                        .padding(10)
+                }
+                .overlay {
+                    RoundedRectangle(cornerRadius: PickoDesign.Radius.lg)
+                        .stroke(PickoDesign.ColorToken.outline.opacity(0.35), lineWidth: 1)
+                }
+        }
+        .padding(PickoDesign.Spacing.md)
+        .background(PickoDesign.ColorToken.surface, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
+        .overlay {
+            RoundedRectangle(cornerRadius: PickoDesign.Radius.lg)
+                .stroke(PickoDesign.ColorToken.outline.opacity(0.45), lineWidth: 1)
+        }
+    }
+
+    private var map: some View {
+        Map(position: $mapPosition, interactionModes: presentation.interactionModes) {
+            ForEach(presentation.annotations) { annotation in
+                Annotation(annotation.title, coordinate: annotation.coordinate) {
+                    PlaceMapPin(count: annotation.count)
+                }
+            }
+        }
+        .accessibilityLabel("地点聚合地图")
+        .accessibilityHint("可拖动、缩放，或打开大地图查看")
+    }
+
+    private var expandButton: some View {
+        Button(action: onExpand) {
+            Image(systemName: "arrow.up.left.and.arrow.down.right")
+                .font(.system(size: 14, weight: .semibold))
+                .frame(width: 34, height: 34)
+                .background(.thinMaterial, in: Circle())
+                .foregroundStyle(PickoDesign.ColorToken.primary)
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel("放大地图")
+    }
+}
+
+private struct PlaceMapDetailView: View {
+    @Environment(\.dismiss) private var dismiss
+    let presentation: PlaceMapPresentation
+
+    @State private var mapPosition: MapCameraPosition
+
+    init(presentation: PlaceMapPresentation) {
+        self.presentation = presentation
+        _mapPosition = State(initialValue: .region(presentation.region))
+    }
+
+    var body: some View {
+        NavigationStack {
+            Map(position: $mapPosition, interactionModes: presentation.interactionModes) {
+                ForEach(presentation.annotations) { annotation in
+                    Annotation(annotation.title, coordinate: annotation.coordinate) {
+                        PlaceMapPin(count: annotation.count)
+                    }
+                }
+            }
+            .ignoresSafeArea(edges: .bottom)
+            .navigationTitle("地图聚合")
+            .toolbar {
+                ToolbarItem(placement: .cancellationAction) {
+                    Button("关闭") {
+                        dismiss()
+                    }
+                }
+            }
+            .accessibilityLabel("地点聚合大地图")
+        }
+    }
+}
+
+private struct PlaceMapPin: View {
+    let count: Int
+
+    var body: some View {
+        HStack(spacing: 4) {
+            Image(systemName: "mappin.circle.fill")
+                .font(.system(size: 16, weight: .semibold))
+            Text("\(count)")
+                .font(.system(size: 11, weight: .bold, design: .monospaced))
+        }
+        .padding(.horizontal, 8)
+        .padding(.vertical, 5)
+        .background(PickoDesign.ColorToken.primary, in: Capsule())
+        .foregroundStyle(.white)
     }
 }
 

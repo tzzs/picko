@@ -1,8 +1,9 @@
 import Foundation
 import MapKit
 import PickoCore
+import SwiftUI
 
-struct PlaceMapPresentation {
+struct PlaceMapPresentation: Identifiable {
     struct Annotation: Identifiable, Equatable {
         var id: String
         var title: String
@@ -17,6 +18,13 @@ struct PlaceMapPresentation {
 
     var annotations: [Annotation]
     var region: MKCoordinateRegion
+    var interactionModes: MapInteractionModes {
+        [.pan, .zoom]
+    }
+
+    var id: String {
+        annotations.map(\.id).joined(separator: "|")
+    }
 
     init(groups: [PhotoCollectionGroup]) {
         annotations = groups.compactMap { group in

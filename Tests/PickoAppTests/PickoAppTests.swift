@@ -1,5 +1,6 @@
 import XCTest
 import MapKit
+import SwiftUI
 import PickoCore
 import PickoPhotos
 @testable import PickoApp
@@ -334,6 +335,16 @@ final class PickoAppTests: XCTestCase {
         XCTAssertEqual(presentation.region.center.longitude, 120.8144, accuracy: 0.01)
         XCTAssertGreaterThan(presentation.region.span.latitudeDelta, 0.9)
         XCTAssertGreaterThan(presentation.region.span.longitudeDelta, 1.3)
+    }
+
+    func testPlaceMapPresentationAllowsPanAndZoom() {
+        let presentation = PlaceMapPresentation(groups: [
+            makePlaceGroup(id: "shanghai", title: "上海", latitude: 31.2304, longitude: 121.4737, assetIds: ["a1"])
+        ])
+
+        XCTAssertTrue(presentation.interactionModes.contains(MapInteractionModes.pan))
+        XCTAssertTrue(presentation.interactionModes.contains(MapInteractionModes.zoom))
+        XCTAssertFalse(presentation.interactionModes.contains(MapInteractionModes.rotate))
     }
 
     func testStartingReviewScopeLimitsCurrentAssetToSelectedUnreviewedAssets() {
