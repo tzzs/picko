@@ -108,7 +108,11 @@ public struct PhotoCollectionGroupingEngine: Sendable {
             let sortedAssets = assets.sorted { $0.creationDate > $1.creationDate }
             let assetIds = sortedAssets.map(\.id)
             let location = representativeLocation(for: assets)
-            let resolvedTitle = await resolver.label(for: location)
+            let resolvedTitle = await resolvedPlaceTitle(
+                for: sortedAssets,
+                representativeLocation: location,
+                resolver: resolver
+            )
             let similarCount = matchingSimilarGroupCount(in: assetIds, similarGroups: similarGroups)
             groups.append(PhotoCollectionGroup(
                 id: bucket.id,
@@ -155,12 +159,50 @@ public struct PhotoCollectionGroupingEngine: Sendable {
         return PhotoAsset.Location(latitude: latitude, longitude: longitude)
     }
 
+    private func resolvedPlaceTitle(
+        for assets: [PhotoAsset],
+        representativeLocation: PhotoAsset.Location,
+        resolver: any PlaceLabelResolving
+    ) async -> String? {
+        for location in placeLabelCandidateLocations(for: assets, representativeLocation: representativeLocation) {
+            if let label = await resolver.label(for: location) {
+                return label
+            }
+        }
+
+        return nil
+    }
+
+    private func placeLabelCandidateLocations(
+        for assets: [PhotoAsset],
+        representativeLocation: PhotoAsset.Location
+    ) -> [PhotoAsset.Location] {
+        var seenKeys = Set<String>()
+        var locations: [PhotoAsset.Location] = []
+
+        func appendIfNeeded(_ location: PhotoAsset.Location) {
+            let key = String(format: "%.4f,%.4f", location.latitude, location.longitude)
+            guard !seenKeys.contains(key) else {
+                return
+            }
+            seenKeys.insert(key)
+            locations.append(location)
+        }
+
+        for location in assets.compactMap(\.location) {
+            appendIfNeeded(location)
+        }
+        appendIfNeeded(representativeLocation)
+
+        return locations
+    }
+
     private func fallbackPlaceTitle(for location: PhotoAsset.Location) -> String {
         if let region = localRegionTitle(for: location) {
             return region
         }
 
-        return String(format: "附近 · %.2f, %.2f", location.latitude, location.longitude)
+        return "附近地点"
     }
 
     private func localRegionTitle(for location: PhotoAsset.Location) -> String? {

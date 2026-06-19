@@ -214,6 +214,8 @@ final class PickoAppTests: XCTestCase {
             "forward"
         ])
         XCTAssertTrue(presentation.dateLocationText.contains("附近"))
+        XCTAssertFalse(presentation.dateLocationText.contains("31.23"))
+        XCTAssertFalse(presentation.dateLocationText.contains("121.47"))
         XCTAssertFalse(presentation.dateLocationText.contains("2026年5月30日 · 上海"))
         XCTAssertTrue(presentation.metadataSummary.contains("相似组"))
     }

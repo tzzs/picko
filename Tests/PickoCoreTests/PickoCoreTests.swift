@@ -316,7 +316,7 @@ final class PickoCoreTests: XCTestCase {
         XCTAssertFalse(groups.flatMap(\.assetIds).contains("no-location"))
     }
 
-    func testPlaceCollectionGroupsFallBackToCoordinateLabelWhenResolverFails() async {
+    func testPlaceCollectionGroupsFallBackToGenericNearbyLabelWhenResolverFails() async {
         let assets = [
             makeAsset(id: "local", location: .init(latitude: 31.2304, longitude: 121.4737))
         ]
@@ -326,8 +326,27 @@ final class PickoCoreTests: XCTestCase {
             resolver: FakePlaceLabelResolver(labels: [:])
         )
 
-        XCTAssertEqual(groups.first?.title, "附近 · 31.23, 121.47")
+        XCTAssertEqual(groups.first?.title, "附近地点")
+        XCTAssertFalse(groups.first?.title.contains("31.23") ?? true)
         XCTAssertEqual(groups.first?.representativeLocation?.latitude ?? 0, 31.2304, accuracy: 0.001)
+    }
+
+    func testPlaceCollectionGroupsTryAssetLocationsBeforeRepresentativeLocation() async {
+        let assets = [
+            makeAsset(id: "point-1", location: .init(latitude: 31.2304, longitude: 121.4737)),
+            makeAsset(id: "point-2", location: .init(latitude: 31.2310, longitude: 121.4740))
+        ]
+
+        let groups = await PhotoCollectionGroupingEngine().placeGroups(
+            from: assets,
+            resolver: FakePlaceLabelResolver(
+                labels: ["31.2304,121.4737": "上海 · 武康路"],
+                allowsNearbyMatch: false
+            )
+        )
+
+        XCTAssertEqual(groups.first?.title, "上海 · 武康路")
+        XCTAssertEqual(groups.first?.representativeLocation?.latitude ?? 0, 31.2307, accuracy: 0.001)
     }
 
     func testPlaceCollectionGroupsUseLocalRegionFallbackBeforeCoordinates() async {
@@ -398,10 +417,15 @@ private extension PickoCoreTests {
 
 private struct FakePlaceLabelResolver: PlaceLabelResolving {
     var labels: [String: String]
+    var allowsNearbyMatch = true
 
     func label(for location: PhotoAsset.Location) async -> String? {
         if let exact = labels[String(format: "%.4f,%.4f", location.latitude, location.longitude)] {
             return exact
+        }
+
+        guard allowsNearbyMatch else {
+            return nil
         }
 
         return labels

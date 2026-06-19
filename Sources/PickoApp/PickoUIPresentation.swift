@@ -130,11 +130,11 @@ public struct PickoSingleReviewPresentation: Equatable {
 
     private static func dateLocationText(for asset: PhotoAsset) -> String {
         let dateText = reviewDateFormatter.string(from: asset.creationDate)
-        guard let location = asset.location else {
-            return "\(dateText) · 无地点"
+        guard asset.location != nil else {
+            return "\(dateText) · \(PickoCopy.Review.noLocation)"
         }
 
-        return String(format: "\(dateText) · 附近 %.2f, %.2f", location.latitude, location.longitude)
+        return "\(dateText) · \(PickoCopy.Review.nearbyPlace)"
     }
 
     private static let reviewDateFormatter: DateFormatter = {

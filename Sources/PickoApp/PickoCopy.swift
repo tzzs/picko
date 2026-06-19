@@ -30,6 +30,8 @@ public enum PickoCopy {
         public static let preDelete = "放入预删除篮"
         public static let skip = "跳过"
         public static let metadataNoGroup = "无"
+        public static let noLocation = "无地点"
+        public static let nearbyPlace = "附近地点"
         public static func similarGroupPosition(_ position: String) -> String {
             "相似组 \(position)"
         }

@@ -32,6 +32,7 @@
 | 2.8 Similar 空态背景不一致 | 已修复 | 新增页面级空状态样式，背景与 app 页面背景一致，并提供下一步动作。 |
 | 2.9 首页时间/地点无法点击 | 已修复 | 时间和地点入口改为 `NavigationLink`，进入可用的合集占位页面。 |
 | 2.10 Tab 和主流程英文 | 已修复 | Tab 和首页、复核、相似、预删除篮、授权失败等主流程文案已中文化。 |
+| 2.11 地点页暴露经纬度 | 已修复 | 地点标题改为公开 Photos 坐标 + 系统反查 + 中文兜底：优先尝试组内真实照片坐标，反查失败时不再展示裸坐标。 |
 
 已完成验证：
 
@@ -118,6 +119,40 @@
 4. 修改 `Sources/PickoApp/PhotoLibraryBootstrapper.swift`
 5. 修改 `Sources/PickoApp/Views/SimilarGroupReviewView.swift`
 6. 补充 `Tests/PickoCoreTests/PickoCoreTests.swift`
+
+#### 2.11 地点页仍展示经纬度，且地图/地点命名不够可信
+
+用户反馈：地点聚合页面中仍有卡片显示 `附近 · 38.04, -122.80` 这类坐标；地图区域虽然已经是真实地图，但地点名称不应暴露经纬度。
+
+设计判断：
+
+1. Picko 不能直接读取系统 Photos app 已经生成的“地点”页面名称或回忆聚类结果；公开 PhotoKit 能稳定提供的是 `PHAsset.location` 坐标。
+2. 正确的数据链路是：从 `PHAsset.location` 读取坐标，在 app 内部按坐标聚类，再用系统 `CLGeocoder` 反查城市、区县、地标、街区或自然地貌。
+3. `CLGeocoder` 可能因为网络、系统数据、海面/郊外坐标、模拟器环境或平均坐标偏移而失败，因此 UI 不能把经纬度作为最终用户可见兜底。
+4. 地图定位可以使用合集代表坐标；地点命名应优先尝试组内真实照片坐标，最后才尝试代表坐标，避免平均坐标落在不可反查区域。
+
+优化方案：
+
+1. `PhotosLibraryAdapter` 继续只读取公开 `PHAsset.location`，不接入私有 Photos 数据或第三方云服务。
+2. `PhotoCollectionGroupingEngine.placeGroups` 对每个地点组按照片时间顺序尝试真实照片坐标反查，并去重后再尝试代表坐标。
+3. `SystemPlaceLabelResolver` 保持基于 `CLGeocoder` 的内存缓存，不持久化地点名称，不上传照片或坐标。
+4. `fallbackPlaceTitle` 只返回本地可解释区域或通用中文名称，例如“附近地点”，不再格式化经纬度。
+5. 若后续页面已有地图或地点功能但没有真实数据支撑，应在开发阶段直接补齐真实实现；若暂时不能实现，必须在文档和 UI 中明确标注能力边界，不能给用户一个可用但空心的控件。
+
+涉及文件：
+
+1. 修改 `Sources/PickoCore/PhotoCollectionGroupingEngine.swift`
+2. 保持 `Sources/PickoPhotos/PhotosLibraryAdapter.swift` 使用公开 PhotoKit 坐标
+3. 保持 `Sources/PickoApp/SystemPlaceLabelResolver.swift` 使用系统 `CLGeocoder`
+4. 补充 `Tests/PickoCoreTests/PickoCoreTests.swift`
+
+验收标准：
+
+1. 地点标题不会出现 `31.23, 121.47` 或 `38.04, -122.80` 这类裸坐标。
+2. 当代表坐标反查失败但组内真实照片坐标可反查时，地点组显示真实地名。
+3. 当所有反查失败时，地点组显示“附近地点”或本地可解释区域名称。
+4. 地图聚合继续使用代表坐标展示地点分布。
+5. `swift test` 和隐私日志审计通过。
 7. 补充 `Tests/PickoPhotosTests/PickoPhotosTests.swift`
 
 验收标准：
