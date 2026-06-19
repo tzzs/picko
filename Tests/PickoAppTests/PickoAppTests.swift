@@ -369,6 +369,22 @@ final class PickoAppTests: XCTestCase {
         XCTAssertEqual(thumbnailRegion.center.longitude, 121.5, accuracy: 0.0001)
     }
 
+    func testPlaceMapPresentationThumbnailFocusesMainClusterWhenThereIsDistantOutlier() {
+        let groups = [
+            makePlaceGroup(id: "iceland-south", title: "冰岛南部", latitude: 63.5321, longitude: -19.5114, assetIds: ["a1"]),
+            makePlaceGroup(id: "iceland-east", title: "冰岛东部", latitude: 64.2539, longitude: -15.2082, assetIds: ["a2"]),
+            makePlaceGroup(id: "iceland-north", title: "冰岛北部", latitude: 65.6835, longitude: -18.0878, assetIds: ["a3"]),
+            makePlaceGroup(id: "california", title: "加州 · 马林县", latitude: 37.9060, longitude: -122.5449, assetIds: ["a4"])
+        ]
+
+        let presentation = PlaceMapPresentation(groups: groups)
+        let thumbnailRegion = presentation.thumbnailRegion(forAspectRatio: 2.0)
+
+        XCTAssertEqual(thumbnailRegion.center.latitude, 64.6078, accuracy: 0.2)
+        XCTAssertEqual(thumbnailRegion.center.longitude, -17.3598, accuracy: 0.5)
+        XCTAssertLessThan(thumbnailRegion.span.longitudeDelta, 20)
+    }
+
     func testPlaceMapPresentationKeepsDetailPinsAwayFromEdges() {
         let groups = [
             makePlaceGroup(id: "northwest", title: "西北", latitude: 32.0, longitude: 121.0, assetIds: ["a1"]),

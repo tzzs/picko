@@ -54,7 +54,11 @@ struct PlaceMapPresentation: Identifiable {
     }
 
     func thumbnailRegion(forAspectRatio aspectRatio: Double) -> MKCoordinateRegion {
-        Self.region(for: annotations, aspectRatio: aspectRatio, paddingMultiplier: Self.overviewPaddingMultiplier)
+        Self.region(
+            for: Self.primaryCluster(from: annotations),
+            aspectRatio: aspectRatio,
+            paddingMultiplier: Self.overviewPaddingMultiplier
+        )
     }
 
     func detailRegion(forAspectRatio aspectRatio: Double) -> MKCoordinateRegion {
@@ -102,5 +106,57 @@ struct PlaceMapPresentation: Identifiable {
         )
 
         return MKCoordinateRegion(center: center, span: span)
+    }
+
+    private static func primaryCluster(from annotations: [Annotation]) -> [Annotation] {
+        guard annotations.count > 2 else {
+            return annotations
+        }
+
+        let nearbyThresholdMeters = 1_200_000.0
+        let minimumClusterCount = max(2, Int(ceil(Double(annotations.count) * 0.5)))
+        let candidates = annotations.map { seed in
+            annotations.filter { distanceMeters(from: seed, to: $0) <= nearbyThresholdMeters }
+        }
+        let bestCandidate = candidates.max { lhs, rhs in
+            if lhs.count == rhs.count {
+                return regionArea(for: lhs) > regionArea(for: rhs)
+            }
+            return lhs.count < rhs.count
+        } ?? annotations
+
+        guard bestCandidate.count >= minimumClusterCount else {
+            return annotations
+        }
+
+        return bestCandidate.sorted { $0.id < $1.id }
+    }
+
+    private static func regionArea(for annotations: [Annotation]) -> Double {
+        guard annotations.count > 1 else {
+            return 0
+        }
+
+        let latitudes = annotations.map(\.latitude)
+        let longitudes = annotations.map(\.longitude)
+        let latitudeDelta = (latitudes.max() ?? 0) - (latitudes.min() ?? 0)
+        let longitudeDelta = (longitudes.max() ?? 0) - (longitudes.min() ?? 0)
+        return latitudeDelta * longitudeDelta
+    }
+
+    private static func distanceMeters(from lhs: Annotation, to rhs: Annotation) -> Double {
+        let earthRadiusMeters = 6_371_000.0
+        let latitude1 = degreesToRadians(lhs.latitude)
+        let latitude2 = degreesToRadians(rhs.latitude)
+        let deltaLatitude = degreesToRadians(rhs.latitude - lhs.latitude)
+        let deltaLongitude = degreesToRadians(rhs.longitude - lhs.longitude)
+        let a = sin(deltaLatitude / 2) * sin(deltaLatitude / 2)
+            + cos(latitude1) * cos(latitude2) * sin(deltaLongitude / 2) * sin(deltaLongitude / 2)
+        let c = 2 * atan2(sqrt(a), sqrt(1 - a))
+        return earthRadiusMeters * c
+    }
+
+    private static func degreesToRadians(_ degrees: Double) -> Double {
+        degrees * .pi / 180
     }
 }
