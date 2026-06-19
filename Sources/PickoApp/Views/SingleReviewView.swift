@@ -13,30 +13,37 @@ public struct SingleReviewView: View {
     public var body: some View {
         Group {
             if let presentation = PickoSingleReviewPresentation(model: model) {
-                VStack(spacing: PickoDesign.Spacing.md) {
-                    VStack(spacing: 2) {
-                        Text("复核")
-                            .font(.system(size: 20, weight: .semibold, design: .rounded))
-                            .foregroundStyle(PickoDesign.ColorToken.primary)
-                        Text("\(model.currentAssetIndex + 1) / \(max(model.assets.count, 1))")
-                            .font(.system(size: 10, weight: .medium, design: .monospaced))
-                            .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
-                    }
+                GeometryReader { proxy in
+                    VStack(spacing: PickoDesign.Spacing.md) {
+                        VStack(spacing: 2) {
+                            Text("复核")
+                                .font(.system(size: 20, weight: .semibold, design: .rounded))
+                                .foregroundStyle(PickoDesign.ColorToken.primary)
+                            Text("\(model.currentAssetIndex + 1) / \(max(model.assets.count, 1))")
+                                .font(.system(size: 10, weight: .medium, design: .monospaced))
+                                .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+                        }
 
-                    Button {
-                        previewAsset = presentation.asset
-                    } label: {
-                        ZStack(alignment: .bottomLeading) {
-                            PickoThumbnailView(asset: presentation.asset, thumbnailProvider: model.thumbnailProvider)
-                                .aspectRatio(3 / 4, contentMode: .fill)
+                        Button {
+                            previewAsset = presentation.asset
+                        } label: {
+                            ZStack(alignment: .bottomLeading) {
+                                PickoThumbnailView(
+                                    asset: presentation.asset,
+                                    thumbnailProvider: model.thumbnailProvider,
+                                    targetPixelWidth: 900,
+                                    targetPixelHeight: 900,
+                                    contentMode: .fit
+                                )
                                 .frame(maxWidth: .infinity)
+                                .frame(height: SingleReviewLayout.mainImageHeight(availableHeight: proxy.size.height))
                                 .clipShape(RoundedRectangle(cornerRadius: PickoDesign.Radius.xl))
                                 .background(PickoDesign.ColorToken.surfaceLow, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.xl))
                                 .overlay(alignment: .top) {
                                     VStack(spacing: 2) {
                                         Image(systemName: "chevron.compact.up")
                                             .font(.system(size: 30, weight: .semibold))
-                                        Text("向上保留")
+                                        Text("点击预览")
                                             .font(.system(size: 11, weight: .medium, design: .monospaced))
                                     }
                                     .foregroundStyle(PickoDesign.ColorToken.primary.opacity(0.45))
@@ -48,7 +55,7 @@ public struct SingleReviewView: View {
                                         startPoint: .top,
                                         endPoint: .bottom
                                     )
-                                    .frame(height: 150)
+                                    .frame(height: 120)
                                     .clipShape(RoundedRectangle(cornerRadius: PickoDesign.Radius.xl))
                                 }
                                 .overlay {
@@ -56,74 +63,73 @@ public struct SingleReviewView: View {
                                         .stroke(PickoDesign.ColorToken.outline.opacity(0.7), lineWidth: 1)
                                 }
 
-                            VStack(alignment: .leading, spacing: 6) {
-                                HStack {
-                                    VStack(alignment: .leading, spacing: 2) {
-                                        Text("2026年5月30日 · 上海")
-                                            .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                            .foregroundStyle(.white)
-                                        Text(presentation.metadataSummary)
-                                            .font(.system(size: 12, weight: .medium, design: .monospaced))
-                                            .foregroundStyle(.white.opacity(0.72))
-                                            .lineLimit(1)
+                                VStack(alignment: .leading, spacing: 6) {
+                                    HStack {
+                                        VStack(alignment: .leading, spacing: 2) {
+                                            Text("2026年5月30日 · 上海")
+                                                .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                                .foregroundStyle(.white)
+                                            Text(presentation.metadataSummary)
+                                                .font(.system(size: 12, weight: .medium, design: .monospaced))
+                                                .foregroundStyle(.white.opacity(0.72))
+                                                .lineLimit(1)
+                                        }
+                                        Spacer()
+                                        Image(systemName: "sparkles")
+                                            .font(.system(size: 15, weight: .bold))
+                                            .frame(width: 34, height: 34)
+                                            .background(PickoDesign.ColorToken.goldSoft, in: Circle())
+                                            .foregroundStyle(PickoDesign.ColorToken.primaryDeep)
                                     }
-                                    Spacer()
-                                    Image(systemName: "sparkles")
-                                        .font(.system(size: 15, weight: .bold))
-                                        .frame(width: 34, height: 34)
-                                        .background(PickoDesign.ColorToken.goldSoft, in: Circle())
-                                        .foregroundStyle(PickoDesign.ColorToken.primaryDeep)
                                 }
-                            }
-                            .padding(PickoDesign.Spacing.md)
-                        }
-                    }
-                    .buttonStyle(.plain)
-
-                    Spacer(minLength: 0)
-
-                    HStack(alignment: .top, spacing: PickoDesign.Spacing.md) {
-                        reviewCircleButton(title: "撤销", displayTitle: "撤销", systemImage: "arrow.uturn.backward") {
-                            model.undo()
-                        }
-
-                        Button {
-                            model.skipCurrentAsset()
-                        } label: {
-                            VStack(spacing: 5) {
-                                Text("跳过")
-                                    .font(.system(size: 18, weight: .semibold, design: .rounded))
-                                    .frame(maxWidth: .infinity)
-                                    .frame(height: 56)
-                                    .background(PickoDesign.ColorToken.surfaceHigh, in: Capsule())
-                                    .foregroundStyle(PickoDesign.ColorToken.primary)
-                                Text("下一张")
-                                    .font(.system(size: 10, weight: .medium, design: .monospaced))
-                                    .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+                                .padding(PickoDesign.Spacing.md)
                             }
                         }
                         .buttonStyle(.plain)
-                        .accessibilityLabel(presentation.primaryActions[2].title)
 
-                        reviewCircleButton(title: presentation.primaryActions[0].title, displayTitle: "保留", systemImage: "star.fill", accent: PickoDesign.ColorToken.gold) {
-                            model.keepCurrentAsset()
+                        HStack(alignment: .top, spacing: PickoDesign.Spacing.md) {
+                            reviewCircleButton(title: "撤销", displayTitle: "撤销", systemImage: "arrow.uturn.backward") {
+                                model.undo()
+                            }
+
+                            Button {
+                                model.skipCurrentAsset()
+                            } label: {
+                                VStack(spacing: 5) {
+                                    Text("跳过")
+                                        .font(.system(size: 18, weight: .semibold, design: .rounded))
+                                        .frame(maxWidth: .infinity)
+                                        .frame(height: 56)
+                                        .background(PickoDesign.ColorToken.surfaceHigh, in: Capsule())
+                                        .foregroundStyle(PickoDesign.ColorToken.primary)
+                                    Text("下一张")
+                                        .font(.system(size: 10, weight: .medium, design: .monospaced))
+                                        .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+                                }
+                            }
+                            .buttonStyle(.plain)
+                            .accessibilityLabel(presentation.primaryActions[2].title)
+
+                            reviewCircleButton(title: presentation.primaryActions[0].title, displayTitle: "保留", systemImage: "star.fill", accent: PickoDesign.ColorToken.gold) {
+                                model.keepCurrentAsset()
+                            }
                         }
-                    }
 
-                    Button {
-                        model.preDeleteCurrentAsset()
-                    } label: {
-                        Label("向下预删除", systemImage: presentation.primaryActions[1].systemImage)
-                            .font(.system(size: 14, weight: .semibold, design: .rounded))
-                            .frame(maxWidth: .infinity)
-                            .padding(.vertical, 12)
-                            .background(PickoDesign.ColorToken.coralDeep, in: Capsule())
-                            .foregroundStyle(PickoDesign.ColorToken.coral)
+                        Button {
+                            model.preDeleteCurrentAsset()
+                        } label: {
+                            Label("向下预删除", systemImage: presentation.primaryActions[1].systemImage)
+                                .font(.system(size: 14, weight: .semibold, design: .rounded))
+                                .frame(maxWidth: .infinity)
+                                .padding(.vertical, 12)
+                                .background(PickoDesign.ColorToken.coralDeep, in: Capsule())
+                                .foregroundStyle(PickoDesign.ColorToken.coral)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel(presentation.primaryActions[1].title)
                     }
-                    .buttonStyle(.plain)
-                    .accessibilityLabel(presentation.primaryActions[1].title)
+                    .padding(PickoDesign.Spacing.page)
                 }
-                .padding(PickoDesign.Spacing.page)
             } else {
                 PickoEmptyStateView(
                     title: "暂无待复核照片",
@@ -164,6 +170,12 @@ public struct SingleReviewView: View {
         }
         .buttonStyle(.plain)
         .accessibilityLabel(title)
+    }
+}
+
+enum SingleReviewLayout {
+    static func mainImageHeight(availableHeight: CGFloat) -> CGFloat {
+        min(max(availableHeight * 0.48, 260), 390)
     }
 }
 

@@ -12,18 +12,21 @@ public struct PickoThumbnailView: View {
     private let thumbnailProvider: (any PhotoThumbnailProviding)?
     private let targetPixelWidth: Int
     private let targetPixelHeight: Int
+    private let contentMode: ContentMode
     @State private var thumbnailData: Data?
 
     public init(
         asset: PhotoAsset,
         thumbnailProvider: (any PhotoThumbnailProviding)?,
         targetPixelWidth: Int = 600,
-        targetPixelHeight: Int = 450
+        targetPixelHeight: Int = 450,
+        contentMode: ContentMode = .fill
     ) {
         self.asset = asset
         self.thumbnailProvider = thumbnailProvider
         self.targetPixelWidth = targetPixelWidth
         self.targetPixelHeight = targetPixelHeight
+        self.contentMode = contentMode
     }
 
     public var body: some View {
@@ -33,7 +36,7 @@ public struct PickoThumbnailView: View {
             if let image = platformImage(from: thumbnailData) {
                 image
                     .resizable()
-                    .scaledToFill()
+                    .aspectRatio(contentMode: contentMode)
             }
         }
         .clipped()

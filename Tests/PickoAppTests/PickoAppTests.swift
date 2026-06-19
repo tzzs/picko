@@ -215,6 +215,12 @@ final class PickoAppTests: XCTestCase {
         XCTAssertTrue(presentation.metadataSummary.contains("相似组"))
     }
 
+    func testSingleReviewLayoutKeepsActionsVisibleOnSmallPhones() {
+        XCTAssertEqual(SingleReviewLayout.mainImageHeight(availableHeight: 667), 320.16, accuracy: 0.01)
+        XCTAssertEqual(SingleReviewLayout.mainImageHeight(availableHeight: 568), 272.64, accuracy: 0.01)
+        XCTAssertEqual(SingleReviewLayout.mainImageHeight(availableHeight: 900), 390, accuracy: 0.01)
+    }
+
     func testSimilarGroupPresentationExplainsKeepNAndEditableRecommendation() throws {
         let model = PickoAppModel.preview()
 
