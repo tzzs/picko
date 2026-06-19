@@ -301,7 +301,7 @@ private struct PlaceMapPanel: View {
     init(presentation: PlaceMapPresentation, onExpand: @escaping () -> Void) {
         self.presentation = presentation
         self.onExpand = onExpand
-        _mapPosition = State(initialValue: .region(presentation.fittingRegion(forAspectRatio: 2.0)))
+        _mapPosition = State(initialValue: .region(presentation.thumbnailRegion(forAspectRatio: 2.0)))
     }
 
     var body: some View {
@@ -370,7 +370,7 @@ private struct PlaceMapPanel: View {
     }
 
     private func resetMapPosition(for size: CGSize) {
-        mapPosition = .region(presentation.fittingRegion(forAspectRatio: aspectRatio(for: size)))
+        mapPosition = .region(presentation.thumbnailRegion(forAspectRatio: aspectRatio(for: size)))
     }
 
     private func aspectRatio(for size: CGSize) -> Double {

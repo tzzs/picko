@@ -48,10 +48,18 @@ struct PlaceMapPresentation: Identifiable {
     }
 
     func fittingRegion(forAspectRatio aspectRatio: Double) -> MKCoordinateRegion {
-        Self.region(for: annotations, aspectRatio: aspectRatio)
+        Self.region(for: annotations, aspectRatio: aspectRatio, paddingMultiplier: 1.6)
     }
 
-    private static func region(for annotations: [Annotation], aspectRatio: Double = 1.0) -> MKCoordinateRegion {
+    func thumbnailRegion(forAspectRatio aspectRatio: Double) -> MKCoordinateRegion {
+        Self.region(for: annotations, aspectRatio: aspectRatio, paddingMultiplier: 2.4)
+    }
+
+    private static func region(
+        for annotations: [Annotation],
+        aspectRatio: Double = 1.0,
+        paddingMultiplier: Double = 1.6
+    ) -> MKCoordinateRegion {
         guard !annotations.isEmpty else {
             return MKCoordinateRegion(
                 center: CLLocationCoordinate2D(latitude: 0, longitude: 0),
@@ -72,8 +80,9 @@ struct PlaceMapPresentation: Identifiable {
         )
 
         let normalizedAspectRatio = max(aspectRatio, 0.1)
-        var latitudeDelta = max((maxLatitude - minLatitude) * 1.6, 0.08)
-        var longitudeDelta = max((maxLongitude - minLongitude) * 1.6, 0.08)
+        let normalizedPaddingMultiplier = max(paddingMultiplier, 1.0)
+        var latitudeDelta = max((maxLatitude - minLatitude) * normalizedPaddingMultiplier, 0.08)
+        var longitudeDelta = max((maxLongitude - minLongitude) * normalizedPaddingMultiplier, 0.08)
 
         if longitudeDelta < latitudeDelta * normalizedAspectRatio {
             longitudeDelta = latitudeDelta * normalizedAspectRatio
