@@ -167,6 +167,11 @@ public struct PhotoCollectionGroupingEngine: Sendable {
         let latitude = location.latitude
         let longitude = location.longitude
 
+        if (37.7...38.4).contains(latitude),
+           (-123.2 ... -122.3).contains(longitude) {
+            return "加州 · 马林县"
+        }
+
         guard (63.0...67.0).contains(latitude),
               (-25.0 ... -13.0).contains(longitude) else {
             return nil

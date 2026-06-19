@@ -343,6 +343,19 @@ final class PickoCoreTests: XCTestCase {
         XCTAssertEqual(groups.first?.title, "冰岛南部")
     }
 
+    func testPlaceCollectionGroupsUseCaliforniaRegionFallbackBeforeCoordinates() async {
+        let assets = [
+            makeAsset(id: "point-reyes", location: .init(latitude: 38.04, longitude: -122.80))
+        ]
+
+        let groups = await PhotoCollectionGroupingEngine().placeGroups(
+            from: assets,
+            resolver: FakePlaceLabelResolver(labels: [:])
+        )
+
+        XCTAssertEqual(groups.first?.title, "加州 · 马林县")
+    }
+
 }
 
 private extension PickoCoreTests {
