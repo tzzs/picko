@@ -4,6 +4,8 @@ import PickoCore
 import SwiftUI
 
 struct PlaceMapPresentation: Identifiable {
+    private static let overviewPaddingMultiplier = 3.4
+
     struct Annotation: Identifiable, Equatable {
         var id: String
         var title: String
@@ -52,11 +54,11 @@ struct PlaceMapPresentation: Identifiable {
     }
 
     func thumbnailRegion(forAspectRatio aspectRatio: Double) -> MKCoordinateRegion {
-        Self.region(for: annotations, aspectRatio: aspectRatio, paddingMultiplier: 2.4)
+        Self.region(for: annotations, aspectRatio: aspectRatio, paddingMultiplier: Self.overviewPaddingMultiplier)
     }
 
     func detailRegion(forAspectRatio aspectRatio: Double) -> MKCoordinateRegion {
-        Self.region(for: annotations, aspectRatio: aspectRatio, paddingMultiplier: 2.4)
+        Self.region(for: annotations, aspectRatio: aspectRatio, paddingMultiplier: Self.overviewPaddingMultiplier)
     }
 
     private static func region(

@@ -384,6 +384,20 @@ final class PickoAppTests: XCTestCase {
         XCTAssertEqual(detailRegion.center.longitude, 121.5, accuracy: 0.0001)
     }
 
+    func testPlaceMapPresentationKeepsDetailPinsInsideVisualSafeArea() {
+        let groups = [
+            makePlaceGroup(id: "northwest", title: "西北", latitude: 32.0, longitude: 121.0, assetIds: ["a1"]),
+            makePlaceGroup(id: "southeast", title: "东南", latitude: 31.0, longitude: 122.0, assetIds: ["a2"])
+        ]
+
+        let presentation = PlaceMapPresentation(groups: groups)
+        let detailRegion = presentation.detailRegion(forAspectRatio: 0.46)
+        let margins = normalizedMargins(for: presentation.annotations, in: detailRegion)
+
+        XCTAssertGreaterThanOrEqual(margins.horizontal, 0.35)
+        XCTAssertGreaterThanOrEqual(margins.vertical, 0.35)
+    }
+
     func testPlaceMapPresentationPrefersMapTapToExpand() {
         let presentation = PlaceMapPresentation(groups: [
             makePlaceGroup(id: "shanghai", title: "上海", latitude: 31.2304, longitude: 121.4737, assetIds: ["a1"])
@@ -972,6 +986,22 @@ final class PickoAppTests: XCTestCase {
             thumbnailHash: nil,
             perceptualHash: nil
         )
+    }
+
+    private func normalizedMargins(
+        for annotations: [PlaceMapPresentation.Annotation],
+        in region: MKCoordinateRegion
+    ) -> (horizontal: Double, vertical: Double) {
+        let minLatitude = annotations.map(\.latitude).min() ?? region.center.latitude
+        let maxLatitude = annotations.map(\.latitude).max() ?? region.center.latitude
+        let minLongitude = annotations.map(\.longitude).min() ?? region.center.longitude
+        let maxLongitude = annotations.map(\.longitude).max() ?? region.center.longitude
+        let latitudeRange = max(maxLatitude - minLatitude, 0)
+        let longitudeRange = max(maxLongitude - minLongitude, 0)
+        let verticalMargin = (region.span.latitudeDelta - latitudeRange) / (region.span.latitudeDelta * 2)
+        let horizontalMargin = (region.span.longitudeDelta - longitudeRange) / (region.span.longitudeDelta * 2)
+
+        return (horizontal: horizontalMargin, vertical: verticalMargin)
     }
 
     private func makePlaceGroup(
