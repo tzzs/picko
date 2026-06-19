@@ -229,9 +229,114 @@ final class PickoCoreTests: XCTestCase {
         XCTAssertEqual(recommended, ["a2", "a3"])
     }
 
+    func testTimeCollectionGroupsCreateFixedRelativeBuckets() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 8 * 60 * 60)!
+        let now = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 6, day: 20, hour: 12)))
+        let engine = PhotoCollectionGroupingEngine()
+        let assets = [
+            makeAsset(id: "today", creationDate: date(year: 2026, month: 6, day: 20, calendar: calendar)),
+            makeAsset(id: "yesterday", creationDate: date(year: 2026, month: 6, day: 19, calendar: calendar)),
+            makeAsset(id: "week", creationDate: date(year: 2026, month: 6, day: 17, calendar: calendar)),
+            makeAsset(id: "last-month", creationDate: date(year: 2026, month: 5, day: 12, calendar: calendar)),
+            makeAsset(id: "archive", creationDate: date(year: 2025, month: 12, day: 3, calendar: calendar))
+        ]
+
+        let groups = engine.timeGroups(from: assets, now: now, calendar: calendar)
+
+        XCTAssertEqual(groups.map(\.title), [
+            "今天 · 周六",
+            "昨天 · 周五",
+            "本周早些",
+            "上个月 · 五月",
+            "2025年12月"
+        ])
+        XCTAssertEqual(groups.map(\.assetIds), [
+            ["today"],
+            ["yesterday"],
+            ["week"],
+            ["last-month"],
+            ["archive"]
+        ])
+        XCTAssertEqual(groups.map(\.kind), [.time, .time, .time, .time, .time])
+    }
+
+    func testTimeCollectionGroupsCountSimilarGroupsInsideBuckets() throws {
+        var calendar = Calendar(identifier: .gregorian)
+        calendar.timeZone = TimeZone(secondsFromGMT: 0)!
+        let now = try XCTUnwrap(calendar.date(from: DateComponents(year: 2026, month: 6, day: 20, hour: 12)))
+        let assets = [
+            makeAsset(id: "a1", creationDate: date(year: 2026, month: 6, day: 20, calendar: calendar)),
+            makeAsset(id: "a2", creationDate: date(year: 2026, month: 6, day: 20, calendar: calendar)),
+            makeAsset(id: "a3", creationDate: date(year: 2026, month: 6, day: 19, calendar: calendar))
+        ]
+        let similarGroup = SimilarGroup(
+            id: "similar-today",
+            assetIds: ["a1", "a2"],
+            groupType: .similar,
+            timeRange: nil,
+            locationSummary: nil,
+            recommendedKeepIds: ["a1"],
+            keepCount: 1,
+            confidenceScore: 0.9,
+            status: .unreviewed
+        )
+
+        let groups = PhotoCollectionGroupingEngine().timeGroups(
+            from: assets,
+            similarGroups: [similarGroup],
+            now: now,
+            calendar: calendar
+        )
+
+        XCTAssertEqual(groups.first?.title, "今天 · 周六")
+        XCTAssertEqual(groups.first?.similarGroupCount, 1)
+        XCTAssertEqual(groups.dropFirst().first?.similarGroupCount, 0)
+    }
+
+    func testPlaceCollectionGroupsClusterNearbyCoordinatesAndSkipMissingLocations() async {
+        let assets = [
+            makeAsset(id: "near-1", location: .init(latitude: 31.2304, longitude: 121.4737)),
+            makeAsset(id: "near-2", location: .init(latitude: 31.2310, longitude: 121.4740)),
+            makeAsset(id: "far", location: .init(latitude: 30.2741, longitude: 120.1551)),
+            makeAsset(id: "no-location", location: nil)
+        ]
+
+        let groups = await PhotoCollectionGroupingEngine().placeGroups(
+            from: assets,
+            resolver: FakePlaceLabelResolver(labels: [
+                "31.2307,121.4739": "上海 · 武康路",
+                "30.2741,120.1551": "杭州 · 西湖"
+            ])
+        )
+
+        XCTAssertEqual(groups.map(\.title), ["上海 · 武康路", "杭州 · 西湖"])
+        XCTAssertEqual(groups.first?.assetIds, ["near-1", "near-2"])
+        XCTAssertEqual(groups.last?.assetIds, ["far"])
+        XCTAssertFalse(groups.flatMap(\.assetIds).contains("no-location"))
+    }
+
+    func testPlaceCollectionGroupsFallBackToCoordinateLabelWhenResolverFails() async {
+        let assets = [
+            makeAsset(id: "local", location: .init(latitude: 31.2304, longitude: 121.4737))
+        ]
+
+        let groups = await PhotoCollectionGroupingEngine().placeGroups(
+            from: assets,
+            resolver: FakePlaceLabelResolver(labels: [:])
+        )
+
+        XCTAssertEqual(groups.first?.title, "附近 · 31.23, 121.47")
+        XCTAssertEqual(groups.first?.representativeLocation?.latitude ?? 0, 31.2304, accuracy: 0.001)
+    }
+
 }
 
 private extension PickoCoreTests {
+    func date(year: Int, month: Int, day: Int, calendar: Calendar) -> Date {
+        calendar.date(from: DateComponents(year: year, month: month, day: day, hour: 10))!
+    }
+
     func makeAsset(
         id: String,
         mediaType: PhotoAsset.MediaType = .photo,
@@ -262,5 +367,28 @@ private extension PickoCoreTests {
             thumbnailHash: thumbnailHash,
             perceptualHash: perceptualHash
         )
+    }
+}
+
+private struct FakePlaceLabelResolver: PlaceLabelResolving {
+    var labels: [String: String]
+
+    func label(for location: PhotoAsset.Location) async -> String? {
+        if let exact = labels[String(format: "%.4f,%.4f", location.latitude, location.longitude)] {
+            return exact
+        }
+
+        return labels
+            .compactMap { key, label -> (distance: Double, label: String)? in
+                let parts = key.split(separator: ",").compactMap(Double.init)
+                guard parts.count == 2 else {
+                    return nil
+                }
+                let distance = abs(parts[0] - location.latitude) + abs(parts[1] - location.longitude)
+                return (distance, label)
+            }
+            .filter { $0.distance < 0.001 }
+            .min { $0.distance < $1.distance }?
+            .label
     }
 }

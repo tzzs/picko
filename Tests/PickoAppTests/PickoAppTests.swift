@@ -212,6 +212,8 @@ final class PickoAppTests: XCTestCase {
             "tray.and.arrow.down",
             "forward"
         ])
+        XCTAssertTrue(presentation.dateLocationText.contains("附近"))
+        XCTAssertFalse(presentation.dateLocationText.contains("2026年5月30日 · 上海"))
         XCTAssertTrue(presentation.metadataSummary.contains("相似组"))
     }
 
@@ -259,6 +261,83 @@ final class PickoAppTests: XCTestCase {
         let view = PhotoPreviewView(asset: model.assets[0], model: model)
 
         XCTAssertNotNil(view)
+    }
+
+    func testCollectionReviewViewCanRenderTimeAndPlaceModes() {
+        let model = PickoAppModel.preview()
+
+        let timeView = CollectionReviewView(mode: .time, model: model)
+        let placeView = CollectionReviewView(
+            mode: .place,
+            model: model,
+            placeLabelResolver: FakePlaceLabelResolver(labels: [:])
+        )
+
+        XCTAssertNotNil(timeView)
+        XCTAssertNotNil(placeView)
+    }
+
+    func testStartingReviewScopeLimitsCurrentAssetToSelectedUnreviewedAssets() {
+        var state = ReviewStateStore(assets: [
+            makeAsset(id: "outside"),
+            makeAsset(id: "inside-reviewed"),
+            makeAsset(id: "inside-live")
+        ])
+        state.apply(.keep("inside-reviewed"))
+        let model = PickoAppModel(store: state)
+
+        model.startReview(scope: .init(
+            mode: .time,
+            title: "今天 · 周六",
+            assetIds: ["inside-reviewed", "inside-live"]
+        ))
+
+        XCTAssertEqual(model.selectedTab, .review)
+        XCTAssertEqual(model.reviewScope?.assetIds, ["inside-live"])
+        XCTAssertEqual(model.currentAsset?.id, "inside-live")
+        XCTAssertEqual(model.currentSession.mode, .timeRange)
+    }
+
+    func testScopedReviewActionsUpdateSharedStoreAndBasket() {
+        let model = PickoAppModel(store: ReviewStateStore(assets: [
+            makeAsset(id: "keep-me", fileSizeBytes: 10),
+            makeAsset(id: "delete-me", fileSizeBytes: 20),
+            makeAsset(id: "outside", fileSizeBytes: 30)
+        ]))
+        model.startReview(scope: .init(
+            mode: .place,
+            title: "上海 · 武康路",
+            assetIds: ["keep-me", "delete-me"]
+        ))
+
+        model.keepCurrentAsset()
+        model.preDeleteCurrentAsset()
+
+        XCTAssertEqual(model.store.asset(id: "keep-me")?.status, .kept)
+        XCTAssertEqual(model.store.asset(id: "delete-me")?.status, .preDeleted)
+        XCTAssertEqual(model.store.asset(id: "outside")?.status, .unreviewed)
+        XCTAssertEqual(model.store.deletionQueue.itemIds, ["delete-me"])
+        XCTAssertTrue(model.hasCompletedReviewScope)
+        XCTAssertNil(model.currentAsset)
+    }
+
+    func testScopedReviewCompletionCanReturnHomeOrBasket() {
+        let model = PickoAppModel(store: ReviewStateStore(assets: [
+            makeAsset(id: "only", fileSizeBytes: 10)
+        ]))
+        model.startReview(scope: .init(
+            mode: .time,
+            title: "今天 · 周六",
+            assetIds: ["only"]
+        ))
+
+        model.skipCurrentAsset()
+
+        XCTAssertTrue(model.hasCompletedReviewScope)
+        model.clearReviewScope()
+        XCTAssertNil(model.reviewScope)
+        XCTAssertEqual(model.currentAssetIndex, 0)
+        XCTAssertEqual(model.currentAsset?.id, "only")
     }
 
     func testModelLoadsAssetsFromPhotoIndexer() async throws {
@@ -844,6 +923,14 @@ private final class FakePhotoDeleter: PhotoDeleting {
 private final class FakeThumbnailProvider: PhotoThumbnailProviding {
     func thumbnailData(for request: PhotoThumbnailRequest) async throws -> Data? {
         Data([1])
+    }
+}
+
+private struct FakePlaceLabelResolver: PlaceLabelResolving {
+    var labels: [String: String]
+
+    func label(for location: PhotoAsset.Location) async -> String? {
+        labels[String(format: "%.4f,%.4f", location.latitude, location.longitude)]
     }
 }
 

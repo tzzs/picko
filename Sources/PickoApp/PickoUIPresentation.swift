@@ -96,6 +96,7 @@ public struct PickoHomePresentation: Equatable {
 public struct PickoSingleReviewPresentation: Equatable {
     public let asset: PhotoAsset
     public let decisionHint: String
+    public let dateLocationText: String
     public let metadataSummary: String
     public let primaryActions: [PickoActionPresentation]
 
@@ -106,6 +107,7 @@ public struct PickoSingleReviewPresentation: Equatable {
 
         self.asset = asset
         decisionHint = PickoCopy.Review.decisionHint
+        dateLocationText = Self.dateLocationText(for: asset)
         metadataSummary = "\(asset.pixelWidth)x\(asset.pixelHeight) · \(Self.byteText(asset.fileSizeBytes)) · \(PickoCopy.Review.similarGroupPosition(Self.groupPosition(for: asset.id, in: model)))"
         primaryActions = [
             PickoActionPresentation(title: PickoCopy.Review.keep, systemImage: "checkmark.circle.fill"),
@@ -125,6 +127,23 @@ public struct PickoSingleReviewPresentation: Equatable {
     private static func byteText(_ bytes: Int64) -> String {
         PickoCopy.byteText(bytes)
     }
+
+    private static func dateLocationText(for asset: PhotoAsset) -> String {
+        let dateText = reviewDateFormatter.string(from: asset.creationDate)
+        guard let location = asset.location else {
+            return "\(dateText) · 无地点"
+        }
+
+        return String(format: "\(dateText) · 附近 %.2f, %.2f", location.latitude, location.longitude)
+    }
+
+    private static let reviewDateFormatter: DateFormatter = {
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "zh_Hans_CN")
+        formatter.calendar = Calendar(identifier: .gregorian)
+        formatter.dateFormat = "yyyy年M月d日"
+        return formatter
+    }()
 }
 
 public struct PickoSimilarAssetPresentation: Equatable, Identifiable {

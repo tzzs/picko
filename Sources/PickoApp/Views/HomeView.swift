@@ -2,6 +2,7 @@ import SwiftUI
 
 public struct HomeView: View {
     @Bindable private var model: PickoAppModel
+    @State private var selectedCollectionMode: CollectionReviewView.Mode?
 
     public init(model: PickoAppModel) {
         self.model = model
@@ -140,16 +141,16 @@ public struct HomeView: View {
                 VStack(alignment: .leading, spacing: PickoDesign.Spacing.gutter) {
                     PickoSectionLabel(title: "探索合集")
                     NavigationLink {
-                        CollectionReviewView(mode: .time)
+                        CollectionReviewView(mode: .time, model: model)
                     } label: {
-                        collectionRow(title: "时间", subtitle: "2014 - 2024", systemImage: "clock")
+                        collectionRow(title: "时间", subtitle: "按拍摄日期", systemImage: "clock")
                     }
                     .buttonStyle(.plain)
 
                     NavigationLink {
-                        CollectionReviewView(mode: .place)
+                        CollectionReviewView(mode: .place, model: model)
                     } label: {
-                        collectionRow(title: "地点", subtitle: "12 个国家 / 地区", systemImage: "location")
+                        collectionRow(title: "地点", subtitle: "城市与地点", systemImage: "location")
                     }
                     .buttonStyle(.plain)
                 }
@@ -164,6 +165,9 @@ public struct HomeView: View {
         }
         .navigationTitle(PickoCopy.Tabs.home)
         .pickoInlineNavigationTitle()
+        .navigationDestination(item: $selectedCollectionMode) { mode in
+            CollectionReviewView(mode: mode, model: model)
+        }
         .pickoScreenBackground()
     }
 
@@ -187,7 +191,7 @@ public struct HomeView: View {
         case 2:
             model.selectedTab = .basket
         default:
-            model.selectedTab = .home
+            selectedCollectionMode = .time
         }
     }
 

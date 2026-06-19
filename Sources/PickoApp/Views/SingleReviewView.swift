@@ -12,16 +12,24 @@ public struct SingleReviewView: View {
 
     public var body: some View {
         Group {
-            if let presentation = PickoSingleReviewPresentation(model: model) {
+            if model.hasCompletedReviewScope {
+                scopedCompletionView
+            } else if let presentation = PickoSingleReviewPresentation(model: model) {
                 GeometryReader { proxy in
                     VStack(spacing: PickoDesign.Spacing.md) {
                         VStack(spacing: 2) {
                             Text("复核")
                                 .font(.system(size: 20, weight: .semibold, design: .rounded))
                                 .foregroundStyle(PickoDesign.ColorToken.primary)
-                            Text("\(model.currentAssetIndex + 1) / \(max(model.assets.count, 1))")
+                            Text(reviewProgressText)
                                 .font(.system(size: 10, weight: .medium, design: .monospaced))
                                 .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+                            if let scopeTitle = model.reviewScope?.title {
+                                Text(scopeTitle)
+                                    .font(.system(size: 11, weight: .medium, design: .rounded))
+                                    .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+                                    .lineLimit(1)
+                            }
                         }
 
                         Button {
@@ -66,7 +74,7 @@ public struct SingleReviewView: View {
                                 VStack(alignment: .leading, spacing: 6) {
                                     HStack {
                                         VStack(alignment: .leading, spacing: 2) {
-                                            Text("2026年5月30日 · 上海")
+                                            Text(presentation.dateLocationText)
                                                 .font(.system(size: 18, weight: .semibold, design: .rounded))
                                                 .foregroundStyle(.white)
                                             Text(presentation.metadataSummary)
@@ -143,6 +151,51 @@ public struct SingleReviewView: View {
         .sheet(item: $previewAsset) { asset in
             PhotoPreviewView(asset: asset, model: model)
         }
+    }
+
+    private var scopedCompletionView: some View {
+        PickoPageEmptyStateView(
+            title: "本合集已整理完成",
+            message: "这个时间或地点合集内的照片已处理完。已放入预删除篮的项目仍可在最终确认前恢复。",
+            systemImage: "checkmark.circle"
+        ) {
+            VStack(spacing: PickoDesign.Spacing.gutter) {
+                Button {
+                    model.clearReviewScope()
+                    model.selectedTab = .home
+                } label: {
+                    Label("返回首页", systemImage: "house")
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(PickoDesign.ColorToken.primary, in: Capsule())
+                        .foregroundStyle(.white)
+                }
+                .buttonStyle(.plain)
+
+                Button {
+                    model.clearReviewScope()
+                    model.selectedTab = .basket
+                } label: {
+                    Label("查看预删除篮", systemImage: "basket")
+                        .font(.system(size: 15, weight: .semibold, design: .rounded))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 12)
+                        .background(PickoDesign.ColorToken.surface, in: Capsule())
+                        .foregroundStyle(PickoDesign.ColorToken.primary)
+                        .overlay {
+                            Capsule()
+                                .stroke(PickoDesign.ColorToken.outline.opacity(0.55), lineWidth: 1)
+                        }
+                }
+                .buttonStyle(.plain)
+            }
+        }
+    }
+
+    private var reviewProgressText: String {
+        let totalCount = max(model.activeReviewAssetCount, 1)
+        return "\(model.currentAssetIndex + 1) / \(totalCount)"
     }
 
     private func reviewCircleButton(
