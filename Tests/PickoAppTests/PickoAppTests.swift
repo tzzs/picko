@@ -219,6 +219,13 @@ final class PickoAppTests: XCTestCase {
         XCTAssertTrue(HomeLayout.hidesNavigationBar)
     }
 
+    func testTopLevelReviewPagesHideRedundantNavigationTitles() {
+        XCTAssertNil(SimilarReviewLayout.navigationTitle)
+        XCTAssertTrue(SimilarReviewLayout.hidesNavigationBar)
+        XCTAssertNil(PreDeleteBasketLayout.navigationTitle)
+        XCTAssertTrue(PreDeleteBasketLayout.hidesNavigationBar)
+    }
+
     func testSingleReviewPresentationKeepsPrimaryActionsPhotoFirst() throws {
         let model = PickoAppModel.preview()
 

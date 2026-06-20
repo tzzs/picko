@@ -89,8 +89,10 @@ public struct SimilarGroupReviewView: View {
                 }
             }
         }
-        .navigationTitle(PickoCopy.Tabs.similar)
         .pickoScreenBackground()
+        #if os(iOS)
+        .toolbar(SimilarReviewLayout.hidesNavigationBar ? .hidden : .visible, for: .navigationBar)
+        #endif
         .sheet(item: $previewAsset) { asset in
             PhotoPreviewView(asset: asset, model: model)
         }
@@ -286,6 +288,11 @@ public struct SimilarGroupReviewView: View {
         .padding(PickoDesign.Spacing.page)
         .background(.ultraThinMaterial)
     }
+}
+
+enum SimilarReviewLayout {
+    static let navigationTitle: String? = nil
+    static let hidesNavigationBar = true
 }
 
 #Preview {

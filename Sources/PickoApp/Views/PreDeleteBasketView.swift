@@ -185,8 +185,10 @@ public struct PreDeleteBasketView: View {
             .padding(PickoDesign.Spacing.page)
             .background(.ultraThinMaterial)
         }
-        .navigationTitle(PickoCopy.Tabs.basket)
         .pickoScreenBackground()
+        #if os(iOS)
+        .toolbar(PreDeleteBasketLayout.hidesNavigationBar ? .hidden : .visible, for: .navigationBar)
+        #endif
         .sheet(item: $previewAsset) { item in
             PhotoPreviewView(asset: item.asset, model: model)
         }
@@ -267,6 +269,11 @@ public struct PreDeleteBasketView: View {
 
         isConfirmingDeletion = false
     }
+}
+
+enum PreDeleteBasketLayout {
+    static let navigationTitle: String? = nil
+    static let hidesNavigationBar = true
 }
 
 #Preview {

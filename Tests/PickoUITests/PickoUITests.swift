@@ -28,7 +28,7 @@ final class PickoUITests: XCTestCase {
         app.launchArguments = ["--picko-use-sample-basket"]
         app.launch()
 
-        XCTAssertTrue(app.navigationBars["预删除篮"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["空间预估"].waitForExistence(timeout: 5))
         XCTAssertTrue(app.staticTexts["1 项等待最终复核"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.buttons["交由系统照片确认"].isEnabled)
         XCTAssertTrue(app.staticTexts["当前为样例图库，无法调用系统照片确认。"].waitForExistence(timeout: 5))
@@ -40,7 +40,7 @@ final class PickoUITests: XCTestCase {
         app.launchArguments = ["--picko-use-sample-basket"]
         app.launch()
 
-        XCTAssertTrue(app.navigationBars["预删除篮"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["空间预估"].waitForExistence(timeout: 5))
         XCTAssertFalse(app.buttons["clear-picko-state-toolbar-button"].exists)
     }
 
