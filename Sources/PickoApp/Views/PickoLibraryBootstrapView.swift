@@ -58,17 +58,17 @@ public struct PickoLibraryBootstrapView: View {
                                 Image(systemName: "photo.badge.exclamationmark")
                                     .font(.system(size: 24, weight: .semibold))
                                     .foregroundStyle(PickoDesign.ColorToken.gold)
-                                Text("Photo library access is needed to review your library.")
+                                Text(PickoCopy.LibraryAccess.deniedTitle)
                                     .font(.system(size: 18, weight: .semibold, design: .rounded))
                                     .foregroundStyle(PickoDesign.ColorToken.primary)
                                     .fixedSize(horizontal: false, vertical: true)
                             }
 
-                            Text("你仍然可以先进入样例图库，查看完整复核流程和预删除篮确认边界。")
+                            Text(PickoCopy.LibraryAccess.deniedMessage)
                                 .font(.system(size: 14, weight: .regular, design: .rounded))
                                 .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
 
-                            Button("Review Sample Library") {
+                            Button(PickoCopy.LibraryAccess.sampleLibrary) {
                                 phase = .loaded(.preview())
                             }
                             .font(.system(size: 16, weight: .semibold, design: .rounded))

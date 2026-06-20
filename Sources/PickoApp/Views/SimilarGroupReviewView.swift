@@ -5,6 +5,7 @@ public struct SimilarGroupReviewView: View {
     @Bindable private var model: PickoAppModel
     @State private var selectedAssetIds: Set<PhotoAsset.ID>
     @State private var keepsMultiple = false
+    @State private var previewAsset: PhotoAsset?
 
     public init(model: PickoAppModel) {
         self.model = model
@@ -17,6 +18,8 @@ public struct SimilarGroupReviewView: View {
             if let presentation = PickoSimilarGroupPresentation(model: model) {
                 ScrollView {
                     VStack(alignment: .leading, spacing: PickoDesign.Spacing.lg) {
+                        PickoTopLevelHeader(spec: .similar)
+
                         header(presentation)
 
                         keepModeControl(presentation.modeTitles)
@@ -29,8 +32,8 @@ public struct SimilarGroupReviewView: View {
                             HStack {
                                 PickoSectionLabel(title: "其他相似照片")
                                 Spacer()
-                                Button("取消全选") {
-                                    selectedAssetIds.removeAll()
+                                Button(selectionShortcutTitle(for: presentation)) {
+                                    applySelectionShortcut(for: presentation)
                                 }
                                 .font(.system(size: 12, weight: .medium, design: .monospaced))
                                 .foregroundStyle(PickoDesign.ColorToken.gold)
@@ -44,32 +47,82 @@ public struct SimilarGroupReviewView: View {
                                 spacing: PickoDesign.Spacing.gutter
                             ) {
                                 ForEach(presentation.assetRows) { row in
-                                    Button {
-                                        toggle(row.id)
-                                    } label: {
-                                        similarAssetCard(row)
+                                    VStack(spacing: 8) {
+                                        Button {
+                                            toggle(row.id)
+                                        } label: {
+                                            similarAssetCard(row)
+                                        }
+                                        .buttonStyle(.plain)
+                                        .accessibilityLabel("选择相似照片 \(row.id)")
+                                        .accessibilityValue(selectedAssetIds.contains(row.id) ? "已选择" : "未选择")
+
+                                        Button("预览") {
+                                            previewAsset = row.asset
+                                        }
+                                        .font(.system(size: 12, weight: .semibold, design: .rounded))
+                                        .foregroundStyle(PickoDesign.ColorToken.primary)
                                     }
-                                    .buttonStyle(.plain)
                                 }
                             }
                         }
+
+                        inlineConfirmationFooter(presentation)
                     }
                     .padding(PickoDesign.Spacing.page)
-                    .padding(.bottom, 160)
-                }
-                .safeAreaInset(edge: .bottom) {
-                    stickyActionBar(presentation)
+                    .padding(.bottom, 112)
                 }
             } else {
-                PickoEmptyStateView(
-                    title: "暂无相似照片组",
-                    message: "Picko 还没有发现需要成组复核的相似照片。继续单张整理或等待新的图库索引。",
-                    systemImage: "square.grid.2x2"
-                )
+                similarEmptyStateView
             }
         }
-        .navigationTitle("Similar")
         .pickoScreenBackground()
+        #if os(iOS)
+        .toolbar(SimilarReviewLayout.hidesNavigationBar ? .hidden : .visible, for: .navigationBar)
+        #endif
+        .sheet(item: $previewAsset) { asset in
+            PhotoPreviewView(asset: asset, model: model)
+        }
+    }
+
+    private var similarEmptyStateView: some View {
+        VStack(alignment: .leading, spacing: PickoDesign.Spacing.lg) {
+            PickoTopLevelHeader(spec: .similar)
+
+            VStack(spacing: PickoDesign.Spacing.md) {
+                Image(systemName: "square.grid.2x2")
+                    .font(.system(size: 36, weight: .semibold))
+                    .frame(width: 76, height: 76)
+                    .background(PickoDesign.ColorToken.primarySoft.opacity(0.7), in: Circle())
+                    .foregroundStyle(PickoDesign.ColorToken.primary)
+
+                VStack(spacing: 8) {
+                    Text(PickoCopy.Similar.emptyTitle)
+                        .font(.system(size: 22, weight: .semibold, design: .rounded))
+                        .foregroundStyle(PickoDesign.ColorToken.primary)
+                    Text(PickoCopy.Similar.emptyMessage)
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+                }
+
+                Button {
+                    model.selectedTab = .review
+                } label: {
+                    Label(PickoCopy.Similar.goReview, systemImage: "rectangle.stack")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(PickoDesign.ColorToken.primary, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
+                        .foregroundStyle(PickoDesign.ColorToken.primarySoft)
+                }
+                .buttonStyle(.plain)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.top, 168)
+        }
+        .padding(PickoDesign.Spacing.page)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
     private func header(_ presentation: PickoSimilarGroupPresentation) -> some View {
@@ -85,21 +138,17 @@ public struct SimilarGroupReviewView: View {
             }
 
             Spacer()
-
-            Button("跳过此组") {}
-                .font(.system(size: 12, weight: .medium, design: .monospaced))
-                .foregroundStyle(PickoDesign.ColorToken.gold)
         }
     }
 
     private func toggle(_ id: PhotoAsset.ID) {
-        if selectedAssetIds.contains(id) {
-            selectedAssetIds.remove(id)
-        } else if keepsMultiple {
-            selectedAssetIds.insert(id)
-        } else {
-            selectedAssetIds = [id]
-        }
+        let result = SimilarSelectionBehavior.toggledSelection(
+            currentSelection: selectedAssetIds,
+            toggledId: id,
+            keepsMultiple: keepsMultiple
+        )
+        selectedAssetIds = result.selectedAssetIds
+        keepsMultiple = result.keepsMultiple
     }
 
     private func keepModeControl(_ titles: [String]) -> some View {
@@ -122,7 +171,7 @@ public struct SimilarGroupReviewView: View {
                 .stroke(PickoDesign.ColorToken.outline.opacity(0.45), lineWidth: 1)
         }
         .accessibilityElement(children: .contain)
-        .accessibilityLabel("Keep mode")
+        .accessibilityLabel("保留模式")
     }
 
     private func keepModeButton(title: String, isSelected: Bool, action: @escaping () -> Void) -> some View {
@@ -139,7 +188,9 @@ public struct SimilarGroupReviewView: View {
     }
 
     private func similarHeroCard(_ row: PickoSimilarAssetPresentation, badge: String) -> some View {
-        ZStack(alignment: .bottomLeading) {
+        let shape = RoundedRectangle(cornerRadius: PickoDesign.Radius.xl)
+
+        return ZStack(alignment: .bottomLeading) {
             PickoThumbnailView(
                 asset: row.asset,
                 thumbnailProvider: model.thumbnailProvider,
@@ -147,7 +198,6 @@ public struct SimilarGroupReviewView: View {
                 targetPixelHeight: 520
             )
             .aspectRatio(1.3, contentMode: .fill)
-            .clipShape(RoundedRectangle(cornerRadius: PickoDesign.Radius.xl))
             .overlay(alignment: .topTrailing) {
                 Text(badge)
                     .font(.system(size: 12, weight: .bold, design: .monospaced))
@@ -163,7 +213,7 @@ public struct SimilarGroupReviewView: View {
             }
 
             VStack(alignment: .leading, spacing: 4) {
-                Text("BEST QUALITY")
+                Text("推荐")
                     .font(.system(size: 10, weight: .medium, design: .monospaced))
                     .tracking(0.6)
                     .foregroundStyle(.white.opacity(0.76))
@@ -173,10 +223,15 @@ public struct SimilarGroupReviewView: View {
             }
             .padding(PickoDesign.Spacing.md)
         }
+        .clipShape(shape)
+        .overlay {
+            shape.stroke(PickoDesign.ColorToken.outline.opacity(0.4), lineWidth: 1)
+        }
     }
 
     private func similarAssetCard(_ row: PickoSimilarAssetPresentation) -> some View {
         let isSelected = selectedAssetIds.contains(row.id)
+        let shape = RoundedRectangle(cornerRadius: PickoDesign.Radius.lg)
 
         return ZStack(alignment: .topTrailing) {
             PickoThumbnailView(
@@ -186,86 +241,172 @@ public struct SimilarGroupReviewView: View {
                 targetPixelHeight: 260
             )
             .aspectRatio(1, contentMode: .fill)
-            .clipShape(RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
             .opacity(isSelected ? 1 : 0.62)
             .overlay {
                 if isSelected {
-                    PickoDesign.ColorToken.gold.opacity(0.18)
+                    shape.fill(PickoDesign.ColorToken.gold.opacity(0.18))
                 }
             }
-            .overlay {
-                RoundedRectangle(cornerRadius: PickoDesign.Radius.lg)
-                    .stroke(isSelected ? PickoDesign.ColorToken.gold : PickoDesign.ColorToken.outline.opacity(0.65), lineWidth: isSelected ? 2 : 1)
-            }
 
-            Image(systemName: isSelected ? "checkmark" : "circle")
-                .font(.system(size: 12, weight: .bold))
-                .frame(width: 26, height: 26)
-                .background(isSelected ? PickoDesign.ColorToken.gold : .white.opacity(0.42), in: Circle())
-                .foregroundStyle(isSelected ? PickoDesign.ColorToken.primaryDeep : .white)
+            selectionIndicator(isSelected: isSelected)
                 .padding(8)
         }
+        .clipShape(shape)
+        .overlay {
+            shape.stroke(isSelected ? PickoDesign.ColorToken.gold : PickoDesign.ColorToken.outline.opacity(0.72), lineWidth: isSelected ? 2 : 1)
+        }
     }
 
-    private func stickyActionBar(_ presentation: PickoSimilarGroupPresentation) -> some View {
-        VStack(spacing: PickoDesign.Spacing.gutter) {
-            HStack(spacing: PickoDesign.Spacing.gutter) {
-                Image(systemName: "basket")
-                    .font(.system(size: 22, weight: .semibold))
-                    .foregroundStyle(PickoDesign.ColorToken.coral)
-                    .overlay(alignment: .topTrailing) {
-                        Text("\(max(presentation.group.assetIds.count - selectedAssetIds.count, 0))")
-                            .font(.system(size: 9, weight: .bold))
-                            .padding(4)
-                            .background(PickoDesign.ColorToken.destructive, in: Circle())
-                            .foregroundStyle(.white)
-                            .offset(x: 9, y: -9)
-                    }
+    private func selectionIndicator(isSelected: Bool) -> some View {
+        ZStack {
+            Circle()
+                .fill(PickoDesign.ColorToken.surface.opacity(isSelected ? 0.94 : 0.78))
 
-                VStack(alignment: .leading, spacing: 2) {
-                    Text("已选择 \(selectedAssetIds.count) 张")
-                        .font(.system(size: 18, weight: .semibold, design: .rounded))
-                    Text(presentation.footerExplanation)
-                        .font(.system(size: 11, weight: .regular, design: .rounded))
-                        .lineLimit(1)
-                        .foregroundStyle(PickoDesign.ColorToken.coral.opacity(0.75))
-                }
+            Circle()
+                .stroke(
+                    isSelected ? PickoDesign.ColorToken.gold.opacity(0.95) : PickoDesign.ColorToken.primary.opacity(0.38),
+                    lineWidth: isSelected ? 1.5 : 1
+                )
 
-                Spacer()
-            }
-            .padding(PickoDesign.Spacing.md)
-            .background(PickoDesign.ColorToken.coralDeep, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.xl))
-            .foregroundStyle(PickoDesign.ColorToken.coral)
-
-            HStack(spacing: PickoDesign.Spacing.md) {
-                Button {
-                    model.keep(assetIds: Array(selectedAssetIds), in: presentation.group)
-                } label: {
-                    Label("保留推荐", systemImage: "star")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.plain)
-                .font(.system(size: 16, weight: .semibold, design: .rounded))
-                .padding(.vertical, 16)
-                .background(PickoDesign.ColorToken.surfaceHigh, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
-                .foregroundStyle(PickoDesign.ColorToken.primary)
-
-                Button {
-                    model.keep(assetIds: Array(selectedAssetIds), in: presentation.group)
-                } label: {
-                    Label("Keep selected", systemImage: "arrow.right")
-                        .frame(maxWidth: .infinity)
-                }
-                .buttonStyle(.plain)
-                .font(.system(size: 16, weight: .semibold, design: .rounded))
-                .padding(.vertical, 16)
-                .background(PickoDesign.ColorToken.primary, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
-                .foregroundStyle(PickoDesign.ColorToken.primarySoft)
+            if isSelected {
+                Image(systemName: "checkmark")
+                    .font(.system(size: 10, weight: .bold))
+                    .foregroundStyle(PickoDesign.ColorToken.primary)
             }
         }
-        .padding(PickoDesign.Spacing.page)
-        .background(.ultraThinMaterial)
+        .frame(width: 24, height: 24)
+        .accessibilityLabel(isSelected ? "已选择" : "未选择")
     }
+
+    private func inlineConfirmationFooter(_ presentation: PickoSimilarGroupPresentation) -> some View {
+        VStack(alignment: .leading, spacing: PickoDesign.Spacing.md) {
+            Divider()
+                .overlay(PickoDesign.ColorToken.outline.opacity(0.55))
+
+            HStack(alignment: .center, spacing: PickoDesign.Spacing.md) {
+                VStack(alignment: .leading, spacing: 4) {
+                    Text("已选择 \(selectedAssetIds.count) 张 · 其余将进入预删除篮")
+                        .font(.system(size: 14, weight: .semibold, design: .rounded))
+                        .foregroundStyle(PickoDesign.ColorToken.primary)
+                    Text(presentation.footerExplanation)
+                        .font(.system(size: 12, weight: .regular, design: .rounded))
+                        .lineLimit(1)
+                        .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+                }
+
+                Spacer(minLength: PickoDesign.Spacing.gutter)
+
+                Button {
+                    restoreRecommendation(from: presentation)
+                } label: {
+                    Text("恢复推荐")
+                        .font(.system(size: 13, weight: .semibold, design: .rounded))
+                }
+                .buttonStyle(.plain)
+                .foregroundStyle(PickoDesign.ColorToken.gold)
+            }
+
+            Button {
+                model.keep(assetIds: Array(selectedAssetIds), in: presentation.group)
+            } label: {
+                Label("确认选择", systemImage: "checkmark")
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 16)
+                    .background(PickoDesign.ColorToken.primary, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
+                    .foregroundStyle(PickoDesign.ColorToken.primarySoft)
+            }
+            .buttonStyle(.plain)
+            .disabled(selectedAssetIds.isEmpty)
+            .opacity(selectedAssetIds.isEmpty ? 0.54 : 1)
+        }
+        .padding(.top, PickoDesign.Spacing.sm)
+    }
+
+    private func restoreRecommendation(from presentation: PickoSimilarGroupPresentation) {
+        selectedAssetIds = Set(presentation.group.recommendedKeepIds)
+        keepsMultiple = presentation.group.recommendedKeepIds.count > 1
+    }
+
+    private func selectionShortcutTitle(for presentation: PickoSimilarGroupPresentation) -> String {
+        SimilarSelectionBehavior.shortcutTitle(
+            currentSelection: selectedAssetIds,
+            allAssetIds: presentation.group.assetIds
+        )
+    }
+
+    private func applySelectionShortcut(for presentation: PickoSimilarGroupPresentation) {
+        let result = SimilarSelectionBehavior.applyingShortcut(
+            currentSelection: selectedAssetIds,
+            allAssetIds: presentation.group.assetIds,
+            recommendedKeepIds: presentation.group.recommendedKeepIds
+        )
+        selectedAssetIds = result.selectedAssetIds
+        keepsMultiple = result.keepsMultiple
+    }
+}
+
+struct SimilarSelectionBehavior {
+    struct Result: Equatable {
+        var selectedAssetIds: Set<PhotoAsset.ID>
+        var keepsMultiple: Bool
+    }
+
+    static func toggledSelection(
+        currentSelection: Set<PhotoAsset.ID>,
+        toggledId: PhotoAsset.ID,
+        keepsMultiple: Bool
+    ) -> Result {
+        var nextSelection = currentSelection
+
+        if nextSelection.contains(toggledId) {
+            nextSelection.remove(toggledId)
+            return Result(selectedAssetIds: nextSelection, keepsMultiple: keepsMultiple)
+        }
+
+        if keepsMultiple || !nextSelection.isEmpty {
+            nextSelection.insert(toggledId)
+            return Result(selectedAssetIds: nextSelection, keepsMultiple: true)
+        }
+
+        return Result(selectedAssetIds: [toggledId], keepsMultiple: false)
+    }
+
+    static func shortcutTitle(currentSelection: Set<PhotoAsset.ID>, allAssetIds: [PhotoAsset.ID]) -> String {
+        currentSelection.isSuperset(of: Set(allAssetIds)) ? "恢复推荐" : "全选"
+    }
+
+    static func applyingShortcut(
+        currentSelection: Set<PhotoAsset.ID>,
+        allAssetIds: [PhotoAsset.ID],
+        recommendedKeepIds: [PhotoAsset.ID]
+    ) -> Result {
+        let allAssetIds = Set(allAssetIds)
+        let nextSelection: Set<PhotoAsset.ID>
+
+        if currentSelection.isSuperset(of: allAssetIds) {
+            nextSelection = Set(recommendedKeepIds)
+        } else {
+            nextSelection = allAssetIds
+        }
+
+        return Result(selectedAssetIds: nextSelection, keepsMultiple: nextSelection.count > 1)
+    }
+}
+
+enum SimilarReviewLayout {
+    static let navigationTitle: String? = nil
+    static let hidesNavigationBar = true
+    static let emptyStateUsesTopAlignment = true
+    static let usesFloatingActionBar = false
+    static let usesInlineActionSummary = true
+    static let clipsHeroOverlaysToRoundedShape = true
+    static let clipsGridSelectionOverlayToRoundedShape = true
+    static let usesHighContrastSelectionIndicator = false
+    static let usesSubtleSelectionIndicator = true
+    static let usesStandaloneConfirmationCard = false
+    static let usesInlineConfirmationFooter = true
+    static let restoresRecommendationWithoutSubmitting = true
 }
 
 #Preview {

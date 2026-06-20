@@ -1,4 +1,5 @@
 import PickoApp
+import PickoCore
 import PickoPhotos
 import SwiftData
 import SwiftUI
@@ -6,7 +7,11 @@ import SwiftUI
 @main
 struct PickoIOSApp: App {
     @State private var sampleLibraryModel = PickoAppModel.preview()
+    @State private var sampleReviewModel = PickoIOSApp.makeSampleReviewModel()
+    @State private var emptyReviewModel = PickoIOSApp.makeEmptyReviewModel()
+    @State private var sampleSimilarModel = PickoIOSApp.makeSampleSimilarModel()
     @State private var sampleBasketModel = PickoIOSApp.makeSampleBasketModel()
+    @State private var emptyBasketModel = PickoIOSApp.makeEmptyBasketModel()
 
     var body: some Scene {
         WindowGroup {
@@ -30,8 +35,16 @@ struct PickoIOSApp: App {
             MetadataBenchmarkView(configuration: configuration)
         } else if arguments.contains("--picko-use-denied-library") {
             PickoLibraryBootstrapView(makeBootstrapper: deniedLibraryBootstrapper)
+        } else if arguments.contains("--picko-use-sample-review") {
+            PickoRootView(model: sampleReviewModel)
+        } else if arguments.contains("--picko-use-empty-review") {
+            PickoRootView(model: emptyReviewModel)
+        } else if arguments.contains("--picko-use-sample-similar") {
+            PickoRootView(model: sampleSimilarModel)
         } else if arguments.contains("--picko-use-sample-basket") {
             PickoRootView(model: sampleBasketModel)
+        } else if arguments.contains("--picko-use-empty-basket") {
+            PickoRootView(model: emptyBasketModel)
         } else if arguments.contains("--picko-use-sample-library") {
             PickoRootView(model: sampleLibraryModel)
         } else {
@@ -39,11 +52,37 @@ struct PickoIOSApp: App {
         }
     }
 
+    private static func makeSampleReviewModel() -> PickoAppModel {
+        let model = PickoAppModel.preview()
+        model.selectedTab = .review
+        return model
+    }
+
+    private static func makeEmptyReviewModel() -> PickoAppModel {
+        PickoAppModel(
+            store: ReviewStateStore(assets: [], groups: []),
+            selectedTab: .review
+        )
+    }
+
+    private static func makeSampleSimilarModel() -> PickoAppModel {
+        let model = PickoAppModel.preview()
+        model.selectedTab = .similar
+        return model
+    }
+
     private static func makeSampleBasketModel() -> PickoAppModel {
         let model = PickoAppModel.preview()
         model.preDeleteCurrentAsset()
         model.selectedTab = .basket
         return model
+    }
+
+    private static func makeEmptyBasketModel() -> PickoAppModel {
+        PickoAppModel(
+            store: ReviewStateStore(assets: [], groups: []),
+            selectedTab: .basket
+        )
     }
 
     private func deniedLibraryBootstrapper() throws -> PhotoLibraryBootstrapper {

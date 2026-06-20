@@ -4,11 +4,31 @@ public struct SimilarityEngine: Equatable {
     public struct Configuration: Equatable {
         public var timeWindow: TimeInterval
         public var locationThresholdMeters: Double?
+        public var usesMetadataFallbackWhenHashesAreMissing: Bool
+        public var dimensionTolerance: Double
+        public var fileSizeTolerance: Double
 
-        public init(timeWindow: TimeInterval, locationThresholdMeters: Double? = nil) {
+        public init(
+            timeWindow: TimeInterval,
+            locationThresholdMeters: Double? = nil,
+            usesMetadataFallbackWhenHashesAreMissing: Bool = false,
+            dimensionTolerance: Double = 0.08,
+            fileSizeTolerance: Double = 0.35
+        ) {
             self.timeWindow = timeWindow
             self.locationThresholdMeters = locationThresholdMeters
+            self.usesMetadataFallbackWhenHashesAreMissing = usesMetadataFallbackWhenHashesAreMissing
+            self.dimensionTolerance = dimensionTolerance
+            self.fileSizeTolerance = fileSizeTolerance
         }
+
+        public static let realLibraryDefault = Configuration(
+            timeWindow: 300,
+            locationThresholdMeters: 250,
+            usesMetadataFallbackWhenHashesAreMissing: true,
+            dimensionTolerance: 0.08,
+            fileSizeTolerance: 0.35
+        )
     }
 
     public var configuration: Configuration
@@ -77,8 +97,12 @@ public struct SimilarityEngine: Equatable {
             return false
         }
 
-        return matchingHash(lhs.thumbnailHash, rhs.thumbnailHash) ||
-            matchingHash(lhs.perceptualHash, rhs.perceptualHash)
+        if matchingHash(lhs.thumbnailHash, rhs.thumbnailHash) ||
+            matchingHash(lhs.perceptualHash, rhs.perceptualHash) {
+            return true
+        }
+
+        return metadataFallbackMatches(lhs, rhs)
     }
 
     private func isWithinLocationThreshold(_ lhs: PhotoAsset.Location?, _ rhs: PhotoAsset.Location?) -> Bool {
@@ -116,6 +140,40 @@ public struct SimilarityEngine: Equatable {
             return false
         }
         return lhs == rhs
+    }
+
+    private func metadataFallbackMatches(_ lhs: PhotoAsset, _ rhs: PhotoAsset) -> Bool {
+        guard configuration.usesMetadataFallbackWhenHashesAreMissing else {
+            return false
+        }
+
+        guard lhs.thumbnailHash == nil,
+              lhs.perceptualHash == nil,
+              rhs.thumbnailHash == nil,
+              rhs.perceptualHash == nil else {
+            return false
+        }
+
+        return dimensionsAreClose(lhs, rhs) && fileSizesAreClose(lhs.fileSizeBytes, rhs.fileSizeBytes)
+    }
+
+    private func dimensionsAreClose(_ lhs: PhotoAsset, _ rhs: PhotoAsset) -> Bool {
+        ratiosAreClose(Double(lhs.pixelWidth), Double(rhs.pixelWidth), tolerance: configuration.dimensionTolerance) &&
+            ratiosAreClose(Double(lhs.pixelHeight), Double(rhs.pixelHeight), tolerance: configuration.dimensionTolerance)
+    }
+
+    private func fileSizesAreClose(_ lhs: Int64, _ rhs: Int64) -> Bool {
+        ratiosAreClose(Double(lhs), Double(rhs), tolerance: configuration.fileSizeTolerance)
+    }
+
+    private func ratiosAreClose(_ lhs: Double, _ rhs: Double, tolerance: Double) -> Bool {
+        guard lhs > 0, rhs > 0 else {
+            return false
+        }
+
+        let smaller = min(lhs, rhs)
+        let larger = max(lhs, rhs)
+        return (larger - smaller) / larger <= tolerance
     }
 
     private func appendGroupIfNeeded(_ group: [PhotoAsset], to groups: inout [[PhotoAsset]]) {

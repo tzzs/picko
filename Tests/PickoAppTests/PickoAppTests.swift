@@ -1,4 +1,6 @@
 import XCTest
+import MapKit
+import SwiftUI
 import PickoCore
 import PickoPhotos
 @testable import PickoApp
@@ -87,6 +89,12 @@ final class PickoAppTests: XCTestCase {
         XCTAssertNotNil(view)
     }
 
+    func testReviewGestureSettingsViewCanBeConstructed() {
+        let view = ReviewGestureSettingsView()
+
+        XCTAssertNotNil(view)
+    }
+
     func testLibraryBootstrapViewCanBeConstructed() {
         let view = PickoLibraryBootstrapView()
 
@@ -154,8 +162,8 @@ final class PickoAppTests: XCTestCase {
     }
 
     func testPhotosConfirmationCopyMentionsRecentlyDeletedRecovery() {
-        XCTAssertTrue(ReviewCopy.photosConfirmationMessage.contains("Recently Deleted"))
-        XCTAssertTrue(ReviewCopy.photosConfirmationMessage.contains("recovered"))
+        XCTAssertTrue(ReviewCopy.photosConfirmationMessage.contains("最近删除"))
+        XCTAssertTrue(ReviewCopy.photosConfirmationMessage.contains("恢复"))
     }
 
     func testThumbnailViewCanBeConstructedWithoutProvider() {
@@ -171,6 +179,68 @@ final class PickoAppTests: XCTestCase {
         let view = SimilarGroupReviewView(model: model)
 
         XCTAssertNotNil(view)
+    }
+
+    func testSimilarReviewLayoutAvoidsFloatingLayerAndClipsArtworkOverlays() {
+        XCTAssertFalse(SimilarReviewLayout.usesFloatingActionBar)
+        XCTAssertTrue(SimilarReviewLayout.usesInlineActionSummary)
+        XCTAssertTrue(SimilarReviewLayout.clipsHeroOverlaysToRoundedShape)
+        XCTAssertTrue(SimilarReviewLayout.clipsGridSelectionOverlayToRoundedShape)
+        XCTAssertFalse(SimilarReviewLayout.usesHighContrastSelectionIndicator)
+        XCTAssertTrue(SimilarReviewLayout.usesSubtleSelectionIndicator)
+        XCTAssertFalse(SimilarReviewLayout.usesStandaloneConfirmationCard)
+        XCTAssertTrue(SimilarReviewLayout.usesInlineConfirmationFooter)
+        XCTAssertTrue(SimilarReviewLayout.restoresRecommendationWithoutSubmitting)
+    }
+
+    func testSimilarSelectionAutoPromotesSingleModeWhenAddingSecondPhoto() {
+        let result = SimilarSelectionBehavior.toggledSelection(
+            currentSelection: ["preview-1"],
+            toggledId: "preview-2",
+            keepsMultiple: false
+        )
+
+        XCTAssertEqual(result.selectedAssetIds, ["preview-1", "preview-2"])
+        XCTAssertTrue(result.keepsMultiple)
+    }
+
+    func testSimilarSelectionKeepsSingleModeForFirstSelection() {
+        let result = SimilarSelectionBehavior.toggledSelection(
+            currentSelection: [],
+            toggledId: "preview-1",
+            keepsMultiple: false
+        )
+
+        XCTAssertEqual(result.selectedAssetIds, ["preview-1"])
+        XCTAssertFalse(result.keepsMultiple)
+    }
+
+    func testSimilarSelectionShortcutSelectsAllWhenSomePhotosAreUnselected() {
+        let allAssetIds = ["preview-1", "preview-2"]
+
+        let result = SimilarSelectionBehavior.applyingShortcut(
+            currentSelection: ["preview-1"],
+            allAssetIds: allAssetIds,
+            recommendedKeepIds: ["preview-1"]
+        )
+
+        XCTAssertEqual(SimilarSelectionBehavior.shortcutTitle(currentSelection: ["preview-1"], allAssetIds: allAssetIds), "全选")
+        XCTAssertEqual(result.selectedAssetIds, ["preview-1", "preview-2"])
+        XCTAssertTrue(result.keepsMultiple)
+    }
+
+    func testSimilarSelectionShortcutRestoresRecommendationWhenAllPhotosAreSelected() {
+        let allAssetIds = ["preview-1", "preview-2"]
+
+        let result = SimilarSelectionBehavior.applyingShortcut(
+            currentSelection: ["preview-1", "preview-2"],
+            allAssetIds: allAssetIds,
+            recommendedKeepIds: ["preview-1"]
+        )
+
+        XCTAssertEqual(SimilarSelectionBehavior.shortcutTitle(currentSelection: ["preview-1", "preview-2"], allAssetIds: allAssetIds), "恢复推荐")
+        XCTAssertEqual(result.selectedAssetIds, ["preview-1"])
+        XCTAssertFalse(result.keepsMultiple)
     }
 
     func testBasketViewCanBeConstructedWithThumbnailProvider() {
@@ -189,15 +259,182 @@ final class PickoAppTests: XCTestCase {
 
         let presentation = PickoHomePresentation(model: model)
 
-        XCTAssertEqual(presentation.heroTitle, "Ready to keep what matters")
-        XCTAssertEqual(presentation.metricRows.map(\.label), ["Library", "Similar groups", "Pre-delete basket"])
+        XCTAssertEqual(presentation.heroTitle, "继续整理珍贵回忆")
+        XCTAssertEqual(presentation.metricRows.map(\.label), ["图库", "相似组", "预删除篮"])
         XCTAssertEqual(presentation.taskRows.map(\.title), [
-            "Review one by one",
-            "Review similar photos",
-            "Review pre-delete basket",
-            "Browse by time and place"
+            "单张整理",
+            "相似照片",
+            "预删除篮复核",
+            "时间与地点"
         ])
-        XCTAssertTrue(presentation.privacyFootnote.contains("Photos are not deleted"))
+        XCTAssertTrue(presentation.privacyFootnote.contains("不会删除照片"))
+    }
+
+    func testHomePresentationKeepsQuickStartRowsVisuallyConsistent() {
+        let presentation = PickoHomePresentation(model: .preview())
+
+        XCTAssertEqual(presentation.taskRows.map(\.tintRole), [
+            .review,
+            .similar,
+            .basket,
+            .time
+        ])
+        XCTAssertFalse(presentation.taskRows.contains { $0.tintRole == .keep })
+    }
+
+    func testHomeLayoutHidesRedundantNavigationTitle() {
+        XCTAssertNil(HomeLayout.navigationTitle)
+        XCTAssertTrue(HomeLayout.hidesNavigationBar)
+    }
+
+    func testTopLevelReviewPagesHideRedundantNavigationTitles() {
+        XCTAssertNil(SimilarReviewLayout.navigationTitle)
+        XCTAssertTrue(SimilarReviewLayout.hidesNavigationBar)
+        XCTAssertTrue(SimilarReviewLayout.emptyStateUsesTopAlignment)
+        XCTAssertNil(PreDeleteBasketLayout.navigationTitle)
+        XCTAssertTrue(PreDeleteBasketLayout.hidesNavigationBar)
+    }
+
+    func testTopLevelTabHeadersUseUnifiedPageTitles() {
+        XCTAssertEqual(PickoTopLevelHeaderSpec.home.title, "拾影")
+        XCTAssertEqual(PickoTopLevelHeaderSpec.review.title, PickoCopy.Tabs.review)
+        XCTAssertEqual(PickoTopLevelHeaderSpec.similar.title, PickoCopy.Tabs.similar)
+        XCTAssertEqual(PickoTopLevelHeaderSpec.basket.title, PickoCopy.Tabs.basket)
+
+        XCTAssertEqual(PickoTopLevelHeaderSpec.home.systemImage, "photo.stack")
+        XCTAssertEqual(PickoTopLevelHeaderSpec.review.systemImage, "rectangle.stack")
+        XCTAssertEqual(PickoTopLevelHeaderSpec.similar.systemImage, "square.grid.2x2")
+        XCTAssertEqual(PickoTopLevelHeaderSpec.basket.systemImage, "tray")
+    }
+
+    func testTopLevelTabHeadersSharePageTopInset() {
+        XCTAssertEqual(SingleReviewLayout.contentTopPadding, PickoDesign.Spacing.page)
+    }
+
+    func testSingleReviewEmptyStateKeepsUnifiedPageChrome() {
+        XCTAssertTrue(SingleReviewLayout.emptyStateUsesTopLevelHeader)
+        XCTAssertTrue(SingleReviewLayout.emptyStateUsesScreenBackground)
+        XCTAssertTrue(SingleReviewLayout.emptyStateMatchesSimilarEmptyStateStyle)
+        XCTAssertFalse(SingleReviewLayout.emptyStateUsesBackgroundCard)
+        XCTAssertTrue(SingleReviewLayout.emptyStateUsesPrimaryNextAction)
+        XCTAssertEqual(SingleReviewLayout.emptyStateTopPadding, SingleReviewLayout.contentTopPadding)
+    }
+
+    func testSharedEmptyStateWidthIsControlledByParentPage() {
+        XCTAssertTrue(PickoEmptyStateLayout.usesCallerControlledOuterPadding)
+        XCTAssertEqual(PickoEmptyStateLayout.outerPadding, 0)
+    }
+
+    func testSingleReviewEmptyActionPrefersSimilarWhenGroupsExist() {
+        let presentation = PickoReviewEmptyActionPresentation(model: .preview())
+
+        XCTAssertEqual(presentation.title, "去相似整理")
+        XCTAssertEqual(presentation.systemImage, "square.grid.2x2")
+        XCTAssertEqual(presentation.destinationTab, .similar)
+    }
+
+    func testSingleReviewEmptyActionFallsBackToBasketWhenItemsAreQueued() {
+        let model = PickoAppModel(
+            store: ReviewStateStore(assets: [PickoPreviewFixtures.assets[0]], groups: []),
+            selectedTab: .review
+        )
+        model.preDeleteCurrentAsset()
+
+        let presentation = PickoReviewEmptyActionPresentation(model: model)
+
+        XCTAssertEqual(presentation.title, "查看预删除篮")
+        XCTAssertEqual(presentation.systemImage, "tray")
+        XCTAssertEqual(presentation.destinationTab, .basket)
+    }
+
+    func testSingleReviewEmptyActionFallsBackToHomeWhenNoWorkRemains() {
+        let model = PickoAppModel(
+            store: ReviewStateStore(assets: [], groups: []),
+            selectedTab: .review
+        )
+
+        let presentation = PickoReviewEmptyActionPresentation(model: model)
+
+        XCTAssertEqual(presentation.title, "返回首页")
+        XCTAssertEqual(presentation.systemImage, "house")
+        XCTAssertEqual(presentation.destinationTab, .home)
+    }
+
+    func testSingleReviewProgressTextExplainsPhotoPosition() {
+        XCTAssertEqual(
+            SingleReviewLayout.reviewProgressText(currentIndex: 0, totalCount: 6),
+            "第 1 / 6 张"
+        )
+        XCTAssertEqual(
+            SingleReviewLayout.reviewProgressText(currentIndex: 2, totalCount: 6),
+            "第 3 / 6 张"
+        )
+    }
+
+    func testSingleReviewGestureMappingDefaultsToSwipeUpKeep() {
+        XCTAssertEqual(
+            SingleReviewLayout.gestureAction(
+                for: CGSize(width: 0, height: -96),
+                preference: .keepOnUp
+            ),
+            .keep
+        )
+        XCTAssertEqual(
+            SingleReviewLayout.gestureAction(
+                for: CGSize(width: 0, height: 96),
+                preference: .keepOnUp
+            ),
+            .preDelete
+        )
+        XCTAssertEqual(
+            SingleReviewLayout.gestureAction(
+                for: CGSize(width: -96, height: 0),
+                preference: .keepOnUp
+            ),
+            .undo
+        )
+        XCTAssertEqual(
+            SingleReviewLayout.gestureAction(
+                for: CGSize(width: 96, height: 0),
+                preference: .keepOnUp
+            ),
+            .skip
+        )
+        XCTAssertNil(
+            SingleReviewLayout.gestureAction(
+                for: CGSize(width: 20, height: 20),
+                preference: .keepOnUp
+            )
+        )
+    }
+
+    func testSingleReviewGestureMappingCanInvertVerticalDecision() {
+        XCTAssertEqual(
+            SingleReviewLayout.gestureAction(
+                for: CGSize(width: 0, height: -96),
+                preference: .keepOnDown
+            ),
+            .preDelete
+        )
+        XCTAssertEqual(
+            SingleReviewLayout.gestureAction(
+                for: CGSize(width: 0, height: 96),
+                preference: .keepOnDown
+            ),
+            .keep
+        )
+        XCTAssertEqual(ReviewGesturePreference.keepOnUp.topHintTitle, "向上保留")
+        XCTAssertEqual(ReviewGesturePreference.keepOnUp.bottomHintTitle, "向下预删除")
+        XCTAssertEqual(ReviewGesturePreference.keepOnDown.topHintTitle, "向上预删除")
+        XCTAssertEqual(ReviewGesturePreference.keepOnDown.bottomHintTitle, "向下保留")
+    }
+
+    func testSingleReviewLayoutUsesGestureFirstCardStack() {
+        XCTAssertTrue(SingleReviewLayout.showsStackedCards)
+        XCTAssertTrue(SingleReviewLayout.centersPhotoStageVertically)
+        XCTAssertFalse(SingleReviewLayout.showsLargePreDeleteDockButton)
+        XCTAssertFalse(SingleReviewLayout.showsFallbackActionDock)
+        XCTAssertTrue(SingleReviewLayout.showsTopUndoAction)
     }
 
     func testSingleReviewPresentationKeepsPrimaryActionsPhotoFirst() throws {
@@ -205,14 +442,101 @@ final class PickoAppTests: XCTestCase {
 
         let presentation = try XCTUnwrap(PickoSingleReviewPresentation(model: model))
 
-        XCTAssertEqual(presentation.decisionHint, "Swipe up to keep, down to send to the basket.")
-        XCTAssertEqual(presentation.primaryActions.map(\.title), ["Keep", "Review Later", "Skip"])
+        XCTAssertEqual(presentation.decisionHint, "向上保留，向下放入预删除篮。")
+        XCTAssertEqual(presentation.primaryActions.map(\.title), ["保留", "放入预删除篮", "跳过"])
         XCTAssertEqual(presentation.primaryActions.map(\.systemImage), [
             "checkmark.circle.fill",
             "tray.and.arrow.down",
             "forward"
         ])
-        XCTAssertTrue(presentation.metadataSummary.contains("Similar group"))
+        XCTAssertTrue(presentation.dateLocationText.contains("附近"))
+        XCTAssertFalse(presentation.dateLocationText.contains("31.23"))
+        XCTAssertFalse(presentation.dateLocationText.contains("121.47"))
+        XCTAssertFalse(presentation.dateLocationText.contains("2026年5月30日 · 上海"))
+        XCTAssertTrue(presentation.metadataSummary.contains("相似组"))
+    }
+
+    func testSingleReviewLayoutKeepsActionsVisibleOnSmallPhones() {
+        XCTAssertEqual(
+            SingleReviewLayout.mainImageHeight(availableWidth: 335, availableHeight: 667, aspectRatio: 3.0 / 4.0),
+            373.52,
+            accuracy: 0.01
+        )
+        XCTAssertEqual(
+            SingleReviewLayout.mainImageHeight(availableWidth: 280, availableHeight: 568, aspectRatio: 3.0 / 4.0),
+            318.08,
+            accuracy: 0.01
+        )
+        XCTAssertEqual(
+            SingleReviewLayout.mainImageHeight(availableWidth: 328, availableHeight: 900, aspectRatio: 3.0 / 4.0),
+            430,
+            accuracy: 0.01
+        )
+    }
+
+    func testSingleReviewLayoutSizesPhotoHeightFromAspectRatioAtFixedWidth() {
+        let width: CGFloat = 328
+
+        XCTAssertEqual(
+            SingleReviewLayout.mainImageHeight(availableWidth: width, availableHeight: 800, aspectRatio: 16.0 / 9.0),
+            184.5,
+            accuracy: 0.01
+        )
+        XCTAssertEqual(
+            SingleReviewLayout.mainImageHeight(availableWidth: width, availableHeight: 800, aspectRatio: 1),
+            328,
+            accuracy: 0.01
+        )
+        XCTAssertEqual(
+            SingleReviewLayout.mainImageHeight(availableWidth: width, availableHeight: 800, aspectRatio: 4.0 / 3.0),
+            246,
+            accuracy: 0.01
+        )
+    }
+
+    func testSingleReviewLayoutKeepsGestureCanvasFreeOfBottomDock() {
+        XCTAssertEqual(SingleReviewLayout.actionDockReservedHeight, 0)
+        XCTAssertEqual(SingleReviewLayout.actionDockBottomPadding, 0)
+        XCTAssertEqual(SingleReviewLayout.contentTopPadding, PickoDesign.Spacing.page)
+    }
+
+    func testSingleReviewLayoutAdaptsPhotoDisplayModeByAspectRatio() {
+        XCTAssertEqual(SingleReviewLayout.mainImageContentMode(forAspectRatio: 4.0 / 3.0), .fill)
+        XCTAssertEqual(SingleReviewLayout.mainImageContentMode(forAspectRatio: 3.0 / 4.0), .fill)
+        XCTAssertEqual(SingleReviewLayout.mainImageContentMode(forAspectRatio: 16.0 / 9.0), .fit)
+        XCTAssertEqual(SingleReviewLayout.mainImageContentMode(forAspectRatio: 6.0 / 19.0), .fit)
+    }
+
+    func testSingleReviewLayoutUsesBackdropForExtremeAspectRatios() {
+        XCTAssertFalse(SingleReviewLayout.usesBackdropFill(forAspectRatio: 4.0 / 3.0))
+        XCTAssertTrue(SingleReviewLayout.usesBackdropFill(forAspectRatio: 16.0 / 9.0))
+        XCTAssertTrue(SingleReviewLayout.usesBackdropFill(forAspectRatio: 6.0 / 19.0))
+    }
+
+    func testPlaceLabelFormatterUsesCountryAndNaturalFeatureWhenCityIsMissing() {
+        let label = PhotoPlaceLabelFormatter.label(
+            city: nil,
+            region: nil,
+            country: "冰岛",
+            place: nil,
+            areaOfInterest: "Skogafoss",
+            naturalFeature: nil
+        )
+
+        XCTAssertEqual(label, "冰岛 · Skogafoss")
+    }
+
+    func testPlaceLabelFormatterUsesNaturalFeatureBeforeCoordinateFallback() {
+        let label = PhotoPlaceLabelFormatter.label(
+            city: nil,
+            region: "南部区",
+            country: nil,
+            place: nil,
+            areaOfInterest: nil,
+            naturalFeature: "大西洋"
+        )
+
+        XCTAssertEqual(label, "南部区 · 大西洋")
     }
 
     func testSimilarGroupPresentationExplainsKeepNAndEditableRecommendation() throws {
@@ -220,9 +544,9 @@ final class PickoAppTests: XCTestCase {
 
         let presentation = try XCTUnwrap(PickoSimilarGroupPresentation(model: model))
 
-        XCTAssertEqual(presentation.modeTitles, ["Keep 1", "Keep N"])
-        XCTAssertEqual(presentation.recommendationBadge, "Suggested keep")
-        XCTAssertTrue(presentation.footerExplanation.contains("Unselected photos move to the pre-delete basket"))
+        XCTAssertEqual(presentation.modeTitles, ["保留 1 张", "保留多张"])
+        XCTAssertEqual(presentation.recommendationBadge, "推荐保留")
+        XCTAssertTrue(presentation.footerExplanation.contains("未选照片会进入预删除篮"))
         XCTAssertGreaterThanOrEqual(presentation.assetRows.count, 2)
     }
 
@@ -232,11 +556,322 @@ final class PickoAppTests: XCTestCase {
 
         let presentation = PickoBasketPresentation(model: model)
 
-        XCTAssertEqual(presentation.summaryTitle, "1 item waiting for final review")
-        XCTAssertEqual(presentation.primaryActionTitle, "Confirm with Photos")
-        XCTAssertEqual(presentation.secondaryActionTitle, "Restore or clear before confirming")
-        XCTAssertTrue(presentation.recoveryMessage.contains("Recently Deleted"))
-        XCTAssertTrue(presentation.recoveryMessage.contains("recovered"))
+        XCTAssertEqual(presentation.summaryTitle, "1 项等待最终复核")
+        XCTAssertEqual(presentation.summarySubtitle, "预计可节省：3.7 MB")
+        XCTAssertEqual(presentation.primaryActionTitle, "在系统照片中确认删除")
+        XCTAssertEqual(presentation.secondaryActionTitle, "最终确认前可恢复或全部移出")
+        XCTAssertEqual(presentation.disabledReason, "当前为样例图库，无法调用系统照片确认。")
+        XCTAssertTrue(presentation.recoveryMessage.contains("最近删除"))
+        XCTAssertTrue(presentation.recoveryMessage.contains("恢复"))
+    }
+
+    func testBasketFinalActionsAreInlineAndHiddenWhenEmpty() {
+        XCTAssertTrue(PreDeleteBasketLayout.usesInlineFinalActions)
+        XCTAssertFalse(PreDeleteBasketLayout.usesFloatingFinalActions)
+        XCTAssertTrue(PreDeleteBasketLayout.requiresClearConfirmation)
+        XCTAssertFalse(PreDeleteBasketLayout.placesItemListBeforeFinalActions)
+        XCTAssertTrue(PreDeleteBasketLayout.mergesSavingsOverviewWithFinalActions)
+        XCTAssertFalse(PreDeleteBasketLayout.showsStandaloneSavingsOverview)
+        XCTAssertTrue(PreDeleteBasketLayout.showsFinalActions(itemCount: 1))
+        XCTAssertFalse(PreDeleteBasketLayout.showsFinalActions(itemCount: 0))
+    }
+
+    func testBasketUsesUnifiedFinalQueueInsteadOfUntrackedSourceBuckets() {
+        XCTAssertEqual(PickoCopy.Basket.itemSectionTitle, "待确认项目")
+        XCTAssertTrue(PreDeleteBasketLayout.usesUnifiedItemList)
+        XCTAssertFalse(PreDeleteBasketLayout.showsSourceBuckets)
+    }
+
+    func testBasketPresentationFormatsZeroBytesInChinese() {
+        let presentation = PickoBasketPresentation(model: .preview())
+
+        XCTAssertEqual(presentation.summarySubtitle, "预计可节省：0 字节")
+        XCTAssertEqual(presentation.disabledReason, "预删除篮为空，暂无需要确认的项目。")
+    }
+
+    func testPhotoPreviewViewCanBeConstructedForReviewActions() {
+        let model = PickoAppModel.preview()
+        let view = PhotoPreviewView(asset: model.assets[0], model: model)
+
+        XCTAssertNotNil(view)
+    }
+
+    func testPhotoPreviewUsesRestoreOnlyActionsWhenOpenedFromBasket() {
+        let basketPresentation = PhotoPreviewActionPresentation(context: .basket)
+
+        XCTAssertEqual(basketPresentation.navigationTitle, "预删除项预览")
+        XCTAssertTrue(basketPresentation.showsRestoreAction)
+        XCTAssertTrue(basketPresentation.showsCloseAction)
+        XCTAssertFalse(basketPresentation.showsPreDeleteAction)
+        XCTAssertEqual(basketPresentation.primaryTitle, "恢复此项")
+        XCTAssertEqual(basketPresentation.secondaryTitle, "关闭")
+    }
+
+    func testPhotoPreviewKeepsReviewDecisionActionsOutsideBasket() {
+        let reviewPresentation = PhotoPreviewActionPresentation(context: .review)
+
+        XCTAssertEqual(reviewPresentation.navigationTitle, "照片预览")
+        XCTAssertTrue(reviewPresentation.showsKeepAction)
+        XCTAssertTrue(reviewPresentation.showsPreDeleteAction)
+        XCTAssertFalse(reviewPresentation.showsRestoreAction)
+    }
+
+    func testCollectionReviewViewCanRenderTimeAndPlaceModes() {
+        let model = PickoAppModel.preview()
+
+        let timeView = CollectionReviewView(mode: .time, model: model)
+        let placeView = CollectionReviewView(
+            mode: .place,
+            model: model,
+            placeLabelResolver: FakePlaceLabelResolver(labels: [:])
+        )
+
+        XCTAssertNotNil(timeView)
+        XCTAssertNotNil(placeView)
+    }
+
+    func testCollectionPreviewStripUsesReadablePhotoHeight() {
+        XCTAssertGreaterThanOrEqual(CollectionPreviewStripLayout.height, 108)
+        XCTAssertGreaterThanOrEqual(CollectionPreviewStripLayout.targetPixelHeight, 320)
+    }
+
+    func testPlaceMapPresentationUsesRealGroupCoordinates() {
+        let groups = [
+            makePlaceGroup(
+                id: "shanghai",
+                title: "上海 · 武康路",
+                latitude: 31.2304,
+                longitude: 121.4737,
+                assetIds: ["a1", "a2"]
+            ),
+            makePlaceGroup(
+                id: "hangzhou",
+                title: "杭州 · 西湖",
+                latitude: 30.2741,
+                longitude: 120.1551,
+                assetIds: ["a3"]
+            )
+        ]
+
+        let presentation = PlaceMapPresentation(groups: groups)
+
+        XCTAssertEqual(presentation.annotations.map(\.id), ["shanghai", "hangzhou"])
+        XCTAssertEqual(presentation.annotations.map(\.count), [2, 1])
+        XCTAssertEqual(presentation.annotations.first?.latitude ?? 0, 31.2304, accuracy: 0.0001)
+        XCTAssertEqual(presentation.annotations.first?.longitude ?? 0, 121.4737, accuracy: 0.0001)
+        XCTAssertEqual(presentation.region.center.latitude, 30.75225, accuracy: 0.01)
+        XCTAssertEqual(presentation.region.center.longitude, 120.8144, accuracy: 0.01)
+        XCTAssertGreaterThan(presentation.region.span.latitudeDelta, 0.9)
+        XCTAssertGreaterThan(presentation.region.span.longitudeDelta, 1.3)
+    }
+
+    func testPlaceMapPresentationFitsAllLocationsForThumbnailAndDetailAspects() {
+        let groups = [
+            makePlaceGroup(id: "west", title: "西侧", latitude: 31.2304, longitude: 121.4737, assetIds: ["a1"]),
+            makePlaceGroup(id: "east", title: "东侧", latitude: 31.2304, longitude: 122.4737, assetIds: ["a2"])
+        ]
+
+        let presentation = PlaceMapPresentation(groups: groups)
+        let thumbnailRegion = presentation.fittingRegion(forAspectRatio: 2.0)
+        let detailRegion = presentation.fittingRegion(forAspectRatio: 0.46)
+
+        XCTAssertEqual(thumbnailRegion.center.latitude, 31.2304, accuracy: 0.0001)
+        XCTAssertEqual(thumbnailRegion.center.longitude, 121.9737, accuracy: 0.0001)
+        XCTAssertGreaterThanOrEqual(thumbnailRegion.span.longitudeDelta, thumbnailRegion.span.latitudeDelta * 2.0)
+        XCTAssertGreaterThanOrEqual(detailRegion.span.latitudeDelta, detailRegion.span.longitudeDelta / 0.46)
+        XCTAssertGreaterThanOrEqual(detailRegion.span.longitudeDelta, 1.6)
+    }
+
+    func testPlaceMapPresentationKeepsThumbnailPinsAwayFromEdges() {
+        let groups = [
+            makePlaceGroup(id: "northwest", title: "西北", latitude: 32.0, longitude: 121.0, assetIds: ["a1"]),
+            makePlaceGroup(id: "southeast", title: "东南", latitude: 31.0, longitude: 122.0, assetIds: ["a2"])
+        ]
+
+        let presentation = PlaceMapPresentation(groups: groups)
+        let thumbnailRegion = presentation.thumbnailRegion(forAspectRatio: 2.0)
+
+        XCTAssertGreaterThanOrEqual(thumbnailRegion.span.latitudeDelta, 2.4)
+        XCTAssertGreaterThanOrEqual(thumbnailRegion.span.longitudeDelta, thumbnailRegion.span.latitudeDelta * 2.0)
+        XCTAssertEqual(thumbnailRegion.center.latitude, 31.5, accuracy: 0.0001)
+        XCTAssertEqual(thumbnailRegion.center.longitude, 121.5, accuracy: 0.0001)
+    }
+
+    func testPlaceMapPresentationThumbnailFocusesMainClusterWhenThereIsDistantOutlier() {
+        let groups = [
+            makePlaceGroup(id: "iceland-south", title: "冰岛南部", latitude: 63.5321, longitude: -19.5114, assetIds: ["a1"]),
+            makePlaceGroup(id: "iceland-east", title: "冰岛东部", latitude: 64.2539, longitude: -15.2082, assetIds: ["a2"]),
+            makePlaceGroup(id: "iceland-north", title: "冰岛北部", latitude: 65.6835, longitude: -18.0878, assetIds: ["a3"]),
+            makePlaceGroup(id: "california", title: "加州 · 马林县", latitude: 37.9060, longitude: -122.5449, assetIds: ["a4"])
+        ]
+
+        let presentation = PlaceMapPresentation(groups: groups)
+        let thumbnailRegion = presentation.thumbnailRegion(forAspectRatio: 2.0)
+
+        XCTAssertEqual(thumbnailRegion.center.latitude, 64.6078, accuracy: 0.2)
+        XCTAssertEqual(thumbnailRegion.center.longitude, -17.3598, accuracy: 0.5)
+        XCTAssertLessThan(thumbnailRegion.span.longitudeDelta, 20)
+    }
+
+    func testPlaceMapPresentationKeepsDetailPinsAwayFromEdges() {
+        let groups = [
+            makePlaceGroup(id: "northwest", title: "西北", latitude: 32.0, longitude: 121.0, assetIds: ["a1"]),
+            makePlaceGroup(id: "southeast", title: "东南", latitude: 31.0, longitude: 122.0, assetIds: ["a2"])
+        ]
+
+        let presentation = PlaceMapPresentation(groups: groups)
+        let detailRegion = presentation.detailRegion(forAspectRatio: 0.46)
+
+        XCTAssertGreaterThanOrEqual(detailRegion.span.latitudeDelta, detailRegion.span.longitudeDelta / 0.46)
+        XCTAssertGreaterThanOrEqual(detailRegion.span.longitudeDelta, 2.4)
+        XCTAssertEqual(detailRegion.center.latitude, 31.5, accuracy: 0.0001)
+        XCTAssertEqual(detailRegion.center.longitude, 121.5, accuracy: 0.0001)
+    }
+
+    func testPlaceMapPresentationKeepsDetailPinsInsideVisualSafeArea() {
+        let groups = [
+            makePlaceGroup(id: "northwest", title: "西北", latitude: 32.0, longitude: 121.0, assetIds: ["a1"]),
+            makePlaceGroup(id: "southeast", title: "东南", latitude: 31.0, longitude: 122.0, assetIds: ["a2"])
+        ]
+
+        let presentation = PlaceMapPresentation(groups: groups)
+        let detailRegion = presentation.detailRegion(forAspectRatio: 0.46)
+        let margins = normalizedMargins(for: presentation.annotations, in: detailRegion)
+
+        XCTAssertGreaterThanOrEqual(margins.horizontal, 0.35)
+        XCTAssertGreaterThanOrEqual(margins.vertical, 0.35)
+    }
+
+    func testPlaceMapPresentationDetailFocusesMainClusterWhenThereIsDistantOutlier() {
+        let groups = [
+            makePlaceGroup(id: "iceland-south", title: "冰岛南部", latitude: 63.5321, longitude: -19.5114, assetIds: ["a1"]),
+            makePlaceGroup(id: "iceland-east", title: "冰岛东部", latitude: 64.2539, longitude: -15.2082, assetIds: ["a2"]),
+            makePlaceGroup(id: "iceland-north", title: "冰岛北部", latitude: 65.6835, longitude: -18.0878, assetIds: ["a3"]),
+            makePlaceGroup(id: "california", title: "加州 · 马林县", latitude: 37.9060, longitude: -122.5449, assetIds: ["a4"])
+        ]
+
+        let presentation = PlaceMapPresentation(groups: groups)
+        let detailRegion = presentation.detailRegion(forAspectRatio: 0.46)
+
+        XCTAssertEqual(detailRegion.center.latitude, 64.6078, accuracy: 0.2)
+        XCTAssertEqual(detailRegion.center.longitude, -17.3598, accuracy: 0.5)
+        XCTAssertLessThan(detailRegion.span.longitudeDelta, 20)
+    }
+
+    func testPlaceMapPresentationPrefersMapTapToExpand() {
+        let presentation = PlaceMapPresentation(groups: [
+            makePlaceGroup(id: "shanghai", title: "上海", latitude: 31.2304, longitude: 121.4737, assetIds: ["a1"])
+        ])
+
+        XCTAssertTrue(presentation.prefersMapTapToExpand)
+    }
+
+    func testPlaceMapPresentationAllowsPanAndZoom() {
+        let presentation = PlaceMapPresentation(groups: [
+            makePlaceGroup(id: "shanghai", title: "上海", latitude: 31.2304, longitude: 121.4737, assetIds: ["a1"])
+        ])
+
+        XCTAssertTrue(presentation.interactionModes.contains(MapInteractionModes.pan))
+        XCTAssertTrue(presentation.interactionModes.contains(MapInteractionModes.zoom))
+        XCTAssertFalse(presentation.interactionModes.contains(MapInteractionModes.rotate))
+    }
+
+    func testStartingReviewScopeLimitsCurrentAssetToSelectedUnreviewedAssets() {
+        var state = ReviewStateStore(assets: [
+            makeAsset(id: "outside"),
+            makeAsset(id: "inside-reviewed"),
+            makeAsset(id: "inside-live")
+        ])
+        state.apply(.keep("inside-reviewed"))
+        let model = PickoAppModel(store: state)
+
+        model.startReview(scope: .init(
+            mode: .time,
+            title: "今天 · 周六",
+            assetIds: ["inside-reviewed", "inside-live"]
+        ))
+
+        XCTAssertEqual(model.selectedTab, .review)
+        XCTAssertEqual(model.reviewScope?.assetIds, ["inside-live"])
+        XCTAssertEqual(model.currentAsset?.id, "inside-live")
+        XCTAssertEqual(model.currentSession.mode, .timeRange)
+    }
+
+    func testScopedReviewActionsUpdateSharedStoreAndBasket() {
+        let model = PickoAppModel(store: ReviewStateStore(assets: [
+            makeAsset(id: "keep-me", fileSizeBytes: 10),
+            makeAsset(id: "delete-me", fileSizeBytes: 20),
+            makeAsset(id: "outside", fileSizeBytes: 30)
+        ]))
+        model.startReview(scope: .init(
+            mode: .place,
+            title: "上海 · 武康路",
+            assetIds: ["keep-me", "delete-me"]
+        ))
+
+        model.keepCurrentAsset()
+        model.preDeleteCurrentAsset()
+
+        XCTAssertEqual(model.store.asset(id: "keep-me")?.status, .kept)
+        XCTAssertEqual(model.store.asset(id: "delete-me")?.status, .preDeleted)
+        XCTAssertEqual(model.store.asset(id: "outside")?.status, .unreviewed)
+        XCTAssertEqual(model.store.deletionQueue.itemIds, ["delete-me"])
+        XCTAssertTrue(model.hasCompletedReviewScope)
+        XCTAssertNil(model.currentAsset)
+    }
+
+    func testUndoReturnsToPreviousReviewedAsset() {
+        let model = PickoAppModel(store: ReviewStateStore(assets: [
+            makeAsset(id: "first", fileSizeBytes: 10),
+            makeAsset(id: "second", fileSizeBytes: 20)
+        ]))
+
+        model.preDeleteCurrentAsset()
+        XCTAssertEqual(model.currentAsset?.id, "second")
+        XCTAssertEqual(model.store.asset(id: "first")?.status, .preDeleted)
+
+        model.undoAndReturnToPreviousAsset()
+
+        XCTAssertEqual(model.currentAsset?.id, "first")
+        XCTAssertEqual(model.store.asset(id: "first")?.status, .unreviewed)
+        XCTAssertTrue(model.store.deletionQueue.itemIds.isEmpty)
+    }
+
+    func testReviewStackPreviewAssetsFollowCurrentScope() {
+        let model = PickoAppModel(store: ReviewStateStore(assets: [
+            makeAsset(id: "outside"),
+            makeAsset(id: "first"),
+            makeAsset(id: "second"),
+            makeAsset(id: "third")
+        ]))
+        model.startReview(scope: .init(
+            mode: .time,
+            title: "今天",
+            assetIds: ["first", "second", "third"]
+        ))
+
+        XCTAssertEqual(model.reviewStackPreviewAssets(limit: 2).map(\.id), ["second", "third"])
+        model.skipCurrentAsset()
+        XCTAssertEqual(model.reviewStackPreviewAssets(limit: 2).map(\.id), ["third"])
+    }
+
+    func testScopedReviewCompletionCanReturnHomeOrBasket() {
+        let model = PickoAppModel(store: ReviewStateStore(assets: [
+            makeAsset(id: "only", fileSizeBytes: 10)
+        ]))
+        model.startReview(scope: .init(
+            mode: .time,
+            title: "今天 · 周六",
+            assetIds: ["only"]
+        ))
+
+        model.skipCurrentAsset()
+
+        XCTAssertTrue(model.hasCompletedReviewScope)
+        model.clearReviewScope()
+        XCTAssertNil(model.reviewScope)
+        XCTAssertEqual(model.currentAssetIndex, 0)
+        XCTAssertEqual(model.currentAsset?.id, "only")
     }
 
     func testModelLoadsAssetsFromPhotoIndexer() async throws {
@@ -748,6 +1383,42 @@ final class PickoAppTests: XCTestCase {
         )
     }
 
+    private func normalizedMargins(
+        for annotations: [PlaceMapPresentation.Annotation],
+        in region: MKCoordinateRegion
+    ) -> (horizontal: Double, vertical: Double) {
+        let minLatitude = annotations.map(\.latitude).min() ?? region.center.latitude
+        let maxLatitude = annotations.map(\.latitude).max() ?? region.center.latitude
+        let minLongitude = annotations.map(\.longitude).min() ?? region.center.longitude
+        let maxLongitude = annotations.map(\.longitude).max() ?? region.center.longitude
+        let latitudeRange = max(maxLatitude - minLatitude, 0)
+        let longitudeRange = max(maxLongitude - minLongitude, 0)
+        let verticalMargin = (region.span.latitudeDelta - latitudeRange) / (region.span.latitudeDelta * 2)
+        let horizontalMargin = (region.span.longitudeDelta - longitudeRange) / (region.span.longitudeDelta * 2)
+
+        return (horizontal: horizontalMargin, vertical: verticalMargin)
+    }
+
+    private func makePlaceGroup(
+        id: String,
+        title: String,
+        latitude: Double,
+        longitude: Double,
+        assetIds: [PhotoAsset.ID]
+    ) -> PhotoCollectionGroup {
+        PhotoCollectionGroup(
+            id: id,
+            kind: .place,
+            title: title,
+            subtitle: "\(assetIds.count) 张 · 0 组相似",
+            assetIds: assetIds,
+            previewAssetIds: assetIds,
+            similarGroupCount: 0,
+            sortDate: Date(timeIntervalSince1970: 0),
+            representativeLocation: .init(latitude: latitude, longitude: longitude)
+        )
+    }
+
     private func makeSnapshot(
         id: String,
         thumbnailHash: String? = nil,
@@ -822,6 +1493,14 @@ private final class FakePhotoDeleter: PhotoDeleting {
 private final class FakeThumbnailProvider: PhotoThumbnailProviding {
     func thumbnailData(for request: PhotoThumbnailRequest) async throws -> Data? {
         Data([1])
+    }
+}
+
+private struct FakePlaceLabelResolver: PlaceLabelResolving {
+    var labels: [String: String]
+
+    func label(for location: PhotoAsset.Location) async -> String? {
+        labels[String(format: "%.4f,%.4f", location.latitude, location.longitude)]
     }
 }
 

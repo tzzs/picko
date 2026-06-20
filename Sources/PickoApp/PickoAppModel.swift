@@ -12,10 +12,35 @@ public final class PickoAppModel {
         case basket
     }
 
+    public struct ReviewScope: Equatable, Identifiable, Sendable {
+        public enum Mode: Equatable, Sendable {
+            case time
+            case place
+        }
+
+        public var id: String
+        public var mode: Mode
+        public var title: String
+        public var assetIds: [PhotoAsset.ID]
+
+        public init(
+            id: String = UUID().uuidString,
+            mode: Mode,
+            title: String,
+            assetIds: [PhotoAsset.ID]
+        ) {
+            self.id = id
+            self.mode = mode
+            self.title = title
+            self.assetIds = assetIds
+        }
+    }
+
     public var selectedTab: Tab
     public var store: ReviewStateStore
     public var currentAssetIndex: Int
     public var currentSession: ReviewSession
+    public var reviewScope: ReviewScope?
     public var photoDeleter: (any PhotoDeleting)?
     public var thumbnailProvider: (any PhotoThumbnailProviding)?
     public var lastPersistenceError: Error?
@@ -34,6 +59,7 @@ public final class PickoAppModel {
         self.selectedTab = selectedTab
         self.currentAssetIndex = currentAssetIndex
         self.currentSession = currentSession
+        self.reviewScope = nil
         self.photoDeleter = photoDeleter
         self.thumbnailProvider = thumbnailProvider
         self.decisionStore = decisionStore
@@ -70,7 +96,7 @@ public final class PickoAppModel {
     public static func loadingFromPhotoLibrary(
         indexer: PhotoAssetIndexing,
         mapper: PhotoAssetMapper = PhotoAssetMapper(),
-        similarityEngine: SimilarityEngine = SimilarityEngine(),
+        similarityEngine: SimilarityEngine = SimilarityEngine(configuration: .realLibraryDefault),
         decisionStore: ReviewDecisionStore? = nil,
         photoDeleter: (any PhotoDeleting)? = nil,
         thumbnailProvider: (any PhotoThumbnailProviding)? = nil
@@ -100,10 +126,19 @@ public final class PickoAppModel {
     }
 
     public var currentAsset: PhotoAsset? {
-        guard assets.indices.contains(currentAssetIndex) else {
+        let reviewAssets = activeReviewAssets
+        guard reviewAssets.indices.contains(currentAssetIndex) else {
             return nil
         }
-        return assets[currentAssetIndex]
+        return reviewAssets[currentAssetIndex]
+    }
+
+    public var activeReviewAssetCount: Int {
+        activeReviewAssets.count
+    }
+
+    public var hasCompletedReviewScope: Bool {
+        reviewScope != nil && currentAsset == nil
     }
 
     public var deletionQueueCount: Int {
@@ -128,6 +163,12 @@ public final class PickoAppModel {
 
     public func undo() {
         store.undo()
+        persistCurrentState()
+    }
+
+    public func undoAndReturnToPreviousAsset() {
+        store.undo()
+        currentAssetIndex = max(currentAssetIndex - 1, 0)
         persistCurrentState()
     }
 
@@ -171,7 +212,50 @@ public final class PickoAppModel {
         resetStore.clearReviewState()
         store = resetStore
         currentAssetIndex = 0
+        reviewScope = nil
         currentSession = PickoAppModel.makeSession(mode: .single)
+    }
+
+    public func startReview(scope: ReviewScope) {
+        var seenAssetIds = Set<PhotoAsset.ID>()
+        let scopedAssetIds = scope.assetIds.compactMap { assetId -> PhotoAsset.ID? in
+            guard !seenAssetIds.contains(assetId),
+                  store.asset(id: assetId)?.status == .unreviewed else {
+                return nil
+            }
+            seenAssetIds.insert(assetId)
+            return assetId
+        }
+
+        reviewScope = ReviewScope(
+            id: scope.id,
+            mode: scope.mode,
+            title: scope.title,
+            assetIds: scopedAssetIds
+        )
+        currentAssetIndex = 0
+        currentSession = PickoAppModel.makeSession(mode: scope.mode.reviewSessionMode)
+        selectedTab = .review
+    }
+
+    public func clearReviewScope() {
+        reviewScope = nil
+        currentAssetIndex = 0
+        currentSession = PickoAppModel.makeSession(mode: .single)
+    }
+
+    public func reviewStackPreviewAssets(limit: Int) -> [PhotoAsset] {
+        guard limit > 0 else {
+            return []
+        }
+
+        let reviewAssets = activeReviewAssets
+        let startIndex = currentAssetIndex + 1
+        guard reviewAssets.indices.contains(startIndex) else {
+            return []
+        }
+
+        return Array(reviewAssets[startIndex...].prefix(limit))
     }
 
     @discardableResult
@@ -261,11 +345,12 @@ public final class PickoAppModel {
     }
 
     private func moveToNextAsset() {
-        guard !assets.isEmpty else {
+        let reviewAssets = activeReviewAssets
+        guard !reviewAssets.isEmpty else {
             currentAssetIndex = 0
             return
         }
-        currentAssetIndex = min(currentAssetIndex + 1, assets.count - 1)
+        currentAssetIndex = min(currentAssetIndex + 1, reviewAssets.count)
     }
 
     private func persistCurrentState() {
@@ -285,10 +370,28 @@ public final class PickoAppModel {
     public static func makeSession(mode: ReviewSession.Mode) -> ReviewSession {
         ReviewSession(id: UUID().uuidString, mode: mode, startedAt: Date())
     }
+
+    private var activeReviewAssets: [PhotoAsset] {
+        guard let reviewScope else {
+            return assets
+        }
+        return reviewScope.assetIds.compactMap { store.asset(id: $0) }
+    }
 }
 
 private enum AssetAction {
     case keep
     case preDelete
     case skip
+}
+
+private extension PickoAppModel.ReviewScope.Mode {
+    var reviewSessionMode: ReviewSession.Mode {
+        switch self {
+        case .time:
+            return .timeRange
+        case .place:
+            return .location
+        }
+    }
 }

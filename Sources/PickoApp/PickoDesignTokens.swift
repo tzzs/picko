@@ -72,9 +72,25 @@ extension View {
     }
 }
 
-struct PickoBrandHeader: View {
+struct PickoTopLevelHeaderSpec: Equatable {
     let title: String
+    let systemImage: String
+
+    static let home = PickoTopLevelHeaderSpec(title: "拾影", systemImage: "photo.stack")
+    static let review = PickoTopLevelHeaderSpec(title: PickoCopy.Tabs.review, systemImage: "rectangle.stack")
+    static let similar = PickoTopLevelHeaderSpec(title: PickoCopy.Tabs.similar, systemImage: "square.grid.2x2")
+    static let basket = PickoTopLevelHeaderSpec(title: PickoCopy.Tabs.basket, systemImage: "tray")
+}
+
+struct PickoTopLevelHeader: View {
+    let spec: PickoTopLevelHeaderSpec
+    var trailingPrimaryText: String?
+    var trailingSecondaryText: String?
+    var auxiliaryTrailingSystemImage: String?
+    var auxiliaryTrailingAccessibilityLabel: String?
+    var auxiliaryTrailingAction: (() -> Void)?
     var trailingSystemImage: String = "gearshape"
+    var trailingAccessibilityLabel: String?
     var trailingAction: (() -> Void)?
 
     var body: some View {
@@ -82,29 +98,93 @@ struct PickoBrandHeader: View {
             Circle()
                 .fill(PickoDesign.ColorToken.primarySoft)
                 .overlay {
-                    Image(systemName: "photo.stack")
+                    Image(systemName: spec.systemImage)
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(PickoDesign.ColorToken.primaryDeep)
                 }
                 .frame(width: 34, height: 34)
 
-            Text(title)
+            Text(spec.title)
                 .font(.system(size: 22, weight: .semibold, design: .rounded))
                 .foregroundStyle(PickoDesign.ColorToken.primary)
+                .accessibilityIdentifier("top-level-title-\(spec.title)")
 
             Spacer()
 
-            if let trailingAction {
-                Button(action: trailingAction) {
-                    Image(systemName: trailingSystemImage)
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
-                        .frame(width: 38, height: 38)
-                        .background(.ultraThinMaterial, in: Circle())
+            if trailingPrimaryText != nil || trailingSecondaryText != nil {
+                HStack(spacing: PickoDesign.Spacing.sm) {
+                    VStack(alignment: .trailing, spacing: 2) {
+                        if let trailingPrimaryText {
+                            Text(trailingPrimaryText)
+                                .font(.system(size: 11, weight: .medium, design: .monospaced))
+                                .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+                        }
+                        if let trailingSecondaryText {
+                            Text(trailingSecondaryText)
+                                .font(.system(size: 11, weight: .medium, design: .rounded))
+                                .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+                                .lineLimit(1)
+                        }
+                    }
+
+                    if let auxiliaryTrailingAction, let auxiliaryTrailingSystemImage {
+                        trailingIconButton(
+                            systemImage: auxiliaryTrailingSystemImage,
+                            accessibilityLabel: auxiliaryTrailingAccessibilityLabel,
+                            action: auxiliaryTrailingAction
+                        )
+                    }
+
+                    if let trailingAction {
+                        trailingIconButton(
+                            systemImage: trailingSystemImage,
+                            accessibilityLabel: trailingAccessibilityLabel,
+                            action: trailingAction
+                        )
+                    }
                 }
-                .buttonStyle(.plain)
+            } else if let trailingAction {
+                trailingIconButton(
+                    systemImage: trailingSystemImage,
+                    accessibilityLabel: trailingAccessibilityLabel,
+                    size: 38,
+                    fontSize: 17,
+                    action: trailingAction
+                )
             }
         }
+    }
+
+    private func trailingIconButton(
+        systemImage: String,
+        accessibilityLabel: String? = nil,
+        size: CGFloat = 34,
+        fontSize: CGFloat = 15,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Image(systemName: systemImage)
+                .font(.system(size: fontSize, weight: .semibold))
+                .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+                .frame(width: size, height: size)
+                .background(.ultraThinMaterial, in: Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(accessibilityLabel ?? systemImage)
+    }
+}
+
+struct PickoBrandHeader: View {
+    let title: String
+    var trailingSystemImage: String = "gearshape"
+    var trailingAction: (() -> Void)?
+
+    var body: some View {
+        PickoTopLevelHeader(
+            spec: PickoTopLevelHeaderSpec(title: title, systemImage: "photo.stack"),
+            trailingSystemImage: trailingSystemImage,
+            trailingAction: trailingAction
+        )
     }
 }
 
@@ -204,6 +284,57 @@ struct PickoEmptyStateView: View {
             RoundedRectangle(cornerRadius: PickoDesign.Radius.xl)
                 .stroke(PickoDesign.ColorToken.outline.opacity(0.45), lineWidth: 1)
         }
+        .padding(PickoEmptyStateLayout.outerPadding)
+    }
+}
+
+enum PickoEmptyStateLayout {
+    static let usesCallerControlledOuterPadding = true
+    static let outerPadding: CGFloat = 0
+}
+
+struct PickoPageEmptyStateView<Actions: View>: View {
+    let title: String
+    let message: String
+    let systemImage: String
+    @ViewBuilder let actions: () -> Actions
+
+    var body: some View {
+        VStack(spacing: PickoDesign.Spacing.md) {
+            Spacer(minLength: PickoDesign.Spacing.lg)
+
+            Image(systemName: systemImage)
+                .font(.system(size: 36, weight: .semibold))
+                .frame(width: 76, height: 76)
+                .background(PickoDesign.ColorToken.primarySoft.opacity(0.7), in: Circle())
+                .foregroundStyle(PickoDesign.ColorToken.primary)
+
+            VStack(spacing: 8) {
+                Text(title)
+                    .font(.system(size: 22, weight: .semibold, design: .rounded))
+                    .foregroundStyle(PickoDesign.ColorToken.primary)
+                Text(message)
+                    .font(.system(size: 15, weight: .regular, design: .rounded))
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+            }
+
+            actions()
+                .padding(.top, PickoDesign.Spacing.sm)
+
+            Spacer(minLength: PickoDesign.Spacing.lg)
+        }
+        .frame(maxWidth: .infinity, maxHeight: .infinity)
         .padding(PickoDesign.Spacing.page)
+        .background(PickoDesign.ColorToken.background.ignoresSafeArea())
+    }
+}
+
+extension PickoPageEmptyStateView where Actions == EmptyView {
+    init(title: String, message: String, systemImage: String) {
+        self.title = title
+        self.message = message
+        self.systemImage = systemImage
+        self.actions = { EmptyView() }
     }
 }
