@@ -284,8 +284,13 @@ struct PickoEmptyStateView: View {
             RoundedRectangle(cornerRadius: PickoDesign.Radius.xl)
                 .stroke(PickoDesign.ColorToken.outline.opacity(0.45), lineWidth: 1)
         }
-        .padding(PickoDesign.Spacing.page)
+        .padding(PickoEmptyStateLayout.outerPadding)
     }
+}
+
+enum PickoEmptyStateLayout {
+    static let usesCallerControlledOuterPadding = true
+    static let outerPadding: CGFloat = 0
 }
 
 struct PickoPageEmptyStateView<Actions: View>: View {
