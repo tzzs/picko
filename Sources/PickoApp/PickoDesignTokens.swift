@@ -86,7 +86,11 @@ struct PickoTopLevelHeader: View {
     let spec: PickoTopLevelHeaderSpec
     var trailingPrimaryText: String?
     var trailingSecondaryText: String?
+    var auxiliaryTrailingSystemImage: String?
+    var auxiliaryTrailingAccessibilityLabel: String?
+    var auxiliaryTrailingAction: (() -> Void)?
     var trailingSystemImage: String = "gearshape"
+    var trailingAccessibilityLabel: String?
     var trailingAction: (() -> Void)?
 
     var body: some View {
@@ -122,28 +126,50 @@ struct PickoTopLevelHeader: View {
                         }
                     }
 
+                    if let auxiliaryTrailingAction, let auxiliaryTrailingSystemImage {
+                        trailingIconButton(
+                            systemImage: auxiliaryTrailingSystemImage,
+                            accessibilityLabel: auxiliaryTrailingAccessibilityLabel,
+                            action: auxiliaryTrailingAction
+                        )
+                    }
+
                     if let trailingAction {
-                        Button(action: trailingAction) {
-                            Image(systemName: trailingSystemImage)
-                                .font(.system(size: 15, weight: .semibold))
-                                .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
-                                .frame(width: 34, height: 34)
-                                .background(.ultraThinMaterial, in: Circle())
-                        }
-                        .buttonStyle(.plain)
+                        trailingIconButton(
+                            systemImage: trailingSystemImage,
+                            accessibilityLabel: trailingAccessibilityLabel,
+                            action: trailingAction
+                        )
                     }
                 }
             } else if let trailingAction {
-                Button(action: trailingAction) {
-                    Image(systemName: trailingSystemImage)
-                        .font(.system(size: 17, weight: .semibold))
-                        .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
-                        .frame(width: 38, height: 38)
-                        .background(.ultraThinMaterial, in: Circle())
-                }
-                .buttonStyle(.plain)
+                trailingIconButton(
+                    systemImage: trailingSystemImage,
+                    accessibilityLabel: trailingAccessibilityLabel,
+                    size: 38,
+                    fontSize: 17,
+                    action: trailingAction
+                )
             }
         }
+    }
+
+    private func trailingIconButton(
+        systemImage: String,
+        accessibilityLabel: String? = nil,
+        size: CGFloat = 34,
+        fontSize: CGFloat = 15,
+        action: @escaping () -> Void
+    ) -> some View {
+        Button(action: action) {
+            Image(systemName: systemImage)
+                .font(.system(size: fontSize, weight: .semibold))
+                .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+                .frame(width: size, height: size)
+                .background(.ultraThinMaterial, in: Circle())
+        }
+        .buttonStyle(.plain)
+        .accessibilityLabel(accessibilityLabel ?? systemImage)
     }
 }
 

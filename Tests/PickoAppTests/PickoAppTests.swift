@@ -322,6 +322,8 @@ final class PickoAppTests: XCTestCase {
         XCTAssertTrue(SingleReviewLayout.showsStackedCards)
         XCTAssertTrue(SingleReviewLayout.centersPhotoStageVertically)
         XCTAssertFalse(SingleReviewLayout.showsLargePreDeleteDockButton)
+        XCTAssertFalse(SingleReviewLayout.showsFallbackActionDock)
+        XCTAssertTrue(SingleReviewLayout.showsTopUndoAction)
     }
 
     func testSingleReviewPresentationKeepsPrimaryActionsPhotoFirst() throws {
@@ -381,9 +383,9 @@ final class PickoAppTests: XCTestCase {
         )
     }
 
-    func testSingleReviewLayoutDocksActionsAboveTabBar() {
-        XCTAssertEqual(SingleReviewLayout.actionDockReservedHeight, 180)
-        XCTAssertEqual(SingleReviewLayout.actionDockBottomPadding, 32)
+    func testSingleReviewLayoutKeepsGestureCanvasFreeOfBottomDock() {
+        XCTAssertEqual(SingleReviewLayout.actionDockReservedHeight, 0)
+        XCTAssertEqual(SingleReviewLayout.actionDockBottomPadding, 0)
         XCTAssertEqual(SingleReviewLayout.contentTopPadding, PickoDesign.Spacing.page)
     }
 

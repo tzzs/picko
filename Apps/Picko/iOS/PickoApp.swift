@@ -6,6 +6,7 @@ import SwiftUI
 @main
 struct PickoIOSApp: App {
     @State private var sampleLibraryModel = PickoAppModel.preview()
+    @State private var sampleReviewModel = PickoIOSApp.makeSampleReviewModel()
     @State private var sampleBasketModel = PickoIOSApp.makeSampleBasketModel()
 
     var body: some Scene {
@@ -30,6 +31,8 @@ struct PickoIOSApp: App {
             MetadataBenchmarkView(configuration: configuration)
         } else if arguments.contains("--picko-use-denied-library") {
             PickoLibraryBootstrapView(makeBootstrapper: deniedLibraryBootstrapper)
+        } else if arguments.contains("--picko-use-sample-review") {
+            PickoRootView(model: sampleReviewModel)
         } else if arguments.contains("--picko-use-sample-basket") {
             PickoRootView(model: sampleBasketModel)
         } else if arguments.contains("--picko-use-sample-library") {
@@ -37,6 +40,12 @@ struct PickoIOSApp: App {
         } else {
             PickoLibraryBootstrapView()
         }
+    }
+
+    private static func makeSampleReviewModel() -> PickoAppModel {
+        let model = PickoAppModel.preview()
+        model.selectedTab = .review
+        return model
     }
 
     private static func makeSampleBasketModel() -> PickoAppModel {

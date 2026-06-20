@@ -9,6 +9,20 @@ final class PickoUITests: XCTestCase {
         XCTAssertTrue(app.tabBars.firstMatch.waitForExistence(timeout: 5))
     }
 
+    func testSampleReviewUsesGestureFirstChrome() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--picko-use-sample-review"]
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["向上保留"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["向下预删除"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.buttons["上一张"].exists)
+        XCTAssertTrue(app.buttons["设置"].exists)
+        XCTAssertFalse(app.buttons["跳过"].exists)
+        XCTAssertFalse(app.buttons["保留"].exists)
+        XCTAssertFalse(app.buttons["预删除"].exists)
+    }
+
     func testMetadataBenchmarkSyntheticLaunches() {
         let app = XCUIApplication()
         app.launchArguments = [

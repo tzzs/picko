@@ -19,25 +19,19 @@ public struct SingleReviewView: View {
                 scopedCompletionView
             } else if let presentation = PickoSingleReviewPresentation(model: model) {
                 GeometryReader { proxy in
-                    ZStack(alignment: .bottom) {
-                        reviewContent(
-                            presentation: presentation,
-                            availableWidth: max(proxy.size.width - PickoDesign.Spacing.page * 2, 1),
-                            availableHeight: max(
-                                proxy.size.height
-                                - SingleReviewLayout.actionDockReservedHeight
-                                - SingleReviewLayout.contentTopPadding,
-                                1
-                            )
+                    reviewContent(
+                        presentation: presentation,
+                        availableWidth: max(proxy.size.width - PickoDesign.Spacing.page * 2, 1),
+                        availableHeight: max(
+                            proxy.size.height
+                            - SingleReviewLayout.contentTopPadding
+                            - PickoDesign.Spacing.page,
+                            1
                         )
-                            .padding(.horizontal, PickoDesign.Spacing.page)
-                            .padding(.top, SingleReviewLayout.contentTopPadding)
-                            .padding(.bottom, SingleReviewLayout.actionDockReservedHeight)
-
-                        reviewActionDock(presentation: presentation)
-                            .padding(.horizontal, PickoDesign.Spacing.page)
-                            .padding(.bottom, SingleReviewLayout.actionDockBottomPadding)
-                    }
+                    )
+                    .padding(.horizontal, PickoDesign.Spacing.page)
+                    .padding(.top, SingleReviewLayout.contentTopPadding)
+                    .padding(.bottom, PickoDesign.Spacing.page)
                 }
             } else {
                 PickoEmptyStateView(
@@ -70,7 +64,13 @@ public struct SingleReviewView: View {
                 spec: .review,
                 trailingPrimaryText: reviewProgressText,
                 trailingSecondaryText: model.reviewScope?.title,
+                auxiliaryTrailingSystemImage: "arrow.uturn.backward",
+                auxiliaryTrailingAccessibilityLabel: "上一张",
+                auxiliaryTrailingAction: {
+                    model.undoAndReturnToPreviousAsset()
+                },
                 trailingSystemImage: "gearshape",
+                trailingAccessibilityLabel: "设置",
                 trailingAction: {
                     showsGestureSettings = true
                 }
@@ -307,58 +307,6 @@ public struct SingleReviewView: View {
         }
     }
 
-    private func reviewActionDock(presentation: PickoSingleReviewPresentation) -> some View {
-        VStack(spacing: PickoDesign.Spacing.gutter) {
-            HStack(alignment: .top, spacing: PickoDesign.Spacing.gutter) {
-                reviewCircleButton(title: "上一张", displayTitle: "上一张", systemImage: "arrow.left") {
-                    model.undoAndReturnToPreviousAsset()
-                }
-
-                Button {
-                    model.skipCurrentAsset()
-                } label: {
-                    VStack(spacing: 5) {
-                        Text("跳过")
-                            .font(.system(size: 18, weight: .semibold, design: .rounded))
-                            .frame(maxWidth: .infinity)
-                            .frame(height: 56)
-                            .background(PickoDesign.ColorToken.surfaceHigh, in: Capsule())
-                            .foregroundStyle(PickoDesign.ColorToken.primary)
-                        Text("下一张")
-                            .font(.system(size: 10, weight: .medium, design: .monospaced))
-                            .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
-                    }
-                }
-                .buttonStyle(.plain)
-                .accessibilityLabel(presentation.primaryActions[2].title)
-
-                reviewCircleButton(
-                    title: presentation.primaryActions[1].title,
-                    displayTitle: "预删除",
-                    systemImage: presentation.primaryActions[1].systemImage,
-                    accent: PickoDesign.ColorToken.coralDeep
-                ) {
-                    model.preDeleteCurrentAsset()
-                }
-
-                reviewCircleButton(
-                    title: presentation.primaryActions[0].title,
-                    displayTitle: "保留",
-                    systemImage: "star.fill",
-                    accent: PickoDesign.ColorToken.gold
-                ) {
-                    model.keepCurrentAsset()
-                }
-            }
-
-            Text("拖动卡片：左滑上一张，右滑跳过。\(reviewGesturePreference.subtitle)。")
-                .font(.system(size: 11, weight: .medium, design: .rounded))
-                .multilineTextAlignment(.center)
-                .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
-                .frame(maxWidth: .infinity)
-        }
-    }
-
     private var scopedCompletionView: some View {
         PickoPageEmptyStateView(
             title: "本合集已整理完成",
@@ -411,44 +359,20 @@ public struct SingleReviewView: View {
         ReviewGesturePreference.resolved(rawValue: gesturePreferenceRawValue)
     }
 
-    private func reviewCircleButton(
-        title: String,
-        displayTitle: String,
-        systemImage: String,
-        accent: Color = PickoDesign.ColorToken.secondaryInk,
-        action: @escaping () -> Void
-    ) -> some View {
-        Button(action: action) {
-            VStack(spacing: 5) {
-                Image(systemName: systemImage)
-                    .font(.system(size: 20, weight: .semibold))
-                    .frame(width: 56, height: 56)
-                    .background(PickoDesign.ColorToken.surface, in: Circle())
-                    .overlay {
-                        Circle()
-                            .stroke(PickoDesign.ColorToken.outline.opacity(0.65), lineWidth: 1)
-                    }
-                    .foregroundStyle(accent)
-                Text(displayTitle)
-                    .font(.system(size: 10, weight: .medium, design: .monospaced))
-                    .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
-            }
-        }
-        .buttonStyle(.plain)
-        .accessibilityLabel(title)
-    }
 }
 
 enum SingleReviewLayout {
     static let contentSpacing: CGFloat = 12
     static let contentTopPadding: CGFloat = PickoDesign.Spacing.page
-    static let actionDockReservedHeight: CGFloat = 180
-    static let actionDockBottomPadding: CGFloat = 32
+    static let actionDockReservedHeight: CGFloat = 0
+    static let actionDockBottomPadding: CGFloat = 0
     static let gestureThreshold: CGFloat = 72
     static let stackedCardCount = 2
     static let showsStackedCards = true
     static let centersPhotoStageVertically = true
     static let showsLargePreDeleteDockButton = false
+    static let showsFallbackActionDock = false
+    static let showsTopUndoAction = true
 
     static func reviewProgressText(currentIndex: Int, totalCount: Int) -> String {
         "第 \(currentIndex + 1) / \(max(totalCount, 1)) 张"
