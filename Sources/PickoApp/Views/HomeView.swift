@@ -228,6 +228,8 @@ private extension PickoTaskPresentation {
             return PickoDesign.ColorToken.primarySoft
         case .review:
             return PickoDesign.ColorToken.primary
+        case .similar:
+            return PickoDesign.ColorToken.primary
         case .time:
             return PickoDesign.ColorToken.primary
         case .basket:
@@ -241,6 +243,8 @@ private extension PickoTaskPresentation {
             return PickoDesign.ColorToken.primarySoft.opacity(0.18)
         case .review:
             return PickoDesign.ColorToken.goldSoft
+        case .similar:
+            return PickoDesign.ColorToken.primarySoft.opacity(0.42)
         case .time:
             return PickoDesign.ColorToken.surfaceHigh
         case .basket:

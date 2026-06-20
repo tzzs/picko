@@ -202,6 +202,18 @@ final class PickoAppTests: XCTestCase {
         XCTAssertTrue(presentation.privacyFootnote.contains("不会删除照片"))
     }
 
+    func testHomePresentationKeepsQuickStartRowsVisuallyConsistent() {
+        let presentation = PickoHomePresentation(model: .preview())
+
+        XCTAssertEqual(presentation.taskRows.map(\.tintRole), [
+            .review,
+            .similar,
+            .basket,
+            .time
+        ])
+        XCTAssertFalse(presentation.taskRows.contains { $0.tintRole == .keep })
+    }
+
     func testSingleReviewPresentationKeepsPrimaryActionsPhotoFirst() throws {
         let model = PickoAppModel.preview()
 

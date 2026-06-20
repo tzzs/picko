@@ -32,6 +32,7 @@ public struct PickoTaskPresentation: Equatable {
     public enum TintRole: Equatable {
         case keep
         case review
+        case similar
         case time
         case basket
     }
@@ -74,7 +75,7 @@ public struct PickoHomePresentation: Equatable {
                 title: PickoCopy.Home.reviewSimilar,
                 subtitle: PickoCopy.Home.reviewSimilarSubtitle,
                 systemImage: "square.grid.2x2",
-                tintRole: .keep
+                tintRole: .similar
             ),
             PickoTaskPresentation(
                 title: PickoCopy.Home.reviewBasket,
