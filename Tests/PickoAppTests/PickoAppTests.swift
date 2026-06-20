@@ -222,9 +222,19 @@ final class PickoAppTests: XCTestCase {
     }
 
     func testSingleReviewLayoutKeepsActionsVisibleOnSmallPhones() {
-        XCTAssertEqual(SingleReviewLayout.mainImageHeight(availableHeight: 667), 320.16, accuracy: 0.01)
-        XCTAssertEqual(SingleReviewLayout.mainImageHeight(availableHeight: 568), 272.64, accuracy: 0.01)
-        XCTAssertEqual(SingleReviewLayout.mainImageHeight(availableHeight: 900), 390, accuracy: 0.01)
+        XCTAssertEqual(SingleReviewLayout.mainImageHeight(availableHeight: 667), 373.52, accuracy: 0.01)
+        XCTAssertEqual(SingleReviewLayout.mainImageHeight(availableHeight: 568), 318.08, accuracy: 0.01)
+        XCTAssertEqual(SingleReviewLayout.mainImageHeight(availableHeight: 900), 430, accuracy: 0.01)
+    }
+
+    func testSingleReviewLayoutDocksActionsAboveTabBar() {
+        XCTAssertEqual(SingleReviewLayout.actionDockReservedHeight, 180)
+        XCTAssertEqual(SingleReviewLayout.actionDockBottomPadding, 32)
+        XCTAssertEqual(SingleReviewLayout.contentTopPadding, 4)
+    }
+
+    func testSingleReviewLayoutFillsMainPhotoToAvoidLetterboxing() {
+        XCTAssertEqual(SingleReviewLayout.mainImageContentMode, .fill)
     }
 
     func testPlaceLabelFormatterUsesCountryAndNaturalFeatureWhenCityIsMissing() {
