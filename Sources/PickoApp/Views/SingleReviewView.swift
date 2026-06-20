@@ -47,25 +47,11 @@ public struct SingleReviewView: View {
 
     private func reviewContent(presentation: PickoSingleReviewPresentation, availableHeight: CGFloat) -> some View {
         VStack(alignment: .leading, spacing: SingleReviewLayout.contentSpacing) {
-            HStack(alignment: .firstTextBaseline, spacing: PickoDesign.Spacing.gutter) {
-                Text(PickoCopy.Tabs.review)
-                    .font(.system(size: 28, weight: .bold, design: .rounded))
-                    .foregroundStyle(PickoDesign.ColorToken.primary)
-
-                Spacer(minLength: PickoDesign.Spacing.gutter)
-
-                VStack(alignment: .trailing, spacing: 2) {
-                    Text(reviewProgressText)
-                        .font(.system(size: 11, weight: .medium, design: .monospaced))
-                        .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
-                    if let scopeTitle = model.reviewScope?.title {
-                        Text(scopeTitle)
-                            .font(.system(size: 11, weight: .medium, design: .rounded))
-                            .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
-                            .lineLimit(1)
-                    }
-                }
-            }
+            PickoTopLevelHeader(
+                spec: .review,
+                trailingPrimaryText: reviewProgressText,
+                trailingSecondaryText: model.reviewScope?.title
+            )
 
             Button {
                 previewAsset = presentation.asset

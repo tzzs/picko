@@ -222,8 +222,21 @@ final class PickoAppTests: XCTestCase {
     func testTopLevelReviewPagesHideRedundantNavigationTitles() {
         XCTAssertNil(SimilarReviewLayout.navigationTitle)
         XCTAssertTrue(SimilarReviewLayout.hidesNavigationBar)
+        XCTAssertTrue(SimilarReviewLayout.emptyStateUsesTopAlignment)
         XCTAssertNil(PreDeleteBasketLayout.navigationTitle)
         XCTAssertTrue(PreDeleteBasketLayout.hidesNavigationBar)
+    }
+
+    func testTopLevelTabHeadersUseUnifiedPageTitles() {
+        XCTAssertEqual(PickoTopLevelHeaderSpec.home.title, "拾影")
+        XCTAssertEqual(PickoTopLevelHeaderSpec.review.title, PickoCopy.Tabs.review)
+        XCTAssertEqual(PickoTopLevelHeaderSpec.similar.title, PickoCopy.Tabs.similar)
+        XCTAssertEqual(PickoTopLevelHeaderSpec.basket.title, PickoCopy.Tabs.basket)
+
+        XCTAssertEqual(PickoTopLevelHeaderSpec.home.systemImage, "photo.stack")
+        XCTAssertEqual(PickoTopLevelHeaderSpec.review.systemImage, "rectangle.stack")
+        XCTAssertEqual(PickoTopLevelHeaderSpec.similar.systemImage, "square.grid.2x2")
+        XCTAssertEqual(PickoTopLevelHeaderSpec.basket.systemImage, "tray")
     }
 
     func testSingleReviewPresentationKeepsPrimaryActionsPhotoFirst() throws {

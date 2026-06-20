@@ -72,8 +72,20 @@ extension View {
     }
 }
 
-struct PickoBrandHeader: View {
+struct PickoTopLevelHeaderSpec: Equatable {
     let title: String
+    let systemImage: String
+
+    static let home = PickoTopLevelHeaderSpec(title: "拾影", systemImage: "photo.stack")
+    static let review = PickoTopLevelHeaderSpec(title: PickoCopy.Tabs.review, systemImage: "rectangle.stack")
+    static let similar = PickoTopLevelHeaderSpec(title: PickoCopy.Tabs.similar, systemImage: "square.grid.2x2")
+    static let basket = PickoTopLevelHeaderSpec(title: PickoCopy.Tabs.basket, systemImage: "tray")
+}
+
+struct PickoTopLevelHeader: View {
+    let spec: PickoTopLevelHeaderSpec
+    var trailingPrimaryText: String?
+    var trailingSecondaryText: String?
     var trailingSystemImage: String = "gearshape"
     var trailingAction: (() -> Void)?
 
@@ -82,19 +94,33 @@ struct PickoBrandHeader: View {
             Circle()
                 .fill(PickoDesign.ColorToken.primarySoft)
                 .overlay {
-                    Image(systemName: "photo.stack")
+                    Image(systemName: spec.systemImage)
                         .font(.system(size: 15, weight: .semibold))
                         .foregroundStyle(PickoDesign.ColorToken.primaryDeep)
                 }
                 .frame(width: 34, height: 34)
 
-            Text(title)
+            Text(spec.title)
                 .font(.system(size: 22, weight: .semibold, design: .rounded))
                 .foregroundStyle(PickoDesign.ColorToken.primary)
 
             Spacer()
 
-            if let trailingAction {
+            if trailingPrimaryText != nil || trailingSecondaryText != nil {
+                VStack(alignment: .trailing, spacing: 2) {
+                    if let trailingPrimaryText {
+                        Text(trailingPrimaryText)
+                            .font(.system(size: 11, weight: .medium, design: .monospaced))
+                            .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+                    }
+                    if let trailingSecondaryText {
+                        Text(trailingSecondaryText)
+                            .font(.system(size: 11, weight: .medium, design: .rounded))
+                            .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+                            .lineLimit(1)
+                    }
+                }
+            } else if let trailingAction {
                 Button(action: trailingAction) {
                     Image(systemName: trailingSystemImage)
                         .font(.system(size: 17, weight: .semibold))
@@ -105,6 +131,20 @@ struct PickoBrandHeader: View {
                 .buttonStyle(.plain)
             }
         }
+    }
+}
+
+struct PickoBrandHeader: View {
+    let title: String
+    var trailingSystemImage: String = "gearshape"
+    var trailingAction: (() -> Void)?
+
+    var body: some View {
+        PickoTopLevelHeader(
+            spec: PickoTopLevelHeaderSpec(title: title, systemImage: "photo.stack"),
+            trailingSystemImage: trailingSystemImage,
+            trailingAction: trailingAction
+        )
     }
 }
 

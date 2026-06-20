@@ -13,7 +13,7 @@ public struct HomeView: View {
 
         ScrollView {
             VStack(alignment: .leading, spacing: PickoDesign.Spacing.lg) {
-                PickoBrandHeader(title: "拾影")
+                PickoTopLevelHeader(spec: .home)
 
                 VStack(alignment: .leading, spacing: PickoDesign.Spacing.sm) {
                     PickoSectionLabel(title: "今日建议")

@@ -16,7 +16,7 @@ public struct PreDeleteBasketView: View {
 
         ScrollView {
             VStack(alignment: .leading, spacing: PickoDesign.Spacing.lg) {
-                PickoBrandHeader(title: "拾影")
+                PickoTopLevelHeader(spec: .basket)
 
                 VStack(alignment: .leading, spacing: PickoDesign.Spacing.md) {
                     PickoSectionLabel(title: PickoCopy.Basket.savingsOverview)

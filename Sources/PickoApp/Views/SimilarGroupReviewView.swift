@@ -18,6 +18,8 @@ public struct SimilarGroupReviewView: View {
             if let presentation = PickoSimilarGroupPresentation(model: model) {
                 ScrollView {
                     VStack(alignment: .leading, spacing: PickoDesign.Spacing.lg) {
+                        PickoTopLevelHeader(spec: .similar)
+
                         header(presentation)
 
                         keepModeControl(presentation.modeTitles)
@@ -70,23 +72,7 @@ public struct SimilarGroupReviewView: View {
                     stickyActionBar(presentation)
                 }
             } else {
-                PickoPageEmptyStateView(
-                    title: PickoCopy.Similar.emptyTitle,
-                    message: PickoCopy.Similar.emptyMessage,
-                    systemImage: "square.grid.2x2"
-                ) {
-                    Button {
-                        model.selectedTab = .review
-                    } label: {
-                        Label(PickoCopy.Similar.goReview, systemImage: "rectangle.stack")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.plain)
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
-                    .padding(.vertical, 14)
-                    .background(PickoDesign.ColorToken.primary, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
-                    .foregroundStyle(PickoDesign.ColorToken.primarySoft)
-                }
+                similarEmptyStateView
             }
         }
         .pickoScreenBackground()
@@ -96,6 +82,46 @@ public struct SimilarGroupReviewView: View {
         .sheet(item: $previewAsset) { asset in
             PhotoPreviewView(asset: asset, model: model)
         }
+    }
+
+    private var similarEmptyStateView: some View {
+        VStack(alignment: .leading, spacing: PickoDesign.Spacing.lg) {
+            PickoTopLevelHeader(spec: .similar)
+
+            VStack(spacing: PickoDesign.Spacing.md) {
+                Image(systemName: "square.grid.2x2")
+                    .font(.system(size: 36, weight: .semibold))
+                    .frame(width: 76, height: 76)
+                    .background(PickoDesign.ColorToken.primarySoft.opacity(0.7), in: Circle())
+                    .foregroundStyle(PickoDesign.ColorToken.primary)
+
+                VStack(spacing: 8) {
+                    Text(PickoCopy.Similar.emptyTitle)
+                        .font(.system(size: 22, weight: .semibold, design: .rounded))
+                        .foregroundStyle(PickoDesign.ColorToken.primary)
+                    Text(PickoCopy.Similar.emptyMessage)
+                        .font(.system(size: 14, weight: .regular, design: .rounded))
+                        .multilineTextAlignment(.center)
+                        .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+                }
+
+                Button {
+                    model.selectedTab = .review
+                } label: {
+                    Label(PickoCopy.Similar.goReview, systemImage: "rectangle.stack")
+                        .font(.system(size: 16, weight: .semibold, design: .rounded))
+                        .frame(maxWidth: .infinity)
+                        .padding(.vertical, 14)
+                        .background(PickoDesign.ColorToken.primary, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
+                        .foregroundStyle(PickoDesign.ColorToken.primarySoft)
+                }
+                .buttonStyle(.plain)
+            }
+            .frame(maxWidth: .infinity)
+            .padding(.top, 168)
+        }
+        .padding(PickoDesign.Spacing.page)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
     }
 
     private func header(_ presentation: PickoSimilarGroupPresentation) -> some View {
@@ -293,6 +319,7 @@ public struct SimilarGroupReviewView: View {
 enum SimilarReviewLayout {
     static let navigationTitle: String? = nil
     static let hidesNavigationBar = true
+    static let emptyStateUsesTopAlignment = true
 }
 
 #Preview {
