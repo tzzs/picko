@@ -80,15 +80,35 @@ public struct SingleReviewView: View {
 
     private func mainPhotoCard(presentation: PickoSingleReviewPresentation, availableHeight: CGFloat) -> some View {
         let imageHeight = SingleReviewLayout.mainImageHeight(availableHeight: availableHeight)
+        let aspectRatio = SingleReviewLayout.aspectRatio(for: presentation.asset)
+        let contentMode = SingleReviewLayout.mainImageContentMode(forAspectRatio: aspectRatio)
+        let usesBackdrop = SingleReviewLayout.usesBackdropFill(forAspectRatio: aspectRatio)
 
         return GeometryReader { proxy in
             ZStack(alignment: .bottomLeading) {
+                if usesBackdrop {
+                    PickoThumbnailView(
+                        asset: presentation.asset,
+                        thumbnailProvider: model.thumbnailProvider,
+                        targetPixelWidth: 1100,
+                        targetPixelHeight: 1100,
+                        contentMode: .fill
+                    )
+                    .frame(width: proxy.size.width, height: imageHeight)
+                    .scaleEffect(1.08)
+                    .blur(radius: 18)
+                    .opacity(0.74)
+                    .overlay(PickoDesign.ColorToken.primary.opacity(0.2))
+                    .clipped()
+                }
+
                 PickoThumbnailView(
                     asset: presentation.asset,
                     thumbnailProvider: model.thumbnailProvider,
                     targetPixelWidth: 1100,
                     targetPixelHeight: 1100,
-                    contentMode: SingleReviewLayout.mainImageContentMode
+                    contentMode: contentMode,
+                    loadedPlaceholderOpacity: usesBackdrop ? 0 : 1
                 )
                 .frame(width: proxy.size.width, height: imageHeight)
                 .background(PickoDesign.ColorToken.surfaceLow)
@@ -273,10 +293,25 @@ enum SingleReviewLayout {
     static let contentTopPadding: CGFloat = 4
     static let actionDockReservedHeight: CGFloat = 180
     static let actionDockBottomPadding: CGFloat = 32
-    static let mainImageContentMode: ContentMode = .fill
 
     static func mainImageHeight(availableHeight: CGFloat) -> CGFloat {
         min(max(availableHeight * 0.56, 300), 430)
+    }
+
+    static func aspectRatio(for asset: PhotoAsset) -> Double {
+        guard asset.pixelWidth > 0, asset.pixelHeight > 0 else {
+            return 1
+        }
+
+        return Double(asset.pixelWidth) / Double(asset.pixelHeight)
+    }
+
+    static func mainImageContentMode(forAspectRatio aspectRatio: Double) -> ContentMode {
+        usesBackdropFill(forAspectRatio: aspectRatio) ? .fit : .fill
+    }
+
+    static func usesBackdropFill(forAspectRatio aspectRatio: Double) -> Bool {
+        aspectRatio >= 1.65 || aspectRatio <= 0.62
     }
 }
 

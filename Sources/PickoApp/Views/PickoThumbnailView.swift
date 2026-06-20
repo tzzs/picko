@@ -13,6 +13,7 @@ public struct PickoThumbnailView: View {
     private let targetPixelWidth: Int
     private let targetPixelHeight: Int
     private let contentMode: ContentMode
+    private let loadedPlaceholderOpacity: Double
     @State private var thumbnailData: Data?
 
     public init(
@@ -20,18 +21,21 @@ public struct PickoThumbnailView: View {
         thumbnailProvider: (any PhotoThumbnailProviding)?,
         targetPixelWidth: Int = 600,
         targetPixelHeight: Int = 450,
-        contentMode: ContentMode = .fill
+        contentMode: ContentMode = .fill,
+        loadedPlaceholderOpacity: Double = 1
     ) {
         self.asset = asset
         self.thumbnailProvider = thumbnailProvider
         self.targetPixelWidth = targetPixelWidth
         self.targetPixelHeight = targetPixelHeight
         self.contentMode = contentMode
+        self.loadedPlaceholderOpacity = loadedPlaceholderOpacity
     }
 
     public var body: some View {
         ZStack {
             placeholder
+                .opacity(thumbnailData == nil ? 1 : loadedPlaceholderOpacity)
 
             if let image = platformImage(from: thumbnailData) {
                 image

@@ -233,8 +233,17 @@ final class PickoAppTests: XCTestCase {
         XCTAssertEqual(SingleReviewLayout.contentTopPadding, 4)
     }
 
-    func testSingleReviewLayoutFillsMainPhotoToAvoidLetterboxing() {
-        XCTAssertEqual(SingleReviewLayout.mainImageContentMode, .fill)
+    func testSingleReviewLayoutAdaptsPhotoDisplayModeByAspectRatio() {
+        XCTAssertEqual(SingleReviewLayout.mainImageContentMode(forAspectRatio: 4.0 / 3.0), .fill)
+        XCTAssertEqual(SingleReviewLayout.mainImageContentMode(forAspectRatio: 3.0 / 4.0), .fill)
+        XCTAssertEqual(SingleReviewLayout.mainImageContentMode(forAspectRatio: 16.0 / 9.0), .fit)
+        XCTAssertEqual(SingleReviewLayout.mainImageContentMode(forAspectRatio: 6.0 / 19.0), .fit)
+    }
+
+    func testSingleReviewLayoutUsesBackdropForExtremeAspectRatios() {
+        XCTAssertFalse(SingleReviewLayout.usesBackdropFill(forAspectRatio: 4.0 / 3.0))
+        XCTAssertTrue(SingleReviewLayout.usesBackdropFill(forAspectRatio: 16.0 / 9.0))
+        XCTAssertTrue(SingleReviewLayout.usesBackdropFill(forAspectRatio: 6.0 / 19.0))
     }
 
     func testPlaceLabelFormatterUsesCountryAndNaturalFeatureWhenCityIsMissing() {
