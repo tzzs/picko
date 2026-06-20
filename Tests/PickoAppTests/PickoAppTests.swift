@@ -89,6 +89,12 @@ final class PickoAppTests: XCTestCase {
         XCTAssertNotNil(view)
     }
 
+    func testReviewGestureSettingsViewCanBeConstructed() {
+        let view = ReviewGestureSettingsView()
+
+        XCTAssertNotNil(view)
+    }
+
     func testLibraryBootstrapViewCanBeConstructed() {
         let view = PickoLibraryBootstrapView()
 
@@ -252,6 +258,70 @@ final class PickoAppTests: XCTestCase {
             SingleReviewLayout.reviewProgressText(currentIndex: 2, totalCount: 6),
             "第 3 / 6 张"
         )
+    }
+
+    func testSingleReviewGestureMappingDefaultsToSwipeUpKeep() {
+        XCTAssertEqual(
+            SingleReviewLayout.gestureAction(
+                for: CGSize(width: 0, height: -96),
+                preference: .keepOnUp
+            ),
+            .keep
+        )
+        XCTAssertEqual(
+            SingleReviewLayout.gestureAction(
+                for: CGSize(width: 0, height: 96),
+                preference: .keepOnUp
+            ),
+            .preDelete
+        )
+        XCTAssertEqual(
+            SingleReviewLayout.gestureAction(
+                for: CGSize(width: -96, height: 0),
+                preference: .keepOnUp
+            ),
+            .undo
+        )
+        XCTAssertEqual(
+            SingleReviewLayout.gestureAction(
+                for: CGSize(width: 96, height: 0),
+                preference: .keepOnUp
+            ),
+            .skip
+        )
+        XCTAssertNil(
+            SingleReviewLayout.gestureAction(
+                for: CGSize(width: 20, height: 20),
+                preference: .keepOnUp
+            )
+        )
+    }
+
+    func testSingleReviewGestureMappingCanInvertVerticalDecision() {
+        XCTAssertEqual(
+            SingleReviewLayout.gestureAction(
+                for: CGSize(width: 0, height: -96),
+                preference: .keepOnDown
+            ),
+            .preDelete
+        )
+        XCTAssertEqual(
+            SingleReviewLayout.gestureAction(
+                for: CGSize(width: 0, height: 96),
+                preference: .keepOnDown
+            ),
+            .keep
+        )
+        XCTAssertEqual(ReviewGesturePreference.keepOnUp.topHintTitle, "向上保留")
+        XCTAssertEqual(ReviewGesturePreference.keepOnUp.bottomHintTitle, "向下预删除")
+        XCTAssertEqual(ReviewGesturePreference.keepOnDown.topHintTitle, "向上预删除")
+        XCTAssertEqual(ReviewGesturePreference.keepOnDown.bottomHintTitle, "向下保留")
+    }
+
+    func testSingleReviewLayoutUsesGestureFirstCardStack() {
+        XCTAssertTrue(SingleReviewLayout.showsStackedCards)
+        XCTAssertTrue(SingleReviewLayout.centersPhotoStageVertically)
+        XCTAssertFalse(SingleReviewLayout.showsLargePreDeleteDockButton)
     }
 
     func testSingleReviewPresentationKeepsPrimaryActionsPhotoFirst() throws {
@@ -598,6 +668,41 @@ final class PickoAppTests: XCTestCase {
         XCTAssertEqual(model.store.deletionQueue.itemIds, ["delete-me"])
         XCTAssertTrue(model.hasCompletedReviewScope)
         XCTAssertNil(model.currentAsset)
+    }
+
+    func testUndoReturnsToPreviousReviewedAsset() {
+        let model = PickoAppModel(store: ReviewStateStore(assets: [
+            makeAsset(id: "first", fileSizeBytes: 10),
+            makeAsset(id: "second", fileSizeBytes: 20)
+        ]))
+
+        model.preDeleteCurrentAsset()
+        XCTAssertEqual(model.currentAsset?.id, "second")
+        XCTAssertEqual(model.store.asset(id: "first")?.status, .preDeleted)
+
+        model.undoAndReturnToPreviousAsset()
+
+        XCTAssertEqual(model.currentAsset?.id, "first")
+        XCTAssertEqual(model.store.asset(id: "first")?.status, .unreviewed)
+        XCTAssertTrue(model.store.deletionQueue.itemIds.isEmpty)
+    }
+
+    func testReviewStackPreviewAssetsFollowCurrentScope() {
+        let model = PickoAppModel(store: ReviewStateStore(assets: [
+            makeAsset(id: "outside"),
+            makeAsset(id: "first"),
+            makeAsset(id: "second"),
+            makeAsset(id: "third")
+        ]))
+        model.startReview(scope: .init(
+            mode: .time,
+            title: "今天",
+            assetIds: ["first", "second", "third"]
+        ))
+
+        XCTAssertEqual(model.reviewStackPreviewAssets(limit: 2).map(\.id), ["second", "third"])
+        model.skipCurrentAsset()
+        XCTAssertEqual(model.reviewStackPreviewAssets(limit: 2).map(\.id), ["third"])
     }
 
     func testScopedReviewCompletionCanReturnHomeOrBasket() {

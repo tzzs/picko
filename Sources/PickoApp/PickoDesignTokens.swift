@@ -107,17 +107,30 @@ struct PickoTopLevelHeader: View {
             Spacer()
 
             if trailingPrimaryText != nil || trailingSecondaryText != nil {
-                VStack(alignment: .trailing, spacing: 2) {
-                    if let trailingPrimaryText {
-                        Text(trailingPrimaryText)
-                            .font(.system(size: 11, weight: .medium, design: .monospaced))
-                            .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+                HStack(spacing: PickoDesign.Spacing.sm) {
+                    VStack(alignment: .trailing, spacing: 2) {
+                        if let trailingPrimaryText {
+                            Text(trailingPrimaryText)
+                                .font(.system(size: 11, weight: .medium, design: .monospaced))
+                                .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+                        }
+                        if let trailingSecondaryText {
+                            Text(trailingSecondaryText)
+                                .font(.system(size: 11, weight: .medium, design: .rounded))
+                                .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+                                .lineLimit(1)
+                        }
                     }
-                    if let trailingSecondaryText {
-                        Text(trailingSecondaryText)
-                            .font(.system(size: 11, weight: .medium, design: .rounded))
-                            .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
-                            .lineLimit(1)
+
+                    if let trailingAction {
+                        Button(action: trailingAction) {
+                            Image(systemName: trailingSystemImage)
+                                .font(.system(size: 15, weight: .semibold))
+                                .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+                                .frame(width: 34, height: 34)
+                                .background(.ultraThinMaterial, in: Circle())
+                        }
+                        .buttonStyle(.plain)
                     }
                 }
             } else if let trailingAction {

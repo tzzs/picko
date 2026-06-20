@@ -166,6 +166,12 @@ public final class PickoAppModel {
         persistCurrentState()
     }
 
+    public func undoAndReturnToPreviousAsset() {
+        store.undo()
+        currentAssetIndex = max(currentAssetIndex - 1, 0)
+        persistCurrentState()
+    }
+
     public func keep(assetIds: [PhotoAsset.ID], in group: SimilarGroup) {
         store.apply(.keepOnly(assetIds: assetIds, inGroup: group.id))
         recordSessionGroupAction(keptAssetIds: assetIds, group: group)
@@ -236,6 +242,20 @@ public final class PickoAppModel {
         reviewScope = nil
         currentAssetIndex = 0
         currentSession = PickoAppModel.makeSession(mode: .single)
+    }
+
+    public func reviewStackPreviewAssets(limit: Int) -> [PhotoAsset] {
+        guard limit > 0 else {
+            return []
+        }
+
+        let reviewAssets = activeReviewAssets
+        let startIndex = currentAssetIndex + 1
+        guard reviewAssets.indices.contains(startIndex) else {
+            return []
+        }
+
+        return Array(reviewAssets[startIndex...].prefix(limit))
     }
 
     @discardableResult

@@ -4,7 +4,10 @@ import SwiftUI
 
 public struct SingleReviewView: View {
     @Bindable private var model: PickoAppModel
+    @AppStorage(ReviewGesturePreference.storageKey) private var gesturePreferenceRawValue = ReviewGesturePreference.keepOnUp.rawValue
     @State private var previewAsset: PhotoAsset?
+    @State private var showsGestureSettings = false
+    @State private var dragOffset: CGSize = .zero
 
     public init(model: PickoAppModel) {
         self.model = model
@@ -20,7 +23,12 @@ public struct SingleReviewView: View {
                         reviewContent(
                             presentation: presentation,
                             availableWidth: max(proxy.size.width - PickoDesign.Spacing.page * 2, 1),
-                            availableHeight: proxy.size.height
+                            availableHeight: max(
+                                proxy.size.height
+                                - SingleReviewLayout.actionDockReservedHeight
+                                - SingleReviewLayout.contentTopPadding,
+                                1
+                            )
                         )
                             .padding(.horizontal, PickoDesign.Spacing.page)
                             .padding(.top, SingleReviewLayout.contentTopPadding)
@@ -47,6 +55,9 @@ public struct SingleReviewView: View {
         .sheet(item: $previewAsset) { asset in
             PhotoPreviewView(asset: asset, model: model)
         }
+        .sheet(isPresented: $showsGestureSettings) {
+            ReviewGestureSettingsView()
+        }
     }
 
     private func reviewContent(
@@ -58,25 +69,22 @@ public struct SingleReviewView: View {
             PickoTopLevelHeader(
                 spec: .review,
                 trailingPrimaryText: reviewProgressText,
-                trailingSecondaryText: model.reviewScope?.title
+                trailingSecondaryText: model.reviewScope?.title,
+                trailingSystemImage: "gearshape",
+                trailingAction: {
+                    showsGestureSettings = true
+                }
             )
 
-            Button {
-                previewAsset = presentation.asset
-            } label: {
-                mainPhotoCard(
-                    presentation: presentation,
-                    availableWidth: availableWidth,
-                    availableHeight: availableHeight
-                )
-            }
-            .buttonStyle(.plain)
-
-            Spacer(minLength: 0)
+            photoStage(
+                presentation: presentation,
+                availableWidth: availableWidth,
+                availableHeight: availableHeight
+            )
         }
     }
 
-    private func mainPhotoCard(
+    private func photoStage(
         presentation: PickoSingleReviewPresentation,
         availableWidth: CGFloat,
         availableHeight: CGFloat
@@ -89,8 +97,68 @@ public struct SingleReviewView: View {
         )
         let contentMode = SingleReviewLayout.mainImageContentMode(forAspectRatio: aspectRatio)
         let usesBackdrop = SingleReviewLayout.usesBackdropFill(forAspectRatio: aspectRatio)
+        let preference = reviewGesturePreference
+        let activeAction = SingleReviewLayout.gestureAction(for: dragOffset, preference: preference)
 
         return GeometryReader { proxy in
+            VStack(spacing: PickoDesign.Spacing.gutter) {
+                gestureHint(
+                    title: preference.topHintTitle,
+                    systemImage: preference.topAction.systemImage,
+                    action: preference.topAction,
+                    isActive: activeAction == preference.topAction
+                )
+
+                ZStack {
+                    ForEach(Array(model.reviewStackPreviewAssets(limit: SingleReviewLayout.stackedCardCount).enumerated()).reversed(), id: \.element.id) { index, asset in
+                        stackedPreviewCard(
+                            asset: asset,
+                            index: index,
+                            width: proxy.size.width,
+                            height: imageHeight
+                        )
+                    }
+
+                    mainPhotoCard(
+                        presentation: presentation,
+                        imageHeight: imageHeight,
+                        contentMode: contentMode,
+                        usesBackdrop: usesBackdrop
+                    )
+                    .offset(dragOffset)
+                    .rotationEffect(.degrees(Double(dragOffset.width / 28)))
+                    .animation(.spring(response: 0.26, dampingFraction: 0.82), value: dragOffset)
+                    .overlay(alignment: activeAction?.overlayAlignment ?? .center) {
+                        if let activeAction {
+                            actionBadge(activeAction.badgeTitle, systemImage: activeAction.systemImage, action: activeAction)
+                                .padding(PickoDesign.Spacing.md)
+                        }
+                    }
+                    .onTapGesture {
+                        previewAsset = presentation.asset
+                    }
+                    .gesture(reviewDragGesture(preference: preference))
+                }
+                .frame(width: proxy.size.width, height: imageHeight + 34)
+
+                gestureHint(
+                    title: preference.bottomHintTitle,
+                    systemImage: preference.bottomAction.systemImage,
+                    action: preference.bottomAction,
+                    isActive: activeAction == preference.bottomAction
+                )
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+        }
+    }
+
+    private func mainPhotoCard(
+        presentation: PickoSingleReviewPresentation,
+        imageHeight: CGFloat,
+        contentMode: ContentMode,
+        usesBackdrop: Bool
+    ) -> some View {
+        GeometryReader { proxy in
             ZStack(alignment: .bottomLeading) {
                 if usesBackdrop {
                     PickoThumbnailView(
@@ -119,17 +187,6 @@ public struct SingleReviewView: View {
                 .frame(width: proxy.size.width, height: imageHeight)
                 .background(PickoDesign.ColorToken.surfaceLow)
                 .clipShape(RoundedRectangle(cornerRadius: PickoDesign.Radius.xl))
-                .overlay(alignment: .top) {
-                    VStack(spacing: 2) {
-                        Image(systemName: "chevron.compact.up")
-                            .font(.system(size: 30, weight: .semibold))
-                        Text("点击预览")
-                            .font(.system(size: 11, weight: .medium, design: .monospaced))
-                    }
-                    .foregroundStyle(.white.opacity(0.62))
-                    .shadow(color: .black.opacity(0.22), radius: 6, x: 0, y: 2)
-                    .padding(.top, 12)
-                }
                 .overlay(alignment: .bottom) {
                     LinearGradient(
                         colors: [.clear, .black.opacity(0.68)],
@@ -171,11 +228,90 @@ public struct SingleReviewView: View {
         .frame(height: imageHeight)
     }
 
+    private func stackedPreviewCard(asset: PhotoAsset, index: Int, width: CGFloat, height: CGFloat) -> some View {
+        let level = CGFloat(index + 1)
+        let corner = RoundedRectangle(cornerRadius: PickoDesign.Radius.xl)
+        let scale = 1 - level * 0.045
+
+        return PickoThumbnailView(
+            asset: asset,
+            thumbnailProvider: model.thumbnailProvider,
+            targetPixelWidth: 900,
+            targetPixelHeight: 900,
+            contentMode: .fill
+        )
+        .frame(width: width, height: height)
+        .background(PickoDesign.ColorToken.surfaceLow)
+        .clipShape(corner)
+        .overlay {
+            corner
+                .stroke(PickoDesign.ColorToken.outline.opacity(0.4), lineWidth: 1)
+        }
+        .scaleEffect(scale)
+        .offset(x: level * 10, y: level * 14)
+        .overlay {
+            corner
+                .fill(PickoDesign.ColorToken.surface.opacity(level * 0.18))
+        }
+        .shadow(color: PickoDesign.ColorToken.primary.opacity(0.08), radius: 14, x: 0, y: 8)
+    }
+
+    private func gestureHint(title: String, systemImage: String, action: SingleReviewGestureAction, isActive: Bool) -> some View {
+        Label(title, systemImage: systemImage)
+            .font(.system(size: 12, weight: .semibold, design: .rounded))
+            .padding(.horizontal, 12)
+            .padding(.vertical, 7)
+            .background(action.tint.opacity(isActive ? 0.24 : 0.1), in: Capsule())
+            .foregroundStyle(isActive ? action.tint : PickoDesign.ColorToken.secondaryInk)
+    }
+
+    private func actionBadge(_ title: String, systemImage: String, action: SingleReviewGestureAction) -> some View {
+        Label(title, systemImage: systemImage)
+            .font(.system(size: 15, weight: .semibold, design: .rounded))
+            .padding(.horizontal, 14)
+            .padding(.vertical, 10)
+            .background(action.tint.opacity(0.92), in: Capsule())
+            .foregroundStyle(.white)
+            .shadow(color: action.tint.opacity(0.24), radius: 12, x: 0, y: 6)
+    }
+
+    private func reviewDragGesture(preference: ReviewGesturePreference) -> some Gesture {
+        DragGesture(minimumDistance: 12)
+            .onChanged { value in
+                dragOffset = value.translation
+            }
+            .onEnded { value in
+                let action = SingleReviewLayout.gestureAction(for: value.translation, preference: preference)
+
+                withAnimation(.spring(response: 0.22, dampingFraction: 0.8)) {
+                    dragOffset = .zero
+                }
+
+                guard let action else {
+                    return
+                }
+                applyGestureAction(action)
+            }
+    }
+
+    private func applyGestureAction(_ action: SingleReviewGestureAction) {
+        switch action {
+        case .keep:
+            model.keepCurrentAsset()
+        case .preDelete:
+            model.preDeleteCurrentAsset()
+        case .skip:
+            model.skipCurrentAsset()
+        case .undo:
+            model.undoAndReturnToPreviousAsset()
+        }
+    }
+
     private func reviewActionDock(presentation: PickoSingleReviewPresentation) -> some View {
-        VStack(spacing: PickoDesign.Spacing.sm) {
-            HStack(alignment: .top, spacing: PickoDesign.Spacing.md) {
-                reviewCircleButton(title: "撤销", displayTitle: "撤销", systemImage: "arrow.uturn.backward") {
-                    model.undo()
+        VStack(spacing: PickoDesign.Spacing.gutter) {
+            HStack(alignment: .top, spacing: PickoDesign.Spacing.gutter) {
+                reviewCircleButton(title: "上一张", displayTitle: "上一张", systemImage: "arrow.left") {
+                    model.undoAndReturnToPreviousAsset()
                 }
 
                 Button {
@@ -197,6 +333,15 @@ public struct SingleReviewView: View {
                 .accessibilityLabel(presentation.primaryActions[2].title)
 
                 reviewCircleButton(
+                    title: presentation.primaryActions[1].title,
+                    displayTitle: "预删除",
+                    systemImage: presentation.primaryActions[1].systemImage,
+                    accent: PickoDesign.ColorToken.coralDeep
+                ) {
+                    model.preDeleteCurrentAsset()
+                }
+
+                reviewCircleButton(
                     title: presentation.primaryActions[0].title,
                     displayTitle: "保留",
                     systemImage: "star.fill",
@@ -206,18 +351,11 @@ public struct SingleReviewView: View {
                 }
             }
 
-            Button {
-                model.preDeleteCurrentAsset()
-            } label: {
-                Label("向下预删除", systemImage: presentation.primaryActions[1].systemImage)
-                    .font(.system(size: 14, weight: .semibold, design: .rounded))
-                    .frame(maxWidth: .infinity)
-                    .padding(.vertical, 12)
-                    .background(PickoDesign.ColorToken.coralDeep, in: Capsule())
-                    .foregroundStyle(PickoDesign.ColorToken.coral)
-            }
-            .buttonStyle(.plain)
-            .accessibilityLabel(presentation.primaryActions[1].title)
+            Text("拖动卡片：左滑上一张，右滑跳过。\(reviewGesturePreference.subtitle)。")
+                .font(.system(size: 11, weight: .medium, design: .rounded))
+                .multilineTextAlignment(.center)
+                .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+                .frame(maxWidth: .infinity)
         }
     }
 
@@ -269,6 +407,10 @@ public struct SingleReviewView: View {
         )
     }
 
+    private var reviewGesturePreference: ReviewGesturePreference {
+        ReviewGesturePreference.resolved(rawValue: gesturePreferenceRawValue)
+    }
+
     private func reviewCircleButton(
         title: String,
         displayTitle: String,
@@ -302,9 +444,36 @@ enum SingleReviewLayout {
     static let contentTopPadding: CGFloat = PickoDesign.Spacing.page
     static let actionDockReservedHeight: CGFloat = 180
     static let actionDockBottomPadding: CGFloat = 32
+    static let gestureThreshold: CGFloat = 72
+    static let stackedCardCount = 2
+    static let showsStackedCards = true
+    static let centersPhotoStageVertically = true
+    static let showsLargePreDeleteDockButton = false
 
     static func reviewProgressText(currentIndex: Int, totalCount: Int) -> String {
         "第 \(currentIndex + 1) / \(max(totalCount, 1)) 张"
+    }
+
+    static func gestureAction(
+        for translation: CGSize,
+        preference: ReviewGesturePreference
+    ) -> SingleReviewGestureAction? {
+        let horizontalDistance = abs(translation.width)
+        let verticalDistance = abs(translation.height)
+        let primaryDistance = max(horizontalDistance, verticalDistance)
+
+        guard primaryDistance >= gestureThreshold else {
+            return nil
+        }
+
+        if horizontalDistance > verticalDistance {
+            return translation.width < 0 ? .undo : .skip
+        }
+
+        if translation.height < 0 {
+            return preference.topAction
+        }
+        return preference.bottomAction
     }
 
     static func mainImageHeight(
@@ -332,6 +501,60 @@ enum SingleReviewLayout {
 
     static func usesBackdropFill(forAspectRatio aspectRatio: Double) -> Bool {
         aspectRatio >= 1.65 || aspectRatio <= 0.62
+    }
+}
+
+extension SingleReviewGestureAction {
+    var badgeTitle: String {
+        switch self {
+        case .keep:
+            return "保留"
+        case .preDelete:
+            return "预删除"
+        case .skip:
+            return "跳过"
+        case .undo:
+            return "上一张"
+        }
+    }
+
+    var systemImage: String {
+        switch self {
+        case .keep:
+            return "star.fill"
+        case .preDelete:
+            return "tray.and.arrow.down"
+        case .skip:
+            return "arrow.right"
+        case .undo:
+            return "arrow.left"
+        }
+    }
+
+    var tint: Color {
+        switch self {
+        case .keep:
+            return PickoDesign.ColorToken.gold
+        case .preDelete:
+            return PickoDesign.ColorToken.coralDeep
+        case .skip:
+            return PickoDesign.ColorToken.primary
+        case .undo:
+            return PickoDesign.ColorToken.secondaryInk
+        }
+    }
+
+    var overlayAlignment: Alignment {
+        switch self {
+        case .keep:
+            return .top
+        case .preDelete:
+            return .bottom
+        case .skip:
+            return .trailing
+        case .undo:
+            return .leading
+        }
     }
 }
 
