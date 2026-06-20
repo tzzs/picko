@@ -320,6 +320,11 @@ final class PickoAppTests: XCTestCase {
         XCTAssertEqual(SingleReviewLayout.emptyStateTopPadding, SingleReviewLayout.contentTopPadding)
     }
 
+    func testSharedEmptyStateWidthIsControlledByParentPage() {
+        XCTAssertTrue(PickoEmptyStateLayout.usesCallerControlledOuterPadding)
+        XCTAssertEqual(PickoEmptyStateLayout.outerPadding, 0)
+    }
+
     func testSingleReviewEmptyActionPrefersSimilarWhenGroupsExist() {
         let presentation = PickoReviewEmptyActionPresentation(model: .preview())
 

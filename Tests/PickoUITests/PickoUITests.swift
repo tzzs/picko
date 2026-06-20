@@ -105,6 +105,18 @@ final class PickoUITests: XCTestCase {
         XCTAssertFalse(app.staticTexts["单张复核"].exists)
     }
 
+    func testEmptySampleBasketLaunchesDirectlyToEmptyBasketState() {
+        let app = XCUIApplication()
+        app.launchArguments = ["--picko-use-empty-basket"]
+        app.launch()
+
+        XCTAssertTrue(app.staticTexts["top-level-title-预删除篮"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["预删除篮为空"].waitForExistence(timeout: 5))
+        XCTAssertTrue(app.staticTexts["复核时放入预删除篮的照片会先在这里等待最终确认。"].exists)
+        XCTAssertFalse(app.buttons["在系统照片中确认删除"].exists)
+        XCTAssertFalse(app.buttons["全部移出预删除篮"].exists)
+    }
+
     func testSampleBasketConfirmsBeforeClearingQueue() {
         let app = XCUIApplication()
         app.launchArguments = ["--picko-use-sample-basket"]

@@ -11,6 +11,7 @@ struct PickoIOSApp: App {
     @State private var emptyReviewModel = PickoIOSApp.makeEmptyReviewModel()
     @State private var sampleSimilarModel = PickoIOSApp.makeSampleSimilarModel()
     @State private var sampleBasketModel = PickoIOSApp.makeSampleBasketModel()
+    @State private var emptyBasketModel = PickoIOSApp.makeEmptyBasketModel()
 
     var body: some Scene {
         WindowGroup {
@@ -42,6 +43,8 @@ struct PickoIOSApp: App {
             PickoRootView(model: sampleSimilarModel)
         } else if arguments.contains("--picko-use-sample-basket") {
             PickoRootView(model: sampleBasketModel)
+        } else if arguments.contains("--picko-use-empty-basket") {
+            PickoRootView(model: emptyBasketModel)
         } else if arguments.contains("--picko-use-sample-library") {
             PickoRootView(model: sampleLibraryModel)
         } else {
@@ -73,6 +76,13 @@ struct PickoIOSApp: App {
         model.preDeleteCurrentAsset()
         model.selectedTab = .basket
         return model
+    }
+
+    private static func makeEmptyBasketModel() -> PickoAppModel {
+        PickoAppModel(
+            store: ReviewStateStore(assets: [], groups: []),
+            selectedTab: .basket
+        )
     }
 
     private func deniedLibraryBootstrapper() throws -> PhotoLibraryBootstrapper {
