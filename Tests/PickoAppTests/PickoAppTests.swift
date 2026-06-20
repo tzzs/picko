@@ -263,9 +263,41 @@ final class PickoAppTests: XCTestCase {
     }
 
     func testSingleReviewLayoutKeepsActionsVisibleOnSmallPhones() {
-        XCTAssertEqual(SingleReviewLayout.mainImageHeight(availableHeight: 667), 373.52, accuracy: 0.01)
-        XCTAssertEqual(SingleReviewLayout.mainImageHeight(availableHeight: 568), 318.08, accuracy: 0.01)
-        XCTAssertEqual(SingleReviewLayout.mainImageHeight(availableHeight: 900), 430, accuracy: 0.01)
+        XCTAssertEqual(
+            SingleReviewLayout.mainImageHeight(availableWidth: 335, availableHeight: 667, aspectRatio: 3.0 / 4.0),
+            373.52,
+            accuracy: 0.01
+        )
+        XCTAssertEqual(
+            SingleReviewLayout.mainImageHeight(availableWidth: 280, availableHeight: 568, aspectRatio: 3.0 / 4.0),
+            318.08,
+            accuracy: 0.01
+        )
+        XCTAssertEqual(
+            SingleReviewLayout.mainImageHeight(availableWidth: 328, availableHeight: 900, aspectRatio: 3.0 / 4.0),
+            430,
+            accuracy: 0.01
+        )
+    }
+
+    func testSingleReviewLayoutSizesPhotoHeightFromAspectRatioAtFixedWidth() {
+        let width: CGFloat = 328
+
+        XCTAssertEqual(
+            SingleReviewLayout.mainImageHeight(availableWidth: width, availableHeight: 800, aspectRatio: 16.0 / 9.0),
+            184.5,
+            accuracy: 0.01
+        )
+        XCTAssertEqual(
+            SingleReviewLayout.mainImageHeight(availableWidth: width, availableHeight: 800, aspectRatio: 1),
+            328,
+            accuracy: 0.01
+        )
+        XCTAssertEqual(
+            SingleReviewLayout.mainImageHeight(availableWidth: width, availableHeight: 800, aspectRatio: 4.0 / 3.0),
+            246,
+            accuracy: 0.01
+        )
     }
 
     func testSingleReviewLayoutDocksActionsAboveTabBar() {

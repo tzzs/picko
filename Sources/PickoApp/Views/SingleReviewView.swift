@@ -17,7 +17,11 @@ public struct SingleReviewView: View {
             } else if let presentation = PickoSingleReviewPresentation(model: model) {
                 GeometryReader { proxy in
                     ZStack(alignment: .bottom) {
-                        reviewContent(presentation: presentation, availableHeight: proxy.size.height)
+                        reviewContent(
+                            presentation: presentation,
+                            availableWidth: max(proxy.size.width - PickoDesign.Spacing.page * 2, 1),
+                            availableHeight: proxy.size.height
+                        )
                             .padding(.horizontal, PickoDesign.Spacing.page)
                             .padding(.top, SingleReviewLayout.contentTopPadding)
                             .padding(.bottom, SingleReviewLayout.actionDockReservedHeight)
@@ -45,7 +49,11 @@ public struct SingleReviewView: View {
         }
     }
 
-    private func reviewContent(presentation: PickoSingleReviewPresentation, availableHeight: CGFloat) -> some View {
+    private func reviewContent(
+        presentation: PickoSingleReviewPresentation,
+        availableWidth: CGFloat,
+        availableHeight: CGFloat
+    ) -> some View {
         VStack(alignment: .leading, spacing: SingleReviewLayout.contentSpacing) {
             PickoTopLevelHeader(
                 spec: .review,
@@ -56,7 +64,11 @@ public struct SingleReviewView: View {
             Button {
                 previewAsset = presentation.asset
             } label: {
-                mainPhotoCard(presentation: presentation, availableHeight: availableHeight)
+                mainPhotoCard(
+                    presentation: presentation,
+                    availableWidth: availableWidth,
+                    availableHeight: availableHeight
+                )
             }
             .buttonStyle(.plain)
 
@@ -64,9 +76,17 @@ public struct SingleReviewView: View {
         }
     }
 
-    private func mainPhotoCard(presentation: PickoSingleReviewPresentation, availableHeight: CGFloat) -> some View {
-        let imageHeight = SingleReviewLayout.mainImageHeight(availableHeight: availableHeight)
+    private func mainPhotoCard(
+        presentation: PickoSingleReviewPresentation,
+        availableWidth: CGFloat,
+        availableHeight: CGFloat
+    ) -> some View {
         let aspectRatio = SingleReviewLayout.aspectRatio(for: presentation.asset)
+        let imageHeight = SingleReviewLayout.mainImageHeight(
+            availableWidth: availableWidth,
+            availableHeight: availableHeight,
+            aspectRatio: aspectRatio
+        )
         let contentMode = SingleReviewLayout.mainImageContentMode(forAspectRatio: aspectRatio)
         let usesBackdrop = SingleReviewLayout.usesBackdropFill(forAspectRatio: aspectRatio)
 
@@ -280,8 +300,15 @@ enum SingleReviewLayout {
     static let actionDockReservedHeight: CGFloat = 180
     static let actionDockBottomPadding: CGFloat = 32
 
-    static func mainImageHeight(availableHeight: CGFloat) -> CGFloat {
-        min(max(availableHeight * 0.56, 300), 430)
+    static func mainImageHeight(
+        availableWidth: CGFloat,
+        availableHeight: CGFloat,
+        aspectRatio: Double
+    ) -> CGFloat {
+        let normalizedAspectRatio = max(CGFloat(aspectRatio), 0.1)
+        let preferredHeight = max(availableWidth, 1) / normalizedAspectRatio
+        let maxHeight = min(max(availableHeight * 0.56, 300), 430)
+        return min(preferredHeight, maxHeight)
     }
 
     static func aspectRatio(for asset: PhotoAsset) -> Double {
