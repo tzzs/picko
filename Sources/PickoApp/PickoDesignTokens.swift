@@ -107,6 +107,7 @@ struct PickoTopLevelHeader: View {
             Text(spec.title)
                 .font(.system(size: 22, weight: .semibold, design: .rounded))
                 .foregroundStyle(PickoDesign.ColorToken.primary)
+                .accessibilityIdentifier("top-level-title-\(spec.title)")
 
             Spacer()
 

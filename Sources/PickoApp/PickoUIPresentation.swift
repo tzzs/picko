@@ -147,6 +147,28 @@ public struct PickoSingleReviewPresentation: Equatable {
     }()
 }
 
+public struct PickoReviewEmptyActionPresentation: Equatable {
+    public let title: String
+    public let systemImage: String
+    public let destinationTab: PickoAppModel.Tab
+
+    public init(model: PickoAppModel) {
+        if !model.groups.isEmpty {
+            title = PickoCopy.Review.goSimilar
+            systemImage = "square.grid.2x2"
+            destinationTab = .similar
+        } else if model.deletionQueueCount > 0 {
+            title = PickoCopy.Review.goBasket
+            systemImage = "tray"
+            destinationTab = .basket
+        } else {
+            title = PickoCopy.Review.goHome
+            systemImage = "house"
+            destinationTab = .home
+        }
+    }
+}
+
 public struct PickoSimilarAssetPresentation: Equatable, Identifiable {
     public let id: PhotoAsset.ID
     public let asset: PhotoAsset

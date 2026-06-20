@@ -47,6 +47,12 @@ Use Swift conventions: four-space indentation, `UpperCamelCase` for types, `lowe
 
 User-facing copy should emphasize “keep” and “review” flows rather than aggressive deletion language.
 
+## UI State & Navigation Conventions
+
+Top-level task pages must use the shared `PickoTopLevelHeader` and the shared app background in both content and empty states. Empty states should not introduce standalone background cards unless the state includes multiple controls that need grouping.
+
+Every empty state on a top-level task page must provide a primary next action instead of leaving the user at a dead end. Prefer the closest remaining task first, then recovery/summary destinations, then Home. For example, the Review empty state should route to Similar when similar groups exist, then Basket when pre-delete items exist, and only fall back to Home when no work remains.
+
 ## Testing Guidelines
 
 XCTest is configured through Swift Package Manager. Start with unit tests for shared organizing logic, then add UI tests where needed. Focus on deterministic coverage for metadata parsing, grouping, similarity thresholds, scoring, undo, and the pre-delete basket.

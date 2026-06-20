@@ -34,11 +34,7 @@ public struct SingleReviewView: View {
                     .padding(.bottom, PickoDesign.Spacing.page)
                 }
             } else {
-                PickoEmptyStateView(
-                    title: "暂无待复核照片",
-                    message: "当前图库没有可继续整理的项目。你可以返回首页查看相似组或预删除篮。",
-                    systemImage: "photo.on.rectangle"
-                )
+                emptyReviewView
             }
         }
         .navigationTitle(PickoCopy.Tabs.review)
@@ -60,27 +56,128 @@ public struct SingleReviewView: View {
         availableHeight: CGFloat
     ) -> some View {
         VStack(alignment: .leading, spacing: SingleReviewLayout.contentSpacing) {
-            PickoTopLevelHeader(
-                spec: .review,
-                trailingPrimaryText: reviewProgressText,
-                trailingSecondaryText: model.reviewScope?.title,
-                auxiliaryTrailingSystemImage: "arrow.uturn.backward",
-                auxiliaryTrailingAccessibilityLabel: "上一张",
-                auxiliaryTrailingAction: {
-                    model.undoAndReturnToPreviousAsset()
-                },
-                trailingSystemImage: "gearshape",
-                trailingAccessibilityLabel: "设置",
-                trailingAction: {
-                    showsGestureSettings = true
-                }
-            )
+            reviewHeader(showsProgress: true, showsUndoAction: true)
 
             photoStage(
                 presentation: presentation,
                 availableWidth: availableWidth,
                 availableHeight: availableHeight
             )
+        }
+    }
+
+    private var emptyReviewView: some View {
+        let action = PickoReviewEmptyActionPresentation(model: model)
+
+        return reviewStatePage(
+            title: PickoCopy.Review.emptyTitle,
+            message: PickoCopy.Review.emptyMessage,
+            systemImage: "photo.on.rectangle",
+            usesBackgroundCard: SingleReviewLayout.emptyStateUsesBackgroundCard
+        ) {
+            Button {
+                model.selectedTab = action.destinationTab
+            } label: {
+                Label(action.title, systemImage: action.systemImage)
+                    .font(.system(size: 16, weight: .semibold, design: .rounded))
+                    .frame(maxWidth: .infinity)
+                    .padding(.vertical, 14)
+                    .background(PickoDesign.ColorToken.primary, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
+                    .foregroundStyle(PickoDesign.ColorToken.primarySoft)
+            }
+            .buttonStyle(.plain)
+        }
+    }
+
+    private func reviewHeader(showsProgress: Bool, showsUndoAction: Bool) -> some View {
+        PickoTopLevelHeader(
+            spec: .review,
+            trailingPrimaryText: showsProgress ? reviewProgressText : nil,
+            trailingSecondaryText: model.reviewScope?.title,
+            auxiliaryTrailingSystemImage: showsUndoAction ? "arrow.uturn.backward" : nil,
+            auxiliaryTrailingAccessibilityLabel: showsUndoAction ? "上一张" : nil,
+            auxiliaryTrailingAction: showsUndoAction ? {
+                model.undoAndReturnToPreviousAsset()
+            } : nil,
+            trailingSystemImage: "gearshape",
+            trailingAccessibilityLabel: "设置",
+            trailingAction: {
+                showsGestureSettings = true
+            }
+        )
+    }
+
+    private func reviewStatePage<Actions: View>(
+        title: String,
+        message: String,
+        systemImage: String,
+        usesBackgroundCard: Bool = true,
+        @ViewBuilder actions: @escaping () -> Actions
+    ) -> some View {
+        VStack(alignment: .leading, spacing: SingleReviewLayout.contentSpacing) {
+            reviewHeader(showsProgress: false, showsUndoAction: false)
+
+            VStack {
+                Spacer(minLength: PickoDesign.Spacing.lg)
+
+                reviewStateCard(
+                    title: title,
+                    message: message,
+                    systemImage: systemImage,
+                    usesBackgroundCard: usesBackgroundCard,
+                    actions: actions
+                )
+
+                Spacer(minLength: PickoDesign.Spacing.lg)
+            }
+            .frame(maxWidth: .infinity, maxHeight: .infinity)
+        }
+        .padding(.horizontal, PickoDesign.Spacing.page)
+        .padding(.top, SingleReviewLayout.emptyStateTopPadding)
+        .padding(.bottom, PickoDesign.Spacing.page)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
+    }
+
+    private func reviewStateCard<Actions: View>(
+        title: String,
+        message: String,
+        systemImage: String,
+        usesBackgroundCard: Bool,
+        @ViewBuilder actions: () -> Actions
+    ) -> some View {
+        VStack(spacing: PickoDesign.Spacing.md) {
+            Image(systemName: systemImage)
+                .font(.system(size: 34, weight: .semibold))
+                .frame(width: 72, height: 72)
+                .background(PickoDesign.ColorToken.primarySoft.opacity(0.7), in: Circle())
+                .foregroundStyle(PickoDesign.ColorToken.primary)
+
+            VStack(spacing: 6) {
+                Text(title)
+                    .font(.system(size: 20, weight: .semibold, design: .rounded))
+                    .foregroundStyle(PickoDesign.ColorToken.primary)
+                Text(message)
+                    .font(.system(size: 14, weight: .regular, design: .rounded))
+                    .multilineTextAlignment(.center)
+                    .foregroundStyle(PickoDesign.ColorToken.secondaryInk)
+            }
+
+            actions()
+                .padding(.top, PickoDesign.Spacing.sm)
+        }
+        .frame(maxWidth: .infinity)
+        .padding(usesBackgroundCard ? PickoDesign.Spacing.lg : 0)
+        .background {
+            if usesBackgroundCard {
+                RoundedRectangle(cornerRadius: PickoDesign.Radius.xl)
+                    .fill(PickoDesign.ColorToken.surface)
+            }
+        }
+        .overlay {
+            if usesBackgroundCard {
+                RoundedRectangle(cornerRadius: PickoDesign.Radius.xl)
+                    .stroke(PickoDesign.ColorToken.outline.opacity(0.45), lineWidth: 1)
+            }
         }
     }
 
@@ -308,7 +405,7 @@ public struct SingleReviewView: View {
     }
 
     private var scopedCompletionView: some View {
-        PickoPageEmptyStateView(
+        reviewStatePage(
             title: "本合集已整理完成",
             message: "这个时间或地点合集内的照片已处理完。已放入预删除篮的项目仍可在最终确认前恢复。",
             systemImage: "checkmark.circle"
@@ -364,11 +461,17 @@ public struct SingleReviewView: View {
 enum SingleReviewLayout {
     static let contentSpacing: CGFloat = 12
     static let contentTopPadding: CGFloat = PickoDesign.Spacing.page
+    static let emptyStateTopPadding: CGFloat = contentTopPadding
     static let actionDockReservedHeight: CGFloat = 0
     static let actionDockBottomPadding: CGFloat = 0
     static let gestureThreshold: CGFloat = 72
     static let stackedCardCount = 2
     static let showsStackedCards = true
+    static let emptyStateUsesTopLevelHeader = true
+    static let emptyStateUsesScreenBackground = true
+    static let emptyStateMatchesSimilarEmptyStateStyle = true
+    static let emptyStateUsesBackgroundCard = false
+    static let emptyStateUsesPrimaryNextAction = true
     static let centersPhotoStageVertically = true
     static let showsLargePreDeleteDockButton = false
     static let showsFallbackActionDock = false
