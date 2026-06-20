@@ -276,7 +276,7 @@ public struct SingleReviewView: View {
 
 enum SingleReviewLayout {
     static let contentSpacing: CGFloat = 12
-    static let contentTopPadding: CGFloat = 4
+    static let contentTopPadding: CGFloat = PickoDesign.Spacing.page
     static let actionDockReservedHeight: CGFloat = 180
     static let actionDockBottomPadding: CGFloat = 32
 

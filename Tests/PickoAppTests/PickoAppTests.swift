@@ -239,6 +239,10 @@ final class PickoAppTests: XCTestCase {
         XCTAssertEqual(PickoTopLevelHeaderSpec.basket.systemImage, "tray")
     }
 
+    func testTopLevelTabHeadersSharePageTopInset() {
+        XCTAssertEqual(SingleReviewLayout.contentTopPadding, PickoDesign.Spacing.page)
+    }
+
     func testSingleReviewPresentationKeepsPrimaryActionsPhotoFirst() throws {
         let model = PickoAppModel.preview()
 
@@ -267,7 +271,7 @@ final class PickoAppTests: XCTestCase {
     func testSingleReviewLayoutDocksActionsAboveTabBar() {
         XCTAssertEqual(SingleReviewLayout.actionDockReservedHeight, 180)
         XCTAssertEqual(SingleReviewLayout.actionDockBottomPadding, 32)
-        XCTAssertEqual(SingleReviewLayout.contentTopPadding, 4)
+        XCTAssertEqual(SingleReviewLayout.contentTopPadding, PickoDesign.Spacing.page)
     }
 
     func testSingleReviewLayoutAdaptsPhotoDisplayModeByAspectRatio() {
