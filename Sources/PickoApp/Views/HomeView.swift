@@ -163,12 +163,13 @@ public struct HomeView: View {
             .padding(PickoDesign.Spacing.page)
             .padding(.bottom, 96)
         }
-        .navigationTitle(PickoCopy.Tabs.home)
-        .pickoInlineNavigationTitle()
         .navigationDestination(item: $selectedCollectionMode) { mode in
             CollectionReviewView(mode: mode, model: model)
         }
         .pickoScreenBackground()
+        #if os(iOS)
+        .toolbar(HomeLayout.hidesNavigationBar ? .hidden : .visible, for: .navigationBar)
+        #endif
     }
 
     private func openMetric(at index: Int) {
@@ -219,6 +220,11 @@ public struct HomeView: View {
         }
     }
 
+}
+
+enum HomeLayout {
+    static let navigationTitle: String? = nil
+    static let hidesNavigationBar = true
 }
 
 private extension PickoTaskPresentation {

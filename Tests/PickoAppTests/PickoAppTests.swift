@@ -214,6 +214,11 @@ final class PickoAppTests: XCTestCase {
         XCTAssertFalse(presentation.taskRows.contains { $0.tintRole == .keep })
     }
 
+    func testHomeLayoutHidesRedundantNavigationTitle() {
+        XCTAssertNil(HomeLayout.navigationTitle)
+        XCTAssertTrue(HomeLayout.hidesNavigationBar)
+    }
+
     func testSingleReviewPresentationKeepsPrimaryActionsPhotoFirst() throws {
         let model = PickoAppModel.preview()
 
