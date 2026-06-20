@@ -181,6 +181,68 @@ final class PickoAppTests: XCTestCase {
         XCTAssertNotNil(view)
     }
 
+    func testSimilarReviewLayoutAvoidsFloatingLayerAndClipsArtworkOverlays() {
+        XCTAssertFalse(SimilarReviewLayout.usesFloatingActionBar)
+        XCTAssertTrue(SimilarReviewLayout.usesInlineActionSummary)
+        XCTAssertTrue(SimilarReviewLayout.clipsHeroOverlaysToRoundedShape)
+        XCTAssertTrue(SimilarReviewLayout.clipsGridSelectionOverlayToRoundedShape)
+        XCTAssertFalse(SimilarReviewLayout.usesHighContrastSelectionIndicator)
+        XCTAssertTrue(SimilarReviewLayout.usesSubtleSelectionIndicator)
+        XCTAssertFalse(SimilarReviewLayout.usesStandaloneConfirmationCard)
+        XCTAssertTrue(SimilarReviewLayout.usesInlineConfirmationFooter)
+        XCTAssertTrue(SimilarReviewLayout.restoresRecommendationWithoutSubmitting)
+    }
+
+    func testSimilarSelectionAutoPromotesSingleModeWhenAddingSecondPhoto() {
+        let result = SimilarSelectionBehavior.toggledSelection(
+            currentSelection: ["preview-1"],
+            toggledId: "preview-2",
+            keepsMultiple: false
+        )
+
+        XCTAssertEqual(result.selectedAssetIds, ["preview-1", "preview-2"])
+        XCTAssertTrue(result.keepsMultiple)
+    }
+
+    func testSimilarSelectionKeepsSingleModeForFirstSelection() {
+        let result = SimilarSelectionBehavior.toggledSelection(
+            currentSelection: [],
+            toggledId: "preview-1",
+            keepsMultiple: false
+        )
+
+        XCTAssertEqual(result.selectedAssetIds, ["preview-1"])
+        XCTAssertFalse(result.keepsMultiple)
+    }
+
+    func testSimilarSelectionShortcutSelectsAllWhenSomePhotosAreUnselected() {
+        let allAssetIds = ["preview-1", "preview-2"]
+
+        let result = SimilarSelectionBehavior.applyingShortcut(
+            currentSelection: ["preview-1"],
+            allAssetIds: allAssetIds,
+            recommendedKeepIds: ["preview-1"]
+        )
+
+        XCTAssertEqual(SimilarSelectionBehavior.shortcutTitle(currentSelection: ["preview-1"], allAssetIds: allAssetIds), "全选")
+        XCTAssertEqual(result.selectedAssetIds, ["preview-1", "preview-2"])
+        XCTAssertTrue(result.keepsMultiple)
+    }
+
+    func testSimilarSelectionShortcutRestoresRecommendationWhenAllPhotosAreSelected() {
+        let allAssetIds = ["preview-1", "preview-2"]
+
+        let result = SimilarSelectionBehavior.applyingShortcut(
+            currentSelection: ["preview-1", "preview-2"],
+            allAssetIds: allAssetIds,
+            recommendedKeepIds: ["preview-1"]
+        )
+
+        XCTAssertEqual(SimilarSelectionBehavior.shortcutTitle(currentSelection: ["preview-1", "preview-2"], allAssetIds: allAssetIds), "恢复推荐")
+        XCTAssertEqual(result.selectedAssetIds, ["preview-1"])
+        XCTAssertFalse(result.keepsMultiple)
+    }
+
     func testBasketViewCanBeConstructedWithThumbnailProvider() {
         let model = PickoAppModel.preview()
         model.thumbnailProvider = FakeThumbnailProvider()
@@ -247,6 +309,50 @@ final class PickoAppTests: XCTestCase {
 
     func testTopLevelTabHeadersSharePageTopInset() {
         XCTAssertEqual(SingleReviewLayout.contentTopPadding, PickoDesign.Spacing.page)
+    }
+
+    func testSingleReviewEmptyStateKeepsUnifiedPageChrome() {
+        XCTAssertTrue(SingleReviewLayout.emptyStateUsesTopLevelHeader)
+        XCTAssertTrue(SingleReviewLayout.emptyStateUsesScreenBackground)
+        XCTAssertTrue(SingleReviewLayout.emptyStateMatchesSimilarEmptyStateStyle)
+        XCTAssertFalse(SingleReviewLayout.emptyStateUsesBackgroundCard)
+        XCTAssertTrue(SingleReviewLayout.emptyStateUsesPrimaryNextAction)
+        XCTAssertEqual(SingleReviewLayout.emptyStateTopPadding, SingleReviewLayout.contentTopPadding)
+    }
+
+    func testSingleReviewEmptyActionPrefersSimilarWhenGroupsExist() {
+        let presentation = PickoReviewEmptyActionPresentation(model: .preview())
+
+        XCTAssertEqual(presentation.title, "去相似整理")
+        XCTAssertEqual(presentation.systemImage, "square.grid.2x2")
+        XCTAssertEqual(presentation.destinationTab, .similar)
+    }
+
+    func testSingleReviewEmptyActionFallsBackToBasketWhenItemsAreQueued() {
+        let model = PickoAppModel(
+            store: ReviewStateStore(assets: [PickoPreviewFixtures.assets[0]], groups: []),
+            selectedTab: .review
+        )
+        model.preDeleteCurrentAsset()
+
+        let presentation = PickoReviewEmptyActionPresentation(model: model)
+
+        XCTAssertEqual(presentation.title, "查看预删除篮")
+        XCTAssertEqual(presentation.systemImage, "tray")
+        XCTAssertEqual(presentation.destinationTab, .basket)
+    }
+
+    func testSingleReviewEmptyActionFallsBackToHomeWhenNoWorkRemains() {
+        let model = PickoAppModel(
+            store: ReviewStateStore(assets: [], groups: []),
+            selectedTab: .review
+        )
+
+        let presentation = PickoReviewEmptyActionPresentation(model: model)
+
+        XCTAssertEqual(presentation.title, "返回首页")
+        XCTAssertEqual(presentation.systemImage, "house")
+        XCTAssertEqual(presentation.destinationTab, .home)
     }
 
     func testSingleReviewProgressTextExplainsPhotoPosition() {
@@ -447,11 +553,28 @@ final class PickoAppTests: XCTestCase {
 
         XCTAssertEqual(presentation.summaryTitle, "1 项等待最终复核")
         XCTAssertEqual(presentation.summarySubtitle, "预计可节省：3.7 MB")
-        XCTAssertEqual(presentation.primaryActionTitle, "交由系统照片确认")
-        XCTAssertEqual(presentation.secondaryActionTitle, "确认前可恢复或清空")
+        XCTAssertEqual(presentation.primaryActionTitle, "在系统照片中确认删除")
+        XCTAssertEqual(presentation.secondaryActionTitle, "最终确认前可恢复或全部移出")
         XCTAssertEqual(presentation.disabledReason, "当前为样例图库，无法调用系统照片确认。")
         XCTAssertTrue(presentation.recoveryMessage.contains("最近删除"))
         XCTAssertTrue(presentation.recoveryMessage.contains("恢复"))
+    }
+
+    func testBasketFinalActionsAreInlineAndHiddenWhenEmpty() {
+        XCTAssertTrue(PreDeleteBasketLayout.usesInlineFinalActions)
+        XCTAssertFalse(PreDeleteBasketLayout.usesFloatingFinalActions)
+        XCTAssertTrue(PreDeleteBasketLayout.requiresClearConfirmation)
+        XCTAssertFalse(PreDeleteBasketLayout.placesItemListBeforeFinalActions)
+        XCTAssertTrue(PreDeleteBasketLayout.mergesSavingsOverviewWithFinalActions)
+        XCTAssertFalse(PreDeleteBasketLayout.showsStandaloneSavingsOverview)
+        XCTAssertTrue(PreDeleteBasketLayout.showsFinalActions(itemCount: 1))
+        XCTAssertFalse(PreDeleteBasketLayout.showsFinalActions(itemCount: 0))
+    }
+
+    func testBasketUsesUnifiedFinalQueueInsteadOfUntrackedSourceBuckets() {
+        XCTAssertEqual(PickoCopy.Basket.itemSectionTitle, "待确认项目")
+        XCTAssertTrue(PreDeleteBasketLayout.usesUnifiedItemList)
+        XCTAssertFalse(PreDeleteBasketLayout.showsSourceBuckets)
     }
 
     func testBasketPresentationFormatsZeroBytesInChinese() {
@@ -466,6 +589,26 @@ final class PickoAppTests: XCTestCase {
         let view = PhotoPreviewView(asset: model.assets[0], model: model)
 
         XCTAssertNotNil(view)
+    }
+
+    func testPhotoPreviewUsesRestoreOnlyActionsWhenOpenedFromBasket() {
+        let basketPresentation = PhotoPreviewActionPresentation(context: .basket)
+
+        XCTAssertEqual(basketPresentation.navigationTitle, "预删除项预览")
+        XCTAssertTrue(basketPresentation.showsRestoreAction)
+        XCTAssertTrue(basketPresentation.showsCloseAction)
+        XCTAssertFalse(basketPresentation.showsPreDeleteAction)
+        XCTAssertEqual(basketPresentation.primaryTitle, "恢复此项")
+        XCTAssertEqual(basketPresentation.secondaryTitle, "关闭")
+    }
+
+    func testPhotoPreviewKeepsReviewDecisionActionsOutsideBasket() {
+        let reviewPresentation = PhotoPreviewActionPresentation(context: .review)
+
+        XCTAssertEqual(reviewPresentation.navigationTitle, "照片预览")
+        XCTAssertTrue(reviewPresentation.showsKeepAction)
+        XCTAssertTrue(reviewPresentation.showsPreDeleteAction)
+        XCTAssertFalse(reviewPresentation.showsRestoreAction)
     }
 
     func testCollectionReviewViewCanRenderTimeAndPlaceModes() {
