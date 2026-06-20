@@ -7,8 +7,45 @@ import UIKit
 import AppKit
 #endif
 
+public enum PhotoPreviewContext: Equatable {
+    case review
+    case basket
+}
+
+public struct PhotoPreviewActionPresentation: Equatable {
+    public let navigationTitle: String
+    public let primaryTitle: String
+    public let secondaryTitle: String
+    public let showsKeepAction: Bool
+    public let showsPreDeleteAction: Bool
+    public let showsRestoreAction: Bool
+    public let showsCloseAction: Bool
+
+    public init(context: PhotoPreviewContext) {
+        switch context {
+        case .review:
+            navigationTitle = "照片预览"
+            primaryTitle = PickoCopy.Review.keep
+            secondaryTitle = PickoCopy.Review.preDelete
+            showsKeepAction = true
+            showsPreDeleteAction = true
+            showsRestoreAction = false
+            showsCloseAction = false
+        case .basket:
+            navigationTitle = PickoCopy.Basket.previewTitle
+            primaryTitle = PickoCopy.Basket.restoreItem
+            secondaryTitle = PickoCopy.Basket.closePreview
+            showsKeepAction = false
+            showsPreDeleteAction = false
+            showsRestoreAction = true
+            showsCloseAction = true
+        }
+    }
+}
+
 public struct PhotoPreviewView: View {
     private let asset: PhotoAsset
+    private let context: PhotoPreviewContext
     @Bindable private var model: PickoAppModel
     @Environment(\.dismiss) private var dismiss
     @State private var thumbnailData: Data?
@@ -17,12 +54,19 @@ public struct PhotoPreviewView: View {
     @State private var offset: CGSize = .zero
     @State private var lastOffset: CGSize = .zero
 
-    public init(asset: PhotoAsset, model: PickoAppModel) {
+    public init(
+        asset: PhotoAsset,
+        model: PickoAppModel,
+        context: PhotoPreviewContext = .review
+    ) {
         self.asset = asset
+        self.context = context
         self.model = model
     }
 
     public var body: some View {
+        let actionPresentation = PhotoPreviewActionPresentation(context: context)
+
         NavigationStack {
             VStack(spacing: PickoDesign.Spacing.md) {
                 Spacer(minLength: 0)
@@ -38,37 +82,10 @@ public struct PhotoPreviewView: View {
                     .clipped()
                     .accessibilityLabel("照片预览")
 
-                HStack(spacing: PickoDesign.Spacing.md) {
-                    Button {
-                        model.keep(assetId: asset.id)
-                        dismiss()
-                    } label: {
-                        Label(PickoCopy.Review.keep, systemImage: "star.fill")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.plain)
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
-                    .padding(.vertical, 14)
-                    .background(PickoDesign.ColorToken.goldSoft, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
-                    .foregroundStyle(PickoDesign.ColorToken.primaryDeep)
-
-                    Button {
-                        model.preDelete(assetId: asset.id)
-                        dismiss()
-                    } label: {
-                        Label(PickoCopy.Review.preDelete, systemImage: "tray.and.arrow.down")
-                            .frame(maxWidth: .infinity)
-                    }
-                    .buttonStyle(.plain)
-                    .font(.system(size: 16, weight: .semibold, design: .rounded))
-                    .padding(.vertical, 14)
-                    .background(PickoDesign.ColorToken.coralDeep, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
-                    .foregroundStyle(PickoDesign.ColorToken.coral)
-                }
-                .padding(.horizontal, PickoDesign.Spacing.page)
+                actionButtons(actionPresentation)
             }
             .padding(.bottom, PickoDesign.Spacing.md)
-            .navigationTitle("照片预览")
+            .navigationTitle(actionPresentation.navigationTitle)
             .pickoInlineNavigationTitle()
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) {
@@ -82,6 +99,71 @@ public struct PhotoPreviewView: View {
                 await loadThumbnail()
             }
         }
+    }
+
+    @ViewBuilder
+    private func actionButtons(_ presentation: PhotoPreviewActionPresentation) -> some View {
+        HStack(spacing: PickoDesign.Spacing.md) {
+            if presentation.showsKeepAction {
+                Button {
+                    model.keep(assetId: asset.id)
+                    dismiss()
+                } label: {
+                    Label(presentation.primaryTitle, systemImage: "star.fill")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.plain)
+                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                .padding(.vertical, 14)
+                .background(PickoDesign.ColorToken.goldSoft, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
+                .foregroundStyle(PickoDesign.ColorToken.primaryDeep)
+            }
+
+            if presentation.showsPreDeleteAction {
+                Button {
+                    model.preDelete(assetId: asset.id)
+                    dismiss()
+                } label: {
+                    Label(presentation.secondaryTitle, systemImage: "tray.and.arrow.down")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.plain)
+                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                .padding(.vertical, 14)
+                .background(PickoDesign.ColorToken.coralDeep, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
+                .foregroundStyle(PickoDesign.ColorToken.coral)
+            }
+
+            if presentation.showsRestoreAction {
+                Button {
+                    model.restoreFromBasket(assetId: asset.id)
+                    dismiss()
+                } label: {
+                    Label(presentation.primaryTitle, systemImage: "arrow.uturn.backward")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.plain)
+                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                .padding(.vertical, 14)
+                .background(PickoDesign.ColorToken.goldSoft, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
+                .foregroundStyle(PickoDesign.ColorToken.primaryDeep)
+            }
+
+            if presentation.showsCloseAction {
+                Button {
+                    dismiss()
+                } label: {
+                    Label(presentation.secondaryTitle, systemImage: "xmark")
+                        .frame(maxWidth: .infinity)
+                }
+                .buttonStyle(.plain)
+                .font(.system(size: 16, weight: .semibold, design: .rounded))
+                .padding(.vertical, 14)
+                .background(PickoDesign.ColorToken.surfaceHigh, in: RoundedRectangle(cornerRadius: PickoDesign.Radius.lg))
+                .foregroundStyle(PickoDesign.ColorToken.primary)
+            }
+        }
+        .padding(.horizontal, PickoDesign.Spacing.page)
     }
 
     @ViewBuilder
