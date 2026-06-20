@@ -263,7 +263,10 @@ public struct SingleReviewView: View {
 
     private var reviewProgressText: String {
         let totalCount = max(model.activeReviewAssetCount, 1)
-        return "\(model.currentAssetIndex + 1) / \(totalCount)"
+        return SingleReviewLayout.reviewProgressText(
+            currentIndex: model.currentAssetIndex,
+            totalCount: totalCount
+        )
     }
 
     private func reviewCircleButton(
@@ -299,6 +302,10 @@ enum SingleReviewLayout {
     static let contentTopPadding: CGFloat = PickoDesign.Spacing.page
     static let actionDockReservedHeight: CGFloat = 180
     static let actionDockBottomPadding: CGFloat = 32
+
+    static func reviewProgressText(currentIndex: Int, totalCount: Int) -> String {
+        "第 \(currentIndex + 1) / \(max(totalCount, 1)) 张"
+    }
 
     static func mainImageHeight(
         availableWidth: CGFloat,

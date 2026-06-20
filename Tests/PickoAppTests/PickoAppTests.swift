@@ -243,6 +243,17 @@ final class PickoAppTests: XCTestCase {
         XCTAssertEqual(SingleReviewLayout.contentTopPadding, PickoDesign.Spacing.page)
     }
 
+    func testSingleReviewProgressTextExplainsPhotoPosition() {
+        XCTAssertEqual(
+            SingleReviewLayout.reviewProgressText(currentIndex: 0, totalCount: 6),
+            "第 1 / 6 张"
+        )
+        XCTAssertEqual(
+            SingleReviewLayout.reviewProgressText(currentIndex: 2, totalCount: 6),
+            "第 3 / 6 张"
+        )
+    }
+
     func testSingleReviewPresentationKeepsPrimaryActionsPhotoFirst() throws {
         let model = PickoAppModel.preview()
 
